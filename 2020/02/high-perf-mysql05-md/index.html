@@ -46,26 +46,31 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="VC&#39; Blog">
-<meta property="og:url" content="https://viggoc.github.io/index.html">
+  <meta name="description" content="索引基础索引可以包含一个或多个列的值，MySQL只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B树索引 B树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列前缀：只匹配">
+<meta property="og:type" content="article">
+<meta property="og:title" content="创建高性能的索引">
+<meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql05-md/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="索引基础索引可以包含一个或多个列的值，MySQL只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B树索引 B树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列前缀：只匹配">
+<meta property="article:published_time" content="2020-02-12T08:32:38.000Z">
+<meta property="article:modified_time" content="2020-02-13T04:17:10.297Z">
 <meta property="article:author" content="VC">
+<meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://viggoc.github.io/">
+<link rel="canonical" href="https://viggoc.github.io/2020/02/high-perf-mysql05-md/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
+    isHome: false,
+    isPost: true
   };
 </script>
 
-  <title>VC' Blog</title>
+  <title>创建高性能的索引 | VC' Blog</title>
   
 
 
@@ -170,10 +175,10 @@
             
 
   <div class="posts-expand">
-        
+      
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-md/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -187,8 +192,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql05-md/" class="post-title-link" itemprop="url">创建高性能的索引</a>
+          创建高性能的索引
         </h1>
 
         <div class="post-meta">
@@ -230,7 +234,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+        <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
 <p><strong>B树索引</strong></p>
 <p>B树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
 <p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
@@ -383,192 +387,36 @@
 <li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
 </ol>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
 
         
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql04-md/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql04-md/" class="post-title-link" itemprop="url">Schema 与数据类型优化</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-02-07 19:32:38 / Modified: 20:15:47" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="选择优化的数据类型"><a href="#选择优化的数据类型" class="headerlink" title="选择优化的数据类型"></a>选择优化的数据类型</h2><p>选择数据类型的原则</p>
-<ul>
-<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和CPU缓存，处理时需要的CPU周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
-<li>简单就好。简单数据类型的操作通常需要更少的CPU周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储IP比字符串低。</li>
-<li>尽量避免使用<code>NULL</code>。查询可为NULL的列对于MySQL来说更难优化，这些列使得索引、索引统计和值比较都更复杂。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql04-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/high-perf-mysql04-md/" rel="prev" title="Schema 与数据类型优化">
+      <i class="fa fa-chevron-left"></i> Schema 与数据类型优化
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql01-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql01-md/" class="post-title-link" itemprop="url">MySQL架构和历史</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-02-07 16:32:38 / Modified: 20:01:21" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="逻辑架构"><a href="#逻辑架构" class="headerlink" title="逻辑架构"></a>逻辑架构</h2><p>三层架构：</p>
-<ul>
-<li>连接与线程处理  </li>
-</ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在DB服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的DB连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
-<ul>
-<li>MySQL服务层：SQL解析、分析、优化、缓存</li>
-</ul>
-<p>MySQL的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle中有库基于规则优化(RBO)和基于代价优化(CBO)两种方式，但<code>oracle 10g</code>之后已经弃用RBO。相比MySQL的优化器，Oracle的优化更加丰富和完善，可以对照着学习。</p>
-<ul>
-<li>存储引擎
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql01-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
   </article>
   
   
   
 
   </div>
-
-  
-
 
 
           </div>
@@ -619,6 +467,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#索引基础"><span class="nav-number">1.</span> <span class="nav-text">索引基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引的优点"><span class="nav-number">2.</span> <span class="nav-text">索引的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高性能的索引策略"><span class="nav-number">3.</span> <span class="nav-text">高性能的索引策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#独立的列"><span class="nav-number">3.1.</span> <span class="nav-text">独立的列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前缀索引和索引选择性"><span class="nav-number">3.2.</span> <span class="nav-text">前缀索引和索引选择性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多列索引"><span class="nav-number">3.3.</span> <span class="nav-text">多列索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择合适的索引顺序"><span class="nav-number">3.4.</span> <span class="nav-text">选择合适的索引顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-number">3.5.</span> <span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#覆盖索引"><span class="nav-number">3.6.</span> <span class="nav-text">覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用索引扫描来做排序"><span class="nav-number">3.7.</span> <span class="nav-text">使用索引扫描来做排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#压缩索引"><span class="nav-number">3.8.</span> <span class="nav-text">压缩索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#冗余和重复索引"><span class="nav-number">3.9.</span> <span class="nav-text">冗余和重复索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引和锁"><span class="nav-number">3.10.</span> <span class="nav-text">索引和锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引案例学习"><span class="nav-number">4.</span> <span class="nav-text">索引案例学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多种条件过滤"><span class="nav-number">4.1.</span> <span class="nav-text">多种条件过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免多个范围条件"><span class="nav-number">4.2.</span> <span class="nav-text">避免多个范围条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化排序"><span class="nav-number">4.3.</span> <span class="nav-text">优化排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#维护索引和表"><span class="nav-number">5.</span> <span class="nav-text">维护索引和表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#找到并修复损坏的表"><span class="nav-number">5.1.</span> <span class="nav-text">找到并修复损坏的表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新索引统计信息"><span class="nav-number">5.2.</span> <span class="nav-text">更新索引统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少索引和数据碎片"><span class="nav-number">5.3.</span> <span class="nav-text">减少索引和数据碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
