@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="default">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://viggoc.github.io').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="索引案例学习多种条件过滤常用的列放在前面，如果不限制该列可以用 in() 指定所有值 尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。 避免多个范围条件当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动） 优化排序对于分页查询1select * from profiles where sex&#x3D;&#39;M&#39; orde">
+<meta property="og:type" content="article">
+<meta property="og:title" content="创建高性能的索引-02">
+<meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql05-2/index.html">
+<meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="索引案例学习多种条件过滤常用的列放在前面，如果不限制该列可以用 in() 指定所有值 尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。 避免多个范围条件当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动） 优化排序对于分页查询1select * from profiles where sex&#x3D;&#39;M&#39; orde">
+<meta property="article:published_time" content="2020-02-21T09:32:38.000Z">
+<meta property="article:modified_time" content="2020-02-22T09:32:00.631Z">
+<meta property="article:author" content="VC">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://viggoc.github.io/2020/02/high-perf-mysql05-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>创建高性能的索引-02 | VC' Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VC' Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          创建高性能的索引-02
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-21 17:32:38" itemprop="dateCreated datePublished" datetime="2020-02-21T17:32:38+08:00">2020-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-22 17:32:00" itemprop="dateModified" datetime="2020-02-22T17:32:00+08:00">2020-02-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="索引案例学习"><a href="#索引案例学习" class="headerlink" title="索引案例学习"></a>索引案例学习</h2><h3 id="多种条件过滤"><a href="#多种条件过滤" class="headerlink" title="多种条件过滤"></a>多种条件过滤</h3><p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
+<h3 id="避免多个范围条件"><a href="#避免多个范围条件" class="headerlink" title="避免多个范围条件"></a>避免多个范围条件</h3><p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a href="#优化排序" class="headerlink" title="优化排序"></a>优化排序</h3><p>对于分页查询<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure><br>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure><br><a id="more"></a></p>
+<h2 id="维护索引和表"><a href="#维护索引和表" class="headerlink" title="维护索引和表"></a>维护索引和表</h2><p>维护表的三个目的：</p>
+<ul>
+<li>找到并修复损坏的表</li>
+<li>维护准确的索引统计信息</li>
+<li>减少碎片</li>
+</ul>
+<h3 id="找到并修复损坏的表"><a href="#找到并修复损坏的表" class="headerlink" title="找到并修复损坏的表"></a>找到并修复损坏的表</h3><p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
+<p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
+<p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
+<p>MyISAM 的表损坏（corruption）通常是系统崩溃导致的。InnoDB 一般不会出现损坏，如果发生损坏，可能是</p>
+<ul>
+<li>硬件问题，如内存或磁盘故障（有可能）</li>
+<li>数据库管理员的错误操作，如在 MySQL 外部直接操作数据文件（有可能）</li>
+<li>InnoDB 本身缺陷（不太可能）</li>
+</ul>
+<p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
+<h3 id="更新索引统计信息"><a href="#更新索引统计信息" class="headerlink" title="更新索引统计信息"></a>更新索引统计信息</h3><p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
+<ul>
+<li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM 返回精确值，InnoDB 返回估算值。</li>
+<li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
+</ul>
+<p>可以通过<code>ANALYZE TABLE</code>来生成统计信息。如果存储引擎提供的扫描行数是不准确的，或者执行计划本身太复杂无法准确获取各个阶段的行数，优化器会使用索引统计信息来估算扫描行数。</p>
+<p>每种存储引擎实现索引统计信息的方式不同：</p>
+<ul>
+<li>Mymory 引擎不存储索引统计信息</li>
+<li>MyISAM 将索引统计信息存储在磁盘中，ANALYZE TABLE 需要全索引扫描计算索引基数，此过程中需要锁表</li>
+<li>InnoDB 不再磁盘中存储索引统计信息，通过随机的索引访问进行评估将其存储在内存中。</li>
+</ul>
+<p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics 表</code>获取。</p>
+<p>InnoDB 会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过 1/16 或插入 20 亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
+<p>InnoDB 打开某些<code>information_schema</code>表，使用 SHOW TABLE STATUS 或 SHOW INDEX，或 MySQL 客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
+<h3 id="减少索引和数据碎片"><a href="#减少索引和数据碎片" class="headerlink" title="减少索引和数据碎片"></a>减少索引和数据碎片</h3><p>B 树索引会碎片化，造成查询效率降低。</p>
+<p>表的数据存储碎片化有三种类型：</p>
+<ul>
+<li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
+<li>行间碎片（Intra-row fragmentation）：逻辑上顺序的页，在磁盘上不是顺序存储的。对全表扫描和聚簇索引扫描之类的操作影响很大</li>
+<li>剩余空间碎片（Free space fragmentation）：数据页中有大量空余空间，读取数据时读取大量不需要的数据，造成浪费</li>
+</ul>
+<p>MyISAM 中三种都可能发生，InnoDB 中不会出现行碎片。</p>
+<p>解决方式</p>
+<ol>
+<li>OPTIMIZE TABLE 或 导入再导出</li>
+<li>MyISAM 可通过排序算法重建索引</li>
+<li>InnoDB 可先删除索引再重新创建</li>
+<li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>三个原则：</p>
+<ol>
+<li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
+<li>顺序访问数据很快：顺序 IO 不需要磁盘寻道，对于排序的查询也更快</li>
+<li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/high-perf-mysql05-1/" rel="prev" title="创建高性能的索引-01">
+      <i class="fa fa-chevron-left"></i> 创建高性能的索引-01
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/high-perf-mysql06-01/" rel="next" title="查询性能优化-01">
+      查询性能优化-01 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#索引案例学习"><span class="nav-number">1.</span> <span class="nav-text">索引案例学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多种条件过滤"><span class="nav-number">1.1.</span> <span class="nav-text">多种条件过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免多个范围条件"><span class="nav-number">1.2.</span> <span class="nav-text">避免多个范围条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化排序"><span class="nav-number">1.3.</span> <span class="nav-text">优化排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#维护索引和表"><span class="nav-number">2.</span> <span class="nav-text">维护索引和表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#找到并修复损坏的表"><span class="nav-number">2.1.</span> <span class="nav-text">找到并修复损坏的表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新索引统计信息"><span class="nav-number">2.2.</span> <span class="nav-text">更新索引统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少索引和数据碎片"><span class="nav-number">2.3.</span> <span class="nav-text">减少索引和数据碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">VC</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">VC</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

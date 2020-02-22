@@ -174,6 +174,462 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/high-perf-mysql06-02/" class="post-title-link" itemprop="url">查询性能优化-02</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-02-22 14:21:55 / Modified: 17:35:05" itemprop="dateCreated datePublished" datetime="2020-02-22T14:21:55+08:00">2020-02-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="优化特定类型的查询"><a href="#优化特定类型的查询" class="headerlink" title="优化特定类型的查询"></a>优化特定类型的查询</h2><h3 id="优化-COUNT-查询"><a href="#优化-COUNT-查询" class="headerlink" title="优化 COUNT() 查询"></a>优化 COUNT() 查询</h3><p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
+<p>对于没有任何WHERE条件的COUNT(*)，MyISAM可以直接返回结果。</p>
+<p>可以利用MyISAM此特性对特定语句进行优化<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure></p>
+<p>一个查询中统计一个列不同值的数量<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure></p>
+<p>在对精度要求不高的时候可以使用近似值代替</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql06-02/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/high-perf-mysql06-01/" class="post-title-link" itemprop="url">查询性能优化-01</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-02-22 13:21:55 / Modified: 17:35:13" itemprop="dateCreated datePublished" datetime="2020-02-22T13:21:55+08:00">2020-02-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
+<h2 id="查询速度为什么会变慢"><a href="#查询速度为什么会变慢" class="headerlink" title="查询速度为什么会变慢"></a>查询速度为什么会变慢</h2><p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
+<h2 id="慢查询基础：优化数据访问"><a href="#慢查询基础：优化数据访问" class="headerlink" title="慢查询基础：优化数据访问"></a>慢查询基础：优化数据访问</h2><p>分析步骤</p>
+<ol>
+<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
+<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
+</ol>
+<h3 id="是否向数据库请求了多余的数据"><a href="#是否向数据库请求了多余的数据" class="headerlink" title="是否向数据库请求了多余的数据"></a>是否向数据库请求了多余的数据</h3><ul>
+<li><p>查询不需要的记录<br>  使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+</li>
+<li><p>取出全部列<br>  不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br>  内存和CPU的消耗。<br>  有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
+</li>
+<li><p>重复查询相同的数据<br>  利用缓存，减少重复查询。</p>
+</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql06-01/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/high-perf-mysql05-2/" class="post-title-link" itemprop="url">创建高性能的索引-02</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-21 17:32:38" itemprop="dateCreated datePublished" datetime="2020-02-21T17:32:38+08:00">2020-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-22 17:32:00" itemprop="dateModified" datetime="2020-02-22T17:32:00+08:00">2020-02-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="索引案例学习"><a href="#索引案例学习" class="headerlink" title="索引案例学习"></a>索引案例学习</h2><h3 id="多种条件过滤"><a href="#多种条件过滤" class="headerlink" title="多种条件过滤"></a>多种条件过滤</h3><p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
+<h3 id="避免多个范围条件"><a href="#避免多个范围条件" class="headerlink" title="避免多个范围条件"></a>避免多个范围条件</h3><p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a href="#优化排序" class="headerlink" title="优化排序"></a>优化排序</h3><p>对于分页查询<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure><br>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure><br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql05-2/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/high-perf-mysql05-1/" class="post-title-link" itemprop="url">创建高性能的索引-01</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-21 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-21T16:32:38+08:00">2020-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-22 17:32:01" itemprop="dateModified" datetime="2020-02-22T17:32:01+08:00">2020-02-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+<p><strong>B 树索引</strong></p>
+<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
+<p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
+<p>B 树适用于全键值、键值范围或键前缀查找：</p>
+<ul>
+<li>全值匹配：和索引中的所有列进行匹配</li>
+<li>匹配最左前缀：只使用索引的第一列</li>
+<li>匹配列前缀：只匹配某一列的开头部分</li>
+<li>匹配范围值：匹配值处于某个区间</li>
+<li>精确匹配某一列并范围匹配另一列</li>
+<li>只访问索引的查询</li>
+</ul>
+<p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
+<p>B 树索引的限制：</p>
+<ul>
+<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
+<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql05-1/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/high-perf-mysql06-md/" class="post-title-link" itemprop="url">查询性能优化</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-13 13:21:55" itemprop="dateCreated datePublished" datetime="2020-02-13T13:21:55+08:00">2020-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-22 17:36:56" itemprop="dateModified" datetime="2020-02-22T17:36:56+08:00">2020-02-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
+<h2 id="查询速度为什么会变慢"><a href="#查询速度为什么会变慢" class="headerlink" title="查询速度为什么会变慢"></a>查询速度为什么会变慢</h2><p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
+<h2 id="慢查询基础：优化数据访问"><a href="#慢查询基础：优化数据访问" class="headerlink" title="慢查询基础：优化数据访问"></a>慢查询基础：优化数据访问</h2><p>分析步骤</p>
+<ol>
+<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
+<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
+</ol>
+<h3 id="是否向数据库请求了多余的数据"><a href="#是否向数据库请求了多余的数据" class="headerlink" title="是否向数据库请求了多余的数据"></a>是否向数据库请求了多余的数据</h3><ul>
+<li><p>查询不需要的记录<br>  使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+</li>
+<li><p>取出全部列<br>  不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br>  内存和CPU的消耗。<br>  有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
+</li>
+<li><p>重复查询相同的数据<br>  利用缓存，减少重复查询。</p>
+</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql06-md/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-md/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -205,7 +661,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-13 12:17:10" itemprop="dateModified" datetime="2020-02-13T12:17:10+08:00">2020-02-13</time>
+                <time title="Modified: 2020-02-13 13:15:43" itemprop="dateModified" datetime="2020-02-13T13:15:43+08:00">2020-02-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -230,11 +686,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
-<p><strong>B树索引</strong></p>
-<p>B树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
+          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+<p><strong>B 树索引</strong></p>
+<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
 <p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
-<p>B树适用于全键值、键值范围或键前缀查找：</p>
+<p>B 树适用于全键值、键值范围或键前缀查找：</p>
 <ul>
 <li>全值匹配：和索引中的所有列进行匹配</li>
 <li>匹配最左前缀：只使用索引的第一列</li>
@@ -244,145 +700,19 @@
 <li>只访问索引的查询</li>
 </ul>
 <p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
-<p>B树索引的限制：</p>
+<p>B 树索引的限制：</p>
 <ul>
-<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为Bill的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
-<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
-</ul>
-<p><strong>哈希索引</strong></p>
-<p>hash index 只有在精确匹配索引所有列的时候才有效。对于一行数据，存储引擎对所有<em>索引列</em>计算一个hash code。</p>
-<p>MySQL中只有Memory引擎显式支持哈希索引。此外其还支持非唯一哈希索引，哈希值相同是，索引会以链表的形式存放多个记录指针到同一个哈希条目中。</p>
-<p>哈希索引无法用于排序，不支持部分列匹配。</p>
-<p>InnoDB引擎支持“自适应哈希索引（adaptive hash index）”，当InnoDB注意到某些索引值被使用得相对平凡是，它会在B树索引之上再创建一个哈希索引。这是一个内部行为，用户无法控制或配置。</p>
-<p>可以维护一个hash列，查询时手动指定使用hash函数，实现类似哈希索引的效果。</p>
-<p><strong>空间数据索引（R-Tree）</strong></p>
-<p>MyISAM支持空间索引，可以用作地理数据存储，用所有维度来索引数据，必须使用GIS相关函数<code>MBRCONTAINS()</code>等来维护数据，但并不完善。PostgreSQL中的PostGIS较好。</p>
-<p><strong>全文索引</strong></p>
-<p>详见第7章</p>
-<h2 id="索引的优点"><a href="#索引的优点" class="headerlink" title="索引的优点"></a>索引的优点</h2><p>三大优点：</p>
-<ol>
-<li>减少服务器需要扫描的数据量</li>
-<li>帮助服务器避免排序和临时表</li>
-<li>将随机IO变为顺序IO</li>
-</ol>
-<h2 id="高性能的索引策略"><a href="#高性能的索引策略" class="headerlink" title="高性能的索引策略"></a>高性能的索引策略</h2><h3 id="独立的列"><a href="#独立的列" class="headerlink" title="独立的列"></a>独立的列</h3><p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
-<h3 id="前缀索引和索引选择性"><a href="#前缀索引和索引选择性" class="headerlink" title="前缀索引和索引选择性"></a>前缀索引和索引选择性</h3><p>索引很长的字符列会让索引变得大且慢，一个策略是模拟hash索引。</p>
-<p>此外还可以只索引开头的部分字符，节约索引空间，提升效率，但会降低索引的选择性。<strong>索引的选择性</strong>是指，不重复的索引值（基数，cardinality）和记录总数的比值。</p>
-<p>为了确定前缀的合适长度，需要将常见值和常见的前缀进行比较。</p>
-<p>方法一：定性比较<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) AS cnt, city FROM city_demo GROUP BY city ORDER BY cnt DESC LIMIT 10;</span><br><span class="line"></span><br><span class="line">-- 修改前缀长度，寻找合适长度</span><br><span class="line">SELECT COUNT(*) AS cnt, LEFT(city, 3) AS pref FROM city_demo GROUP BY city ORDER BY cnt DESC LIMIT 10;</span><br></pre></td></tr></table></figure></p>
-<p>方法二：计算选择度，定量比较<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(DISTINCT city)&#x2F;COUNT(*) FROM city_demo;</span><br><span class="line"></span><br><span class="line">SELECT COUNT(DISTINCT LEFT(city, 3))&#x2F;COUNT(*) AS sel3,</span><br><span class="line">COUNT(DISTINCT LEFT(city, 4))&#x2F;COUNT(*) AS sel4,</span><br><span class="line">COUNT(DISTINCT LEFT(city, 5))&#x2F;COUNT(*) AS sel5,</span><br><span class="line">COUNT(DISTINCT LEFT(city, 6))&#x2F;COUNT(*) AS sel6</span><br><span class="line">FROM city_demo;</span><br></pre></td></tr></table></figure><br>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
-<p><strong>创建前缀索引</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE city_demo ADD KEY (city(7));</span><br></pre></td></tr></table></figure><br>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
-<p>一个常见场景是针对很长的十六进制唯一ID使用前缀索引。</p>
-<p>后缀索引（suffix index）也有用途，例如查找某个域名的邮箱地址。MySQL原生并不支持，但可以把字符串反转后存储，创建前缀索引。通过触发器来维护。</p>
-<h3 id="多列索引"><a href="#多列索引" class="headerlink" title="多列索引"></a>多列索引</h3><p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR条件的联合，AND条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
-<p>出现索引合并意味着索引建得比较糟糕：</p>
-<ul>
-<li>当出现多个索引相交（多个AND），通常需要创建一个包含多个列的索引</li>
-<li>当出现联合操作（多个OR条件），通常需要耗费大量CPU和内存用于缓存、排序和合并</li>
-<li>更重要的是，优化器不会吧这些计算到查询成本中，优化器只关心随机页面读取。有时运行这样查询不如直接全表扫描。可通过<code>optimizer_switch</code>关闭索引合并，也可以使用<code>IGNORE INDEX</code>提示让优化器忽略有些索引。</li>
-</ul>
-<h3 id="选择合适的索引顺序"><a href="#选择合适的索引顺序" class="headerlink" title="选择合适的索引顺序"></a>选择合适的索引顺序</h3><p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
-<p>当不想需要考虑排序和分组时，将选择性最高的列放在前面通常是最好的。</p>
-<h3 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h3><p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB的聚簇索引在同一个结构中保存了B-Tree索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
-<p>InnoDB默认通过主键聚集数据，没有主键会选择一个唯一的非空索引代替，如果没有这样 的索引，InnoDB会隐式定义一个主键作为聚簇索引。</p>
-<p>聚簇索引的优点：</p>
-<ul>
-<li>相关数据共同存储，减少随机IO</li>
-<li>数据访问更快</li>
-<li>使用覆盖索引扫描的查询可以直接使用页节点中的主键值 –==不太理解==</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>数据存放在内存中时没有优势</li>
-<li>插入顺序，如果不是按照主键顺序插入数据，那么在数据插入完成后最好使用OPTIMIZE TABLE命令重新组织一下表</li>
-<li>更新聚簇索引列的代价很高，因为会强制将每个被更新的行移动到新的位置</li>
-<li>基于聚簇索引的表在插入行或更新主键时，可能面临“页分裂（page split）”问题。当行的主键值要求不许将这一行插入到某个已满的页中是，存储引擎会将该页分裂成两个页面来容纳该行（两个页可能隔得很远），页分裂会导致表占用更多磁盘空间</li>
-<li>聚簇索引可能导致全表扫面变慢，尤其是行比较稀疏，或者因为页分裂导致数据存储不连续的时候</li>
-<li><strong>二级索引访问需要两次索引查找</strong>：二级索引的叶节点不存储地址而是存储行的主键，通过二级索引查找行，需要先在二级索引的叶节点中找到对应的主键值，然后根据主键值在聚簇索引中找到对应的行。</li>
-</ul>
-<p><strong>InnoDB和MyISAM的数据分布对比</strong></p>
-<p><strong>MyISAM</strong>：按照数据插入的顺序存储在磁盘上。索引的叶节点存储数据的物理地址，主键索引和其他索引没有什么不同</p>
-<p><strong>InnoDB</strong>：在InnoDB中聚簇索引就是表，不需要独立的行存储，聚簇索引的每个叶节点都包含了主键值、事务ID、回滚指针以及剩余的列。如果使用主键的列前缀索引，InnoDB也会包含完整的主键列。</p>
-<p>二级索引中叶节点存储的不是“行指针”，而是主键值，这样的策略减少了行移动或数据页分裂时二级索引的维护工作，但当主键值较长时会让二级索引占用更多的空间。</p>
-<p><strong>在InnoDB表中按主键顺序插入行</strong></p>
-<p>如果表中没有什么数据需要聚集，可以定义一个代理键（surrogate key）作为主键，最简单的就是自增列，可以保证数据行顺序写入。</p>
-<p>最好避免随机的（不连续且范围很大）聚簇索引，特别是对于IO密集型的应用。从这个角度，使用UUID作为聚簇索引很糟糕，插入的花费时间更长，索引占用的空间更大。</p>
-<p>顺序主键什么时候会造成坏的结果？<br>对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
-<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
-<ul>
-<li>索引条目通常远小于数据行大小，只读取索引会极大减小数据访问量。</li>
-<li>索引按照列值顺序存储，范围查询有优势</li>
-<li>一些存储引擎如MyISAM在内存中只缓存索引，数据则依赖于操作系统缓存，只扫描索引减少系统调用。</li>
-<li>对于聚簇索引，如果二级索引能够实现覆盖查询，可以避免对主键索引的二级查询。</li>
-</ul>
-<p>MySQL只能使用B树索引做覆盖索引（其他索引类型不存储索引列的值）。</p>
-<p>如果索引覆盖了WHERE条件的字段，但不是整个查询涉及的字段，MySQL 5.5及更早版本会回表获取数据行。可以通过延迟关联（deferred join）进行优化，对能覆盖索引的字段进行子查询，得到主键后在外层查询获取所有列值。</p>
-<h3 id="使用索引扫描来做排序"><a href="#使用索引扫描来做排序" class="headerlink" title="使用索引扫描来做排序"></a>使用索引扫描来做排序</h3><p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
-<p>只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且各列的排序方向都一样时，MySQL才能使用索引的结果做排序。需要关联多张表时，只有ORDER BY子句的字段全部属于第一张表时才能使用索引做排序。通常ORDER BY子句要满足最左前缀要求，除非前导列限定为常数。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> RENTAL_ID, STAFF_ID <span class="keyword">FROM</span> RENTAL </span><br><span class="line"><span class="keyword">WHERE</span> RENTAL_DATA = <span class="string">'2005-05-25'</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> INVENTORY_ID, CUSTIMER_ID</span><br></pre></td></tr></table></figure>
-<p>如上查询中能够利用建立在<code>（RENTAL_DATA，INVENTORY_ID，CUSTIMER_ID）</code>上的索引。</p>
-<h3 id="压缩索引"><a href="#压缩索引" class="headerlink" title="压缩索引"></a>压缩索引</h3><p>MyISAM使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
-<h3 id="冗余和重复索引"><a href="#冗余和重复索引" class="headerlink" title="冗余和重复索引"></a>冗余和重复索引</h3><p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
-<p>唯一限制和主键限制都是通过索引实现的，三个都创建相当于在主键列上创建了三个相同的索引。</p>
-<p>如果创建了索引（A，B），再创建索引（A）就是冗余索引，因为这只是前一个索引的前缀索引。索引（A，B）可以当作索引（A）使用（对于B树）。还有一个情况是将一个索引扩展为（A，ID），因为主键列ID已经包含在二级索引中了，因此这种扩展也是冗余的。</p>
-<h3 id="索引和锁"><a href="#索引和锁" class="headerlink" title="索引和锁"></a>索引和锁</h3><h2 id="索引案例学习"><a href="#索引案例学习" class="headerlink" title="索引案例学习"></a>索引案例学习</h2><h3 id="多种条件过滤"><a href="#多种条件过滤" class="headerlink" title="多种条件过滤"></a>多种条件过滤</h3><p>常用的列放在前面，如果不限制该列可以用in()指定所有值</p>
-<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
-<h3 id="避免多个范围条件"><a href="#避免多个范围条件" class="headerlink" title="避免多个范围条件"></a>避免多个范围条件</h3><p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录A&gt;n的真假（如果N不会变动）</p>
-<h3 id="优化排序"><a href="#优化排序" class="headerlink" title="优化排序"></a>优化排序</h3><p>对于分页查询<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure><br>即使有索引（sex, rating)依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少MySQL扫描多余的行。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure></p>
-<h2 id="维护索引和表"><a href="#维护索引和表" class="headerlink" title="维护索引和表"></a>维护索引和表</h2><p>维护表的三个目的：</p>
-<ul>
-<li>找到并修复损坏的表</li>
-<li>维护准确的索引统计信息</li>
-<li>减少碎片</li>
-</ul>
-<h3 id="找到并修复损坏的表"><a href="#找到并修复损坏的表" class="headerlink" title="找到并修复损坏的表"></a>找到并修复损坏的表</h3><p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
-<p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
-<p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
-<p>MyISAM的表损坏（corruption）通常是系统崩溃导致的。InnoDB一般不会出现损坏，如果发生损坏，可能是</p>
-<ul>
-<li>硬件问题，如内存或磁盘故障（有可能）</li>
-<li>数据库管理员的错误操作，如在MySQL外部直接操作数据文件（有可能）</li>
-<li>InnoDB本身缺陷（不太可能）</li>
-</ul>
-<p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
-<h3 id="更新索引统计信息"><a href="#更新索引统计信息" class="headerlink" title="更新索引统计信息"></a>更新索引统计信息</h3><p>MySQL的查询优化器通过两个API来了解存储引擎的索引值分布情况</p>
-<ul>
-<li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM返回精确值，InnoDB返回估算值。</li>
-<li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
-</ul>
-<p>可以通过<code>ANALYZE TABLE</code>来生成统计信息。如果存储引擎提供的扫描行数是不准确的，或者执行计划本身太复杂无法准确获取各个阶段的行数，优化器会使用索引统计信息来估算扫描行数。</p>
-<p>每种存储引擎实现索引统计信息的方式不同：</p>
-<ul>
-<li>Mymory 引擎不存储索引统计信息</li>
-<li>MyISAM将索引统计信息存储在磁盘中，ANALYZE TABLE 需要全索引扫描计算索引基数，此过程中需要锁表</li>
-<li>InnoDB不再磁盘中存储索引统计信息，通过随机的索引访问进行评估将其存储在内存中。</li>
-</ul>
-<p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics表</code>获取。</p>
-<p>InnoDB会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过1/16或插入20亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
-<p>InnoDB打开某些<code>information_schema</code>表，使用SHOW TABLE STATUS或SHOW INDEX，或MySQL客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
-<h3 id="减少索引和数据碎片"><a href="#减少索引和数据碎片" class="headerlink" title="减少索引和数据碎片"></a>减少索引和数据碎片</h3><p>B树索引会碎片化，造成查询效率降低。</p>
-<p>表的数据存储碎片化有三种类型：</p>
-<ul>
-<li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
-<li>行间碎片（Intra-row fragmentation）：逻辑上顺序的页，在磁盘上不是顺序存储的。对全表扫描和聚簇索引扫描之类的操作影响很大</li>
-<li>剩余空间碎片（Free space fragmentation）：数据页中有大量空余空间，读取数据时读取大量不需要的数据，造成浪费</li>
-</ul>
-<p>MyISAM中三种都可能发生，InnoDB中不会出现行碎片。</p>
-<p>解决方式</p>
-<ol>
-<li>OPTIMIZE TABLE 或 导入再导出</li>
-<li>MyISAM可通过排序算法重建索引</li>
-<li>InnoDB可先删除索引再重新创建</li>
-<li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>三个原则：</p>
-<ol>
-<li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
-<li>顺序访问数据很快：顺序IO不需要磁盘寻道，对于排序的查询也更快</li>
-<li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
-</ol>
-
+<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
+<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/high-perf-mysql05-md/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -424,10 +754,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-02-07 19:32:38 / Modified: 20:15:47" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2020-02-07 19:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-13 13:15:10" itemprop="dateModified" datetime="2020-02-13T13:15:10+08:00">2020-02-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -453,9 +789,9 @@
       
           <h2 id="选择优化的数据类型"><a href="#选择优化的数据类型" class="headerlink" title="选择优化的数据类型"></a>选择优化的数据类型</h2><p>选择数据类型的原则</p>
 <ul>
-<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和CPU缓存，处理时需要的CPU周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
-<li>简单就好。简单数据类型的操作通常需要更少的CPU周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储IP比字符串低。</li>
-<li>尽量避免使用<code>NULL</code>。查询可为NULL的列对于MySQL来说更难优化，这些列使得索引、索引统计和值比较都更复杂。
+<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
+<li>简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符串低。</li>
+<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql04-md/#more" rel="contents">
@@ -496,7 +832,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2020/02/high-perf-mysql01-md/" class="post-title-link" itemprop="url">MySQL架构和历史</a>
+            <a href="/2020/02/high-perf-mysql01-md/" class="post-title-link" itemprop="url">MySQL 架构和历史</a>
         </h1>
 
         <div class="post-meta">
@@ -505,10 +841,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-02-07 16:32:38 / Modified: 20:01:21" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-13 13:16:00" itemprop="dateModified" datetime="2020-02-13T13:16:00+08:00">2020-02-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -536,11 +878,11 @@
 <ul>
 <li>连接与线程处理  </li>
 </ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在DB服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的DB连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
+<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
 <ul>
-<li>MySQL服务层：SQL解析、分析、优化、缓存</li>
+<li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
 </ul>
-<p>MySQL的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle中有库基于规则优化(RBO)和基于代价优化(CBO)两种方式，但<code>oracle 10g</code>之后已经弃用RBO。相比MySQL的优化器，Oracle的优化更加丰富和完善，可以对照着学习。</p>
+<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
 <ul>
 <li>存储引擎
           <!--noindex-->
@@ -632,7 +974,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

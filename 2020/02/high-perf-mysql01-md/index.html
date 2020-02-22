@@ -46,14 +46,14 @@
   };
 </script>
 
-  <meta name="description" content="逻辑架构三层架构：  连接与线程处理    每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在DB服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的DB连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL服务层：SQL解析、分析、优化、缓">
+  <meta name="description" content="逻辑架构三层架构：  连接与线程处理    每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL 服务层：SQL 解析、分">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL架构和历史">
+<meta property="og:title" content="MySQL 架构和历史">
 <meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql01-md/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
-<meta property="og:description" content="逻辑架构三层架构：  连接与线程处理    每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在DB服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的DB连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL服务层：SQL解析、分析、优化、缓">
+<meta property="og:description" content="逻辑架构三层架构：  连接与线程处理    每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL 服务层：SQL 解析、分">
 <meta property="article:published_time" content="2020-02-07T08:32:38.000Z">
-<meta property="article:modified_time" content="2020-02-07T12:01:21.383Z">
+<meta property="article:modified_time" content="2020-02-13T05:16:00.229Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -70,7 +70,7 @@
   };
 </script>
 
-  <title>MySQL架构和历史 | VC' Blog</title>
+  <title>MySQL 架构和历史 | VC' Blog</title>
   
 
 
@@ -192,7 +192,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          MySQL架构和历史
+          MySQL 架构和历史
         </h1>
 
         <div class="post-meta">
@@ -201,10 +201,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-02-07 16:32:38 / Modified: 20:01:21" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-13 13:16:00" itemprop="dateModified" datetime="2020-02-13T13:16:00+08:00">2020-02-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -232,11 +238,11 @@
 <ul>
 <li>连接与线程处理  </li>
 </ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在DB服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的DB连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
+<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
 <ul>
-<li>MySQL服务层：SQL解析、分析、优化、缓存</li>
+<li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
 </ul>
-<p>MySQL的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle中有库基于规则优化(RBO)和基于代价优化(CBO)两种方式，但<code>oracle 10g</code>之后已经弃用RBO。相比MySQL的优化器，Oracle的优化更加丰富和完善，可以对照着学习。</p>
+<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
 <ul>
 <li>存储引擎<a id="more"></a>
 </li>
@@ -248,9 +254,9 @@
 </ul>
 <p>粒度</p>
 <ul>
-<li><p>表锁<br>存储引擎可以管理自己的锁，MySQL本身还是会使用各种表锁来实现不同的目的。如，服务器会对<code>ALTER TABLE</code>之类的语句使用<em>表锁</em>，而忽略存储引擎的锁机制。</p>
+<li><p>表锁<br>存储引擎可以管理自己的锁，MySQL 本身还是会使用各种表锁来实现不同的目的。如，服务器会对<code>ALTER TABLE</code>之类的语句使用<em>表锁</em>，而忽略存储引擎的锁机制。</p>
 </li>
-<li><p>行级锁<br>行级锁只在存储引擎层实现（如InnoDB和XtraDB），服务器层面没有实现。</p>
+<li><p>行级锁<br>行级锁只在存储引擎层实现（如 InnoDB 和 XtraDB），服务器层面没有实现。</p>
 </li>
 </ul>
 <h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h2><p><strong>ACID</strong></p>
@@ -263,27 +269,27 @@
 <p>支持事务必然会来带开销，对于一些不需要事务的查询类应用就可以选择飞事务型的存储引擎，获取更高的性能。通过<code>LOCK TABLES</code>语句同样可以为应用提供一定的保护。</p>
 <p><strong>四种隔离级别</strong></p>
 <ul>
-<li>READ UNCIMMITTED（未提交读）：造成dirty read，实际很少使用</li>
+<li>READ UNCIMMITTED（未提交读）：造成 dirty read，实际很少使用</li>
 <li>READ COMMITTED（提交读）：不可重复读 nonrepeatable read</li>
-<li>REPEATABLE READ：依然会有幻读（Phantom Read） 的问题，进一步通过多版本并发控制（Multi version Concurrency Control，MVCC）解决。是MySQL的默认隔离级别。</li>
+<li>REPEATABLE READ：依然会有幻读（Phantom Read） 的问题，进一步通过多版本并发控制（Multi version Concurrency Control，MVCC）解决。是 MySQL 的默认隔离级别。</li>
 <li>SERIALIZABLE：在读取的每一行上都加上锁，可能导致大量的超时和锁争用，实际很少使用。</li>
 </ul>
 <p><strong>事务日志</strong><br>使用事务日志，修改数据表式可以先在内存中修改，并把操作行为记录到硬盘上的事务日志，事务日志采用追加方式，写日志操作相对写数据要快。事务日志持久化后，内存中被修改的数据可以在后台慢慢刷回到硬盘。（预写式日志 Write-Adead Logging）</p>
-<p><strong>MySQL中的事务</strong>  </p>
+<p><strong>MySQL 中的事务</strong>  </p>
 <ul>
 <li>默认自动提交，可通过<code>SET AUTOCOMMIT = 0</code>禁用</li>
 <li>在同一个事务中使用多种存储引擎是不可靠的</li>
 <li>除了自动加的隐式锁，还可以使用特定语句进行显式锁定,如下语句（ORACLE 里也有）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT ... FOR UPDATE</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<h2 id="多版本并发控制"><a href="#多版本并发控制" class="headerlink" title="多版本并发控制"></a>多版本并发控制</h2><p>MVCC没有统一的实现标准，有多种实现机制。MVCC可以看成是行级锁的一个变种，但它在很多情况下避免了加锁操作，开销更低。读操作非阻塞，写操作锁定必要的行。</p>
+<h2 id="多版本并发控制"><a href="#多版本并发控制" class="headerlink" title="多版本并发控制"></a>多版本并发控制</h2><p>MVCC 没有统一的实现标准，有多种实现机制。MVCC 可以看成是行级锁的一个变种，但它在很多情况下避免了加锁操作，开销更低。读操作非阻塞，写操作锁定必要的行。</p>
 <p>典型的有<code>乐观锁</code>和<code>悲观锁</code></p>
-<p>InnoDB的MVCC通过两个隐藏的列实现：行创建时间、行过期时间。存储的不是时间值而是系统版本号（system version number）。详见相关章节。</p>
-<h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL最初基于<code>ISAM</code>构建，后来被<code>MyISAM</code>取代，如今默认的存储引擎为<code>InnoDB</code>。</p>
-<p>不同的存储引擎各有特点，需要结合实际业务选择使用。多数情况下，使用InnoDB综合表现最好。</p>
+<p>InnoDB 的 MVCC 通过两个隐藏的列实现：行创建时间、行过期时间。存储的不是时间值而是系统版本号（system version number）。详见相关章节。</p>
+<h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL 最初基于<code>ISAM</code>构建，后来被<code>MyISAM</code>取代，如今默认的存储引擎为<code>InnoDB</code>。</p>
+<p>不同的存储引擎各有特点，需要结合实际业务选择使用。多数情况下，使用 InnoDB 综合表现最好。</p>
 <p><strong>应用场景</strong></p>
 <ul>
-<li>日志型应用：使用MyISAM或Archive，开销低，插入速度快。要做分析可以主从备份，读写分离</li>
+<li>日志型应用：使用 MyISAM 或 Archive，开销低，插入速度快。要做分析可以主从备份，读写分离</li>
 </ul>
 <p><strong>切换表的引擎</strong></p>
 <ul>
@@ -386,7 +392,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

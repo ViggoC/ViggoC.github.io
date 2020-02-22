@@ -46,14 +46,14 @@
   };
 </script>
 
-  <meta name="description" content="选择优化的数据类型选择数据类型的原则  更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和CPU缓存，处理时需要的CPU周期也更少。但也要确保没有低估需要存储的值的范围。(个人觉得字符串的长度限制有时候真的很难把握) 简单就好。简单数据类型的操作通常需要更少的CPU周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储IP比字符串低。 尽量避免">
+  <meta name="description" content="选择优化的数据类型选择数据类型的原则  更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。但也要确保没有低估需要存储的值的范围。(个人觉得字符串的长度限制有时候真的很难把握) 简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Schema 与数据类型优化">
 <meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql04-md/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
-<meta property="og:description" content="选择优化的数据类型选择数据类型的原则  更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和CPU缓存，处理时需要的CPU周期也更少。但也要确保没有低估需要存储的值的范围。(个人觉得字符串的长度限制有时候真的很难把握) 简单就好。简单数据类型的操作通常需要更少的CPU周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储IP比字符串低。 尽量避免">
+<meta property="og:description" content="选择优化的数据类型选择数据类型的原则  更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。但也要确保没有低估需要存储的值的范围。(个人觉得字符串的长度限制有时候真的很难把握) 简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符">
 <meta property="article:published_time" content="2020-02-07T11:32:38.000Z">
-<meta property="article:modified_time" content="2020-02-07T12:15:47.750Z">
+<meta property="article:modified_time" content="2020-02-13T05:15:10.185Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -201,10 +201,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-02-07 19:32:38 / Modified: 20:15:47" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2020-02-07 19:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-02-13 13:15:10" itemprop="dateModified" datetime="2020-02-13T13:15:10+08:00">2020-02-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -230,82 +236,82 @@
       
         <h2 id="选择优化的数据类型"><a href="#选择优化的数据类型" class="headerlink" title="选择优化的数据类型"></a>选择优化的数据类型</h2><p>选择数据类型的原则</p>
 <ul>
-<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和CPU缓存，处理时需要的CPU周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
-<li>简单就好。简单数据类型的操作通常需要更少的CPU周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储IP比字符串低。</li>
-<li>尽量避免使用<code>NULL</code>。查询可为NULL的列对于MySQL来说更难优化，这些列使得索引、索引统计和值比较都更复杂。<a id="more"></a>
+<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
+<li>简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符串低。</li>
+<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。<a id="more"></a>
 </li>
 </ul>
-<h3 id="整数类型"><a href="#整数类型" class="headerlink" title="整数类型"></a>整数类型</h3><p>整数计算一般使用64位的<strong>BIGINT</strong>类型。</p>
-<p>MySQL可以为整数类型制定宽度，例如<code>INT(11)</code>，但对于大多数应用没有意义，不会限制值的合法范围，只是规定了交互工具用来显示字符的个数。</p>
-<h3 id="实数类型"><a href="#实数类型" class="headerlink" title="实数类型"></a>实数类型</h3><p>FLOAT和DOUBLE类型支持标准的浮点运算进行近似计算。</p>
-<p>DECIMAL类型用于存储精确的小数。在<code>MySQL 5.0</code>以上，MySQL服务器自身实现了DECIMAL的高精度计算，相较原生浮点计算明显更慢。</p>
-<p>DECIMAL类型可以指定小数点前后的最大位数，如<code>DECIMAL(18,9)</code>小数点两边各存储9个数字，以二进制字符串的形式存储，每4个字节存储9个数字，小数点本身占一个字节，共计9个字节。</p>
-<p>需要精确计算时，也可以考虑使用BIGINT代替DECIMAL，根据需要的精度乘以响应的倍数即可。如存储财务数据要求精确到万分之一分，则可以把所以金额乘以一百万，以整形存储。</p>
-<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><p>从4.1开始每个字符串列可以定义自己的字符集和排序规则。</p>
-<p>VARCHAR需要使用1或2个额外字节记录字符串的长度：如果列长度小于等于255用1个，否则用2个。VARCHAR节省空间但是在更新时需要许多额外工作。适合使用的情况：最大长度比平均长度大很多；列很少更新；使用UTF-8这种每个字符字节数不同的字符集。</p>
-<p><strong>5.0以上版本VARCHAR保留末尾空格，CHAR会删除所有空格。</strong>字符串长度定义不是字节数，是字符数。</p>
-<p>BINARY和VARBIANRY存储二进制字符串，比较时更快。</p>
+<h3 id="整数类型"><a href="#整数类型" class="headerlink" title="整数类型"></a>整数类型</h3><p>整数计算一般使用 64 位的<strong>BIGINT</strong>类型。</p>
+<p>MySQL 可以为整数类型制定宽度，例如<code>INT(11)</code>，但对于大多数应用没有意义，不会限制值的合法范围，只是规定了交互工具用来显示字符的个数。</p>
+<h3 id="实数类型"><a href="#实数类型" class="headerlink" title="实数类型"></a>实数类型</h3><p>FLOAT 和 DOUBLE 类型支持标准的浮点运算进行近似计算。</p>
+<p>DECIMAL 类型用于存储精确的小数。在<code>MySQL 5.0</code>以上，MySQL 服务器自身实现了 DECIMAL 的高精度计算，相较原生浮点计算明显更慢。</p>
+<p>DECIMAL 类型可以指定小数点前后的最大位数，如<code>DECIMAL(18,9)</code>小数点两边各存储 9 个数字，以二进制字符串的形式存储，每 4 个字节存储 9 个数字，小数点本身占一个字节，共计 9 个字节。</p>
+<p>需要精确计算时，也可以考虑使用 BIGINT 代替 DECIMAL，根据需要的精度乘以响应的倍数即可。如存储财务数据要求精确到万分之一分，则可以把所以金额乘以一百万，以整形存储。</p>
+<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><p>从 4.1 开始每个字符串列可以定义自己的字符集和排序规则。</p>
+<p>VARCHAR 需要使用 1 或 2 个额外字节记录字符串的长度：如果列长度小于等于 255 用 1 个，否则用 2 个。VARCHAR 节省空间但是在更新时需要许多额外工作。适合使用的情况：最大长度比平均长度大很多；列很少更新；使用 UTF-8 这种每个字符字节数不同的字符集。</p>
+<p><strong>5.0 以上版本 VARCHAR 保留末尾空格，CHAR 会删除所有空格。</strong>字符串长度定义不是字节数，是字符数。</p>
+<p>BINARY 和 VARBIANRY 存储二进制字符串，比较时更快。</p>
 <blockquote>
-<p>使用<code>VARCHAR(5)</code>和<code>VARCHAR(200)</code>存储’hello’的空间开销是一样的，但MySQL会分配固定大小的内存块来保存内部值，尤其是使用内存临时表进行排序等操作。所以最好的策略是分配真正需要的空间。</p>
+<p>使用<code>VARCHAR(5)</code>和<code>VARCHAR(200)</code>存储 ‘hello’ 的空间开销是一样的，但 MySQL 会分配固定大小的内存块来保存内部值，尤其是使用内存临时表进行排序等操作。所以最好的策略是分配真正需要的空间。</p>
 </blockquote>
-<p>BLOB和TEXT分别使用二进制和字符串方式存储大数据。BLOB没有排序规则和字符集，而TEXT类型有。</p>
-<p>对于BLOB和TEXT，MySQL只对每列的前<code>max_sort_length</code>字节而不是整个串进行排序。来着两种类型不能对全部长度进行索引也不能使用索引消除排序。</p>
+<p>BLOB 和 TEXT 分别使用二进制和字符串方式存储大数据。BLOB 没有排序规则和字符集，而 TEXT 类型有。</p>
+<p>对于 BLOB 和 TEXT，MySQL 只对每列的前<code>max_sort_length</code>字节而不是整个串进行排序。来着两种类型不能对全部长度进行索引也不能使用索引消除排序。</p>
 <blockquote>
-<p>Memory引擎不支持BLOB和TEXT，如果查询中使用这两种类型的列并且需要使用隐式临时表，将使用MyISAM磁盘临时表，开销很大。应尽量避免使用这两种类型，实在无法避免可以在用到该字段时使用<code>SUBSTRING(column, length)</code>将列值转换为字符串。</p>
+<p>Memory 引擎不支持 BLOB 和 TEXT，如果查询中使用这两种类型的列并且需要使用隐式临时表，将使用 MyISAM 磁盘临时表，开销很大。应尽量避免使用这两种类型，实在无法避免可以在用到该字段时使用<code>SUBSTRING(column, length)</code>将列值转换为字符串。</p>
 </blockquote>
 <p>ENUM（枚举）类型有利有弊不太常用。</p>
-<h3 id="日期和时间"><a href="#日期和时间" class="headerlink" title="日期和时间"></a>日期和时间</h3><p>MySQL中时间格式精度为秒（MariaDB支持微秒级别的时间类型）。</p>
+<h3 id="日期和时间"><a href="#日期和时间" class="headerlink" title="日期和时间"></a>日期和时间</h3><p>MySQL 中时间格式精度为秒（MariaDB 支持微秒级别的时间类型）。</p>
 <ul>
-<li>DATETIME使用8字节存储，存储范围大（1001~9999），与时区无关</li>
-<li>TIMESTAMP使用4字节存储，存储范围小（1970~2038），与时区相关</li>
+<li>DATETIME 使用 8 字节存储，存储范围大（1001~9999），与时区无关</li>
+<li>TIMESTAMP 使用 4 字节存储，存储范围小（1970~2038），与时区相关</li>
 </ul>
-<p>通常使用TIMESTAMP类型，效率更高。</p>
+<p>通常使用 TIMESTAMP 类型，效率更高。</p>
 <h3 id="位数据类型"><a href="#位数据类型" class="headerlink" title="位数据类型"></a>位数据类型</h3><p>不太常用</p>
-<h3 id="选择标识符"><a href="#选择标识符" class="headerlink" title="选择标识符"></a>选择标识符</h3><p>选择标识列（identifier column）类型时，不仅要考虑存储类型还要考虑如何进行计算和比较，一旦选定了一种类型，还要确保所有关联表中使用同样的类型，类型之间需要精确匹配（包括UNSIGNED这样的属性）</p>
-<p>整数通常是ID列最好的选择。</p>
-<p>使用MD5(),SHA1(),UUID()产生的字符串的值会随机分布在很大的空间中，导致INSERT和一些SELECT语句变得很慢：</p>
+<h3 id="选择标识符"><a href="#选择标识符" class="headerlink" title="选择标识符"></a>选择标识符</h3><p>选择标识列（identifier column）类型时，不仅要考虑存储类型还要考虑如何进行计算和比较，一旦选定了一种类型，还要确保所有关联表中使用同样的类型，类型之间需要精确匹配（包括 UNSIGNED 这样的属性）</p>
+<p>整数通常是 ID 列最好的选择。</p>
+<p>使用 MD5(),SHA1(),UUID() 产生的字符串的值会随机分布在很大的空间中，导致 INSERT 和一些 SELECT 语句变得很慢：</p>
 <ul>
 <li>插入值随机写到索引的不同位置，导致页分裂，磁盘随机访问等，详见第五章</li>
 <li>逻辑上相邻的行会分布在磁盘和内存的不同地方</li>
 <li>随机值使得缓存赖以工作的<code>访问局部性原理</code>失效。</li>
 </ul>
-<p>存储UUID值应该异出“-”符号；最好使用UNHEX()函数将UUID值转换为16字节的数字，存储在BINARY(16)列中。检索时可以通过HEX()函数格式化成十六进制格式。</p>
-<h3 id="特殊类型数据"><a href="#特殊类型数据" class="headerlink" title="特殊类型数据"></a>特殊类型数据</h3><p>IP的本质是32位无符号整数，分成四段只是为了方便人进行阅读。MySQL使用INET_ATON()和INET_NTOA()函数在两种表示方法之间转换。</p>
+<p>存储 UUID 值应该异出“-”符号；最好使用 UNHEX() 函数将 UUID 值转换为 16 字节的数字，存储在 BINARY(16) 列中。检索时可以通过 HEX() 函数格式化成十六进制格式。</p>
+<h3 id="特殊类型数据"><a href="#特殊类型数据" class="headerlink" title="特殊类型数据"></a>特殊类型数据</h3><p>IP 的本质是 32 位无符号整数，分成四段只是为了方便人进行阅读。MySQL 使用 INET_ATON() 和 INET_NTOA() 函数在两种表示方法之间转换。</p>
 <h2 id="MySQL-schema-设计中的陷阱"><a href="#MySQL-schema-设计中的陷阱" class="headerlink" title="MySQL schema 设计中的陷阱"></a>MySQL schema 设计中的陷阱</h2><ul>
-<li>太多的列<br>  MySQL的存储引擎API需要在服务器曾和存储引擎层之间通过行缓冲格式拷贝数据，然后在服务器层将换缓冲内容解码成各个列。从行缓冲将编码过的列转换成行数据结构的操作代价很高。转换的代价依赖于列的数量。</li>
-<li>太多的关联<br>  如果希望查询执行得快速且并发行好，单个查询最好在12个表以内做关联</li>
+<li>太多的列<br>  MySQL 的存储引擎 API 需要在服务器曾和存储引擎层之间通过行缓冲格式拷贝数据，然后在服务器层将换缓冲内容解码成各个列。从行缓冲将编码过的列转换成行数据结构的操作代价很高。转换的代价依赖于列的数量。</li>
+<li>太多的关联<br>  如果希望查询执行得快速且并发行好，单个查询最好在 12 个表以内做关联</li>
 <li>防止过度使用枚举</li>
 </ul>
 <h2 id="范式和反范式"><a href="#范式和反范式" class="headerlink" title="范式和反范式"></a>范式和反范式</h2><h3 id="范式的优点和缺点"><a href="#范式的优点和缺点" class="headerlink" title="范式的优点和缺点"></a>范式的优点和缺点</h3><ul>
 <li>范式化的更新操作通常更快，只需修改更少的数据</li>
 <li>范式化的表通常更小，可以更好地放在内存中，执行操作更快</li>
-<li>减少DISTINCT或者GROUP BY语句的使用</li>
+<li>减少 DISTINCT 或者 GROUP BY 语句的使用</li>
 </ul>
 <p>范式化设计的缺点是需要更多关联操作。范式化可能将列存放在不同的表中，而这些列如果在一个表中可以属于同一个索引。</p>
-<h3 id="反范式的有点和缺点"><a href="#反范式的有点和缺点" class="headerlink" title="反范式的有点和缺点"></a>反范式的有点和缺点</h3><p>反范式可以避免关联，当数据比内存大是比关联要快得多，因为这样避免了随机IO。</p>
-<p>假设想要查询付费用户最近的10条信息，涉及<code>user_name, account_type, message_text, message_published_time</code>等字段。使用范式化设计，字段存放在两个表格中，使用user_id进行关联。使用反范式化组织数据，并增加一个索引（account_type, published），就可以不通过关联进行高效查询。</p>
+<h3 id="反范式的有点和缺点"><a href="#反范式的有点和缺点" class="headerlink" title="反范式的有点和缺点"></a>反范式的有点和缺点</h3><p>反范式可以避免关联，当数据比内存大是比关联要快得多，因为这样避免了随机 IO。</p>
+<p>假设想要查询付费用户最近的 10 条信息，涉及<code>user_name, account_type, message_text, message_published_time</code>等字段。使用范式化设计，字段存放在两个表格中，使用 user_id 进行关联。使用反范式化组织数据，并增加一个索引（account_type, published），就可以不通过关联进行高效查询。</p>
 <h3 id="混用范式化和反范式化"><a href="#混用范式化和反范式化" class="headerlink" title="混用范式化和反范式化"></a>混用范式化和反范式化</h3><p>现实中往往混合使用，平衡时间和空间开销</p>
 <h2 id="缓存表和汇总表"><a href="#缓存表和汇总表" class="headerlink" title="缓存表和汇总表"></a>缓存表和汇总表</h2><p>有时提升性能的最好方法是在同一张表中保存衍生的冗余数据，又是也需要创建一张独立的汇总表或缓存表。</p>
-<p>汇总表：如统计过去24小时发送的消息数，可以创建<code>msg_per_hr</code>来存储每个小时的发帖数，从中查出完成的23小时的发帖数，在从原始表中查出头尾不完整的数量，相加得到。<br>事事计算统计值是很昂贵的操作，要么扫描表中的大部分数据，要么查询语句只能在某些特定的索引上生效，而这类特定索引一般会对UPDATE操作造成影响。</p>
-<p>缓存表：有时可能需要很多不同的索引组合来加速各种类型的查询。这些矛盾的需求可以通过创建一张包含部分列的缓存表解决。对缓存表使用不同的存储引擎可获得更高的效率，如主表使用InnoDB，用MyISAM作为缓存表的引擎得到更小的索引占用空间，并且可以全文搜索。Elastic Search等也可以看成是缓存表。</p>
-<h3 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h3><p>物化视图实际上是预先计算并存储在硬盘上的表，可以通过各种策略进行刷新和更新。MySQL并不原声支持物化视图，使用Flexviews可以自己实现。</p>
-<h3 id="计数器表"><a href="#计数器表" class="headerlink" title="计数器表"></a>计数器表</h3><p>假设需要记录网站的点击次数，可使用1行记录，每次点击对改行进行更新，但写锁使得更新操作只能顺序执行。要获取更高的并发更新性能，可以将计数器保存在多行中，每次随机选择一行进行更新。</p>
+<p>汇总表：如统计过去 24 小时发送的消息数，可以创建<code>msg_per_hr</code>来存储每个小时的发帖数，从中查出完成的 23 小时的发帖数，在从原始表中查出头尾不完整的数量，相加得到。<br>事事计算统计值是很昂贵的操作，要么扫描表中的大部分数据，要么查询语句只能在某些特定的索引上生效，而这类特定索引一般会对 UPDATE 操作造成影响。</p>
+<p>缓存表：有时可能需要很多不同的索引组合来加速各种类型的查询。这些矛盾的需求可以通过创建一张包含部分列的缓存表解决。对缓存表使用不同的存储引擎可获得更高的效率，如主表使用 InnoDB，用 MyISAM 作为缓存表的引擎得到更小的索引占用空间，并且可以全文搜索。Elastic Search 等也可以看成是缓存表。</p>
+<h3 id="物化视图"><a href="#物化视图" class="headerlink" title="物化视图"></a>物化视图</h3><p>物化视图实际上是预先计算并存储在硬盘上的表，可以通过各种策略进行刷新和更新。MySQL 并不原声支持物化视图，使用 Flexviews 可以自己实现。</p>
+<h3 id="计数器表"><a href="#计数器表" class="headerlink" title="计数器表"></a>计数器表</h3><p>假设需要记录网站的点击次数，可使用 1 行记录，每次点击对改行进行更新，但写锁使得更新操作只能顺序执行。要获取更高的并发更新性能，可以将计数器保存在多行中，每次随机选择一行进行更新。</p>
 <p><code>ON DUPLICATE KEY UPDATE</code>可在主键已经存在时进行更新。</p>
-<h2 id="加快-ALTER-TABLE-操作的速度"><a href="#加快-ALTER-TABLE-操作的速度" class="headerlink" title="加快 ALTER TABLE 操作的速度"></a>加快 ALTER TABLE 操作的速度</h2><p>ALTER TABLE是一个很费事的操作，对于常见的场景能使用的技巧：一种是离线修改后进行主库的切换；另一种是，创建新表，拷贝数据后修改表名。</p>
+<h2 id="加快-ALTER-TABLE-操作的速度"><a href="#加快-ALTER-TABLE-操作的速度" class="headerlink" title="加快 ALTER TABLE 操作的速度"></a>加快 ALTER TABLE 操作的速度</h2><p>ALTER TABLE 是一个很费事的操作，对于常见的场景能使用的技巧：一种是离线修改后进行主库的切换；另一种是，创建新表，拷贝数据后修改表名。</p>
 <p>对于一些特殊的场景，可以只通过修改表的元数据加快操作。</p>
 <h3 id="只修改-frm-文件"><a href="#只修改-frm-文件" class="headerlink" title="只修改 .frm 文件"></a>只修改 .frm 文件</h3><p>不需要重建表的操作：</p>
 <ul>
-<li>移除一个列的AUTO_INCREMENT</li>
-<li>增加、移除或修改ENUM和SET常量</li>
+<li>移除一个列的 AUTO_INCREMENT</li>
+<li>增加、移除或修改 ENUM 和 SET 常量</li>
 </ul>
 <p>操作过程：</p>
 <ol>
 <li>创建一张有相同结构的表，并进行所需要的操作</li>
 <li>执行 <code>FLUSH TABLES WITH READ LOCK</code>，关闭所有正在使用的表</li>
-<li>交换<code>.frm文件</code></li>
+<li>交换<code>.frm 文件</code></li>
 <li>执行<code>UNLOCK TABLES</code>释放锁</li>
 </ol>
-<h3 id="快速创建MyISAM索引"><a href="#快速创建MyISAM索引" class="headerlink" title="快速创建MyISAM索引"></a>快速创建MyISAM索引</h3><p>MyISAM中的<code>唯一索引</code>无法通过禁用索引、载入数据、重启索引的方式导入大量数据，也可以通过直接修改元文件的方式操作</p>
+<h3 id="快速创建-MyISAM-索引"><a href="#快速创建-MyISAM-索引" class="headerlink" title="快速创建 MyISAM 索引"></a>快速创建 MyISAM 索引</h3><p>MyISAM 中的<code>唯一索引</code>无法通过禁用索引、载入数据、重启索引的方式导入大量数据，也可以通过直接修改元文件的方式操作</p>
 
     </div>
 
@@ -324,8 +330,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/02/high-perf-mysql01-md/" rel="prev" title="MySQL架构和历史">
-      <i class="fa fa-chevron-left"></i> MySQL架构和历史
+    <a href="/2020/02/high-perf-mysql01-md/" rel="prev" title="MySQL 架构和历史">
+      <i class="fa fa-chevron-left"></i> MySQL 架构和历史
     </a></div>
       <div class="post-nav-item">
     <a href="/2020/02/high-perf-mysql05-md/" rel="next" title="创建高性能的索引">
@@ -390,7 +396,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#选择优化的数据类型"><span class="nav-number">1.</span> <span class="nav-text">选择优化的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#整数类型"><span class="nav-number">1.1.</span> <span class="nav-text">整数类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实数类型"><span class="nav-number">1.2.</span> <span class="nav-text">实数类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串类型"><span class="nav-number">1.3.</span> <span class="nav-text">字符串类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日期和时间"><span class="nav-number">1.4.</span> <span class="nav-text">日期和时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#位数据类型"><span class="nav-number">1.5.</span> <span class="nav-text">位数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择标识符"><span class="nav-number">1.6.</span> <span class="nav-text">选择标识符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊类型数据"><span class="nav-number">1.7.</span> <span class="nav-text">特殊类型数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL-schema-设计中的陷阱"><span class="nav-number">2.</span> <span class="nav-text">MySQL schema 设计中的陷阱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#范式和反范式"><span class="nav-number">3.</span> <span class="nav-text">范式和反范式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#范式的优点和缺点"><span class="nav-number">3.1.</span> <span class="nav-text">范式的优点和缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反范式的有点和缺点"><span class="nav-number">3.2.</span> <span class="nav-text">反范式的有点和缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#混用范式化和反范式化"><span class="nav-number">3.3.</span> <span class="nav-text">混用范式化和反范式化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存表和汇总表"><span class="nav-number">4.</span> <span class="nav-text">缓存表和汇总表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#物化视图"><span class="nav-number">4.1.</span> <span class="nav-text">物化视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计数器表"><span class="nav-number">4.2.</span> <span class="nav-text">计数器表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加快-ALTER-TABLE-操作的速度"><span class="nav-number">5.</span> <span class="nav-text">加快 ALTER TABLE 操作的速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#只修改-frm-文件"><span class="nav-number">5.1.</span> <span class="nav-text">只修改 .frm 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速创建MyISAM索引"><span class="nav-number">5.2.</span> <span class="nav-text">快速创建MyISAM索引</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#选择优化的数据类型"><span class="nav-number">1.</span> <span class="nav-text">选择优化的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#整数类型"><span class="nav-number">1.1.</span> <span class="nav-text">整数类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实数类型"><span class="nav-number">1.2.</span> <span class="nav-text">实数类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串类型"><span class="nav-number">1.3.</span> <span class="nav-text">字符串类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日期和时间"><span class="nav-number">1.4.</span> <span class="nav-text">日期和时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#位数据类型"><span class="nav-number">1.5.</span> <span class="nav-text">位数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择标识符"><span class="nav-number">1.6.</span> <span class="nav-text">选择标识符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊类型数据"><span class="nav-number">1.7.</span> <span class="nav-text">特殊类型数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL-schema-设计中的陷阱"><span class="nav-number">2.</span> <span class="nav-text">MySQL schema 设计中的陷阱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#范式和反范式"><span class="nav-number">3.</span> <span class="nav-text">范式和反范式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#范式的优点和缺点"><span class="nav-number">3.1.</span> <span class="nav-text">范式的优点和缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反范式的有点和缺点"><span class="nav-number">3.2.</span> <span class="nav-text">反范式的有点和缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#混用范式化和反范式化"><span class="nav-number">3.3.</span> <span class="nav-text">混用范式化和反范式化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存表和汇总表"><span class="nav-number">4.</span> <span class="nav-text">缓存表和汇总表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#物化视图"><span class="nav-number">4.1.</span> <span class="nav-text">物化视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计数器表"><span class="nav-number">4.2.</span> <span class="nav-text">计数器表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加快-ALTER-TABLE-操作的速度"><span class="nav-number">5.</span> <span class="nav-text">加快 ALTER TABLE 操作的速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#只修改-frm-文件"><span class="nav-number">5.1.</span> <span class="nav-text">只修改 .frm 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速创建-MyISAM-索引"><span class="nav-number">5.2.</span> <span class="nav-text">快速创建 MyISAM 索引</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -404,7 +410,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
