@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="default">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://viggoc.github.io').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="概述 复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。 MySQL 支持两种复制方式：  基于行的复制 基于语句的复制（也称为逻辑复制）  两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。 MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql 复制">
+<meta property="og:url" content="https://viggoc.github.io/2020/03/high-perf-mysql10/index.html">
+<meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="概述 复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。 MySQL 支持两种复制方式：  基于行的复制 基于语句的复制（也称为逻辑复制）  两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。 MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中">
+<meta property="og:image" content="https://i.loli.net/2020/03/13/PKl7ELqwzZdOiFk.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/gqfI9St6ov3ar5N.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/qsNnhFJKXct9kRw.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/G7gwk3uDPpQjs1V.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/eqC9LlbSkNDPXgO.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/lucwmEgK7fDnWhZ.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/DQmJUlYt6PRNxoM.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/sRBtKmiPOTgqfuI.png">
+<meta property="og:image" content="https://i.loli.net/2020/03/14/T5PxH3v87iA6EZg.png">
+<meta property="article:published_time" content="2020-03-13T11:51:55.000Z">
+<meta property="article:modified_time" content="2020-03-18T03:54:57.576Z">
+<meta property="article:author" content="VC">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/03/13/PKl7ELqwzZdOiFk.png">
+
+<link rel="canonical" href="https://viggoc.github.io/2020/03/high-perf-mysql10/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Mysql 复制 | VC' Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VC' Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/03/high-perf-mysql10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mysql 复制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-03-13 19:51:55" itemprop="dateCreated datePublished" datetime="2020-03-13T19:51:55+08:00">2020-03-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-18 11:54:57" itemprop="dateModified" datetime="2020-03-18T11:54:57+08:00">2020-03-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/03/high-perf-mysql10/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/high-perf-mysql10/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
+<p>复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。</p>
+<p>MySQL 支持两种复制方式：</p>
+<ul>
+<li>基于行的复制</li>
+<li>基于语句的复制（也称为逻辑复制）</li>
+</ul>
+<p>两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。</p>
+<p>MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中的新特性或语法。对于小版本号升级通常是兼容的。</p>
+<a id="more"></a>
+<blockquote>
+<p>这里记下经历过的一个坑，oracle 10g 小版本不同也不兼容无法恢复 rman 备份。主库版本是 10.2.0.5，尝试在 10.2.0.1、10.2.0.3 下都无法恢复备份。MySQL 也说了通常，最好还是看一下更新的 changelog。</p>
+</blockquote>
+<p>复制主要开销在于：</p>
+<ul>
+<li>备库从主库读取二进制日志文件时的 IO 开销</li>
+<li>从高吞吐主库复制到多个备库时唤醒复制线程的开销</li>
+</ul>
+<p>复制的常见用途</p>
+<ul>
+<li>数据分布：在不同的物理位置分布数据备份</li>
+<li>负载均衡：对读密集型应用进行优化</li>
+<li>备份：复制可以作为备份的补充，但不能取代备份</li>
+<li>高可用性和故障切换：避免单点失败造成的系统宕机</li>
+<li>MySQL 升级测试：用高版本 MySQL 作为备库，进行新版本测试</li>
+</ul>
+<p>复制的三个步骤：</p>
+<ol>
+<li>主库把数据更改记录到二进制日志中
+<ul>
+<li>发生在事务提交后实际更新数据之前，按照事务提交顺序而不是语句执行顺序记录</li>
+</ul>
+</li>
+<li>备库将主库上的日志复制到自己的中继日志（Relay Log）中</li>
+<li>备库读取中继日志中的事件，将其重放到备库数据之上
+<ul>
+<li>在主库上并发运行的查询在备库上只能串行化执行，因为只有一个 SQL 线程来重放中继日志中的事件，这会成为很多工作负载的性能瓶颈</li>
+</ul>
+</li>
+</ol>
+<p><img src="https://i.loli.net/2020/03/13/PKl7ELqwzZdOiFk.png" alt="" /></p>
+<h2 id="配置"><a class="markdownIt-Anchor" href="#配置"></a> 配置</h2>
+<p>假设有 server1（192.168.0.1），server2（192.168.0.2）</p>
+<ol>
+<li>创建复制账号</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GRANT</span> <span class="keyword">REPLICATION</span> <span class="keyword">SLAVE</span>, <span class="keyword">REPLICATION</span> <span class="keyword">CLIENT</span> <span class="keyword">ON</span> *.*</span><br><span class="line"><span class="keyword">TO</span> repl@<span class="string">'192.168.0.%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'PASSWORD'</span>;</span><br></pre></td></tr></table></figure>
+<p>在主库和备库都创建这个账号，尽管这个账号无法执行 select 等查询，但可以从二进制日志获取数据。</p>
+<blockquote>
+<p>复制账号事实上只需要主库上的<code>REPLICATION SLAVE</code>权限，不一定需要每一端服务器都有<code>REPLICATION CLIENT</code>权限，如此设置原因有：</p>
+<ul>
+<li>用来监控和管理复制的账号需要此权限，针对这两种目的使用同一个账号更方便</li>
+<li>备库上的设置和主库完全相同，方便交换主备库</li>
+</ul>
+</blockquote>
+<ol start="2">
+<li>配置主库和备库</li>
+</ol>
+<p>在主库的<code>my.cnf</code>文件中设置如下，重启服务器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 开启二进制日志</span><br><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line"># 指定唯一的 server id</span><br><span class="line">server_id &#x3D; 10</span><br></pre></td></tr></table></figure>
+<p>备库中类似，同样需要重启：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line">server_id &#x3D; 2</span><br><span class="line"># 指定中继日志的位置和名称</span><br><span class="line">relay_log &#x3D; &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-relay-bin</span><br><span class="line"># 一下两个不是必须</span><br><span class="line">log_slave_updates &#x3D; 1</span><br><span class="line">read_only &#x3D; 1</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>启动复制</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;server1&#39;,</span><br><span class="line">MASTER_USER&#x3D;&#39;repl&#39;,</span><br><span class="line">MASTER_PASSWORD&#x3D;&#39;PASSWORD&#39;,</span><br><span class="line">MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000001&#39;,</span><br><span class="line">MASTER_LOG_POS&#x3D;0;</span><br></pre></td></tr></table></figure>
+<p>可以通过<code>SHOW SLAVE STATUS</code>查看是否成功，使用<code>START SLAVE</code>开始复制。</p>
+<h3 id="新备库初始化"><a class="markdownIt-Anchor" href="#新备库初始化"></a> 新备库初始化</h3>
+<p>当主库已经运行一段时间要新增一个备库的时候，需要初始化备库，保持主库和备库同步需要满足如下条件：</p>
+<ul>
+<li>在某个时间点主库的快照</li>
+<li>主库当前的二进制文件，和获得数据快照时在该二进制日志文件中的偏移量</li>
+<li>从快照时间到现在的二进制日志</li>
+</ul>
+<p>从其他服务器克隆备库的方法：</p>
+<ul>
+<li>冷备份，重启主库后使用一个新的二进制日志文件，备库指向这个新文件</li>
+<li>热备份，如果仅使用了 MyISAM 标，可在主库运行时使用<code>mysqlhotcopy</code>或<code>rsync</code>来复制数据</li>
+<li>mysqldump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases --master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用快照或备份，确保从备份时间开始的二进制日志都存在，恢复备份后，使用<code>CHANGE MATER TO</code>指定二进制日志坐标</li>
+<li>其他热备工具如 Xtrabackup</li>
+<li>使用另外的备库，注意不能使用<code>SHOW MATER STATUS</code>来获取主库的日志坐标，而是在获取快照时使用<code>SHOW SLAVE STATUS</code>来获取备库在主库上的执行位置。</li>
+</ul>
+<h2 id="复制的原理"><a class="markdownIt-Anchor" href="#复制的原理"></a> 复制的原理</h2>
+<p>基于语句的复制（统计查询并记录开销大）和基于行的复制（全表更新开销大）各有优缺点，MySQL 能在两种模式间动态切换，默认情况下使用基于语句的复制。</p>
+<p>基于语句的复制</p>
+<ul>
+<li>优点：主备模式不同时，逻辑复制能在多种情况下工作。例如，主备上的表的定义不同但数据类型兼容、列的顺序不同等情况。很容易修改备库上的 schema，将其升级成主库</li>
+<li>缺点：在使用触发器或者存储过程的时候比较容易出问题</li>
+</ul>
+<p>基于行的复制</p>
+<ul>
+<li>优点：几乎没有无法处理的场景，除了修改 schema。这种方式可以减少锁的使用。</li>
+<li>缺点：无法知道执行了哪些 SQL</li>
+</ul>
+<p>设置<code>log_slave_updates</code>选项可以让备库变成其他服务器的主库，实现复制事件的传递<br />
+<img src="https://i.loli.net/2020/03/14/gqfI9St6ov3ar5N.png" alt="" /></p>
+<p>复制过滤选项允许仅复制服务器上的部分数据，有两种过滤方式：</p>
+<ul>
+<li>在主库上过滤记录到二进制日志中的事件</li>
+<li>在备库上过滤记录到中继日志的事件<br />
+<img src="https://i.loli.net/2020/03/14/qsNnhFJKXct9kRw.png" alt="" /></li>
+</ul>
+<p>使用复制过滤比较容易出问题，要慎重。更好的办法是阻止一些特殊的语句被复制，通常是设置<code>SQL_LOG_BIN=0</code>。</p>
+<h2 id="复制拓扑"><a class="markdownIt-Anchor" href="#复制拓扑"></a> 复制拓扑</h2>
+<p>基本原则：</p>
+<ul>
+<li>一个备库只能有一个相应的主库</li>
+<li>每个备库都必须有唯一的服务器 ID</li>
+<li>一个主库可以有多个备库</li>
+<li><code>log_slave_updates</code>选项，可以让备库传递复制</li>
+</ul>
+<h3 id="一主多备"><a class="markdownIt-Anchor" href="#一主多备"></a> 一主多备</h3>
+<p>结构简单，备库之间没有交互，通常用途：</p>
+<ul>
+<li>为不同角色使用不同的备库（如添加不同的索引或使用不同的存储引擎）</li>
+<li>把一个备库作为候补主库</li>
+<li>灾备</li>
+<li>测试、培训、开发等</li>
+</ul>
+<h3 id="主-主复制"><a class="markdownIt-Anchor" href="#主-主复制"></a> 主 - 主复制</h3>
+<p>主动 - 主动模式：在并发修改数据的时候容易起冲突<br />
+<img src="https://i.loli.net/2020/03/14/G7gwk3uDPpQjs1V.png" alt="" /></p>
+<p>主动 - 被动模式：其中一台服务器为只读<br />
+<img src="https://i.loli.net/2020/03/14/eqC9LlbSkNDPXgO.png" alt="" /><br />
+服务器的配置是对称的，使得切换主动和被动服务器非常方便，便于维护。</p>
+<p>例如，<code>ALTER TABLE</code>操作可能会锁住整个表，非常耗时，影响服务。在主-主配置下，可以先停止主动服务器上的备库复制线程（从被动库复制），在被动库上执行耗时操作后交换角色，重启先前主动库上的复制线程，后台执行操作。这样两个库上的操作都在“后台”完成。</p>
+<p>配置：</p>
+<ol>
+<li>确保两机有相同的数据</li>
+<li>启用二进制日志，选择唯一 ID，创建复制账号</li>
+<li>启用备库更新的日志记录，用于故障转移和故障恢复</li>
+<li>把被动库配置成只读，防止数据冲突</li>
+<li>启动实例</li>
+<li>将对方设置为备库</li>
+</ol>
+<p>主动服务器上发生更新后，更新被记录在二进制日志中，通过复制传递到被动服务器的中继日志中。被动服务器重放查询并记录到自己的二进制日志中。由于时间的服务器 ID 和主动服务器的相同，主动服务器将忽略这些事件。</p>
+<h3 id="有备库的主-主结构"><a class="markdownIt-Anchor" href="#有备库的主-主结构"></a> 有备库的主 - 主结构</h3>
+<p><img src="https://i.loli.net/2020/03/14/lucwmEgK7fDnWhZ.png" alt="" /></p>
+<h3 id="环形复制"><a class="markdownIt-Anchor" href="#环形复制"></a> 环形复制</h3>
+<p><img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /><br />
+环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。</p>
+<h3 id="分发主库"><a class="markdownIt-Anchor" href="#分发主库"></a> 分发主库</h3>
+<p><img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /><br />
+当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。</p>
+<h3 id="树结构"><a class="markdownIt-Anchor" href="#树结构"></a> 树结构</h3>
+<p><img src="https://i.loli.net/2020/03/14/DQmJUlYt6PRNxoM.png" alt="" /></p>
+<h3 id="定制化方案"><a class="markdownIt-Anchor" href="#定制化方案"></a> 定制化方案</h3>
+<ul>
+<li>选择性复制：每个备库只拥有主库的部分数据，将数据驻留在内存中。有点类似水平数据划分，但是主库中拥有所有数据。</li>
+<li>分离功能：将 OLTP 服务器的数据复制到专门的 OLAP 备库上，这个备库可以使用不同的硬件、配置、索引或存储引擎</li>
+<li>数据归档：选择性阻止 delete 语句的传递，在备库上保留猪肚上删除过的数据</li>
+<li>全文检索：在备库中使用 MyISAM 支持全文检索，主库使用支持事务的 InnoDB</li>
+<li>模拟多主库复制<br />
+<img src="https://i.loli.net/2020/03/14/sRBtKmiPOTgqfuI.png" alt="" /><br />
+<img src="https://i.loli.net/2020/03/14/T5PxH3v87iA6EZg.png" alt="" /></li>
+<li>创建日志服务器：使用复制代替<code>mysqlbinlog</code>工具实现备份恢复</li>
+</ul>
+<h2 id="复制和容量规划"><a class="markdownIt-Anchor" href="#复制和容量规划"></a> 复制和容量规划</h2>
+<p>考虑备库吞吐量的使用不能只使用总查询/备库数量，每台机器还需要加上主库分发的写数据的工作量。备库的扩展不是线性的，查询数量增加 4 倍可能要增加 17 倍的服务器。</p>
+<h2 id="todo"><a class="markdownIt-Anchor" href="#todo"></a> TODO</h2>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/high-perf-mysql06-02/" rel="prev" title="查询性能优化-02">
+      <i class="fa fa-chevron-left"></i> 查询性能优化-02
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text"> 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">2.</span> <span class="nav-text"> 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新备库初始化"><span class="nav-number">2.1.</span> <span class="nav-text"> 新备库初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制的原理"><span class="nav-number">3.</span> <span class="nav-text"> 复制的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制拓扑"><span class="nav-number">4.</span> <span class="nav-text"> 复制拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一主多备"><span class="nav-number">4.1.</span> <span class="nav-text"> 一主多备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主-主复制"><span class="nav-number">4.2.</span> <span class="nav-text"> 主 - 主复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有备库的主-主结构"><span class="nav-number">4.3.</span> <span class="nav-text"> 有备库的主 - 主结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环形复制"><span class="nav-number">4.4.</span> <span class="nav-text"> 环形复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分发主库"><span class="nav-number">4.5.</span> <span class="nav-text"> 分发主库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#树结构"><span class="nav-number">4.6.</span> <span class="nav-text"> 树结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定制化方案"><span class="nav-number">4.7.</span> <span class="nav-text"> 定制化方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制和容量规划"><span class="nav-number">5.</span> <span class="nav-text"> 复制和容量规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#todo"><span class="nav-number">6.</span> <span class="nav-text"> TODO</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">VC</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">VC</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'zh-cn' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</body>
+</html>

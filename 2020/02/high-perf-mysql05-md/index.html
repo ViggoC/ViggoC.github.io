@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="default">
 <head>
-  <meta charset="UTF-8">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 4.2.0">
@@ -40,18 +40,18 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
   };
 </script>
 
-  <meta name="description" content="索引基础索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B 树索引 B 树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B 树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列前缀">
+  <meta name="description" content="索引基础 索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B 树索引 B 树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B 树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列">
 <meta property="og:type" content="article">
 <meta property="og:title" content="创建高性能的索引">
 <meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql05-md/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
-<meta property="og:description" content="索引基础索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B 树索引 B 树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B 树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列前缀">
+<meta property="og:description" content="索引基础 索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。 B 树索引 B 树中所有的值按顺序存储，每个叶节点到根的距离相同。 索引对多个值进行排序的依据是CREATE TABLE语句中定义索引时列的顺序。 B 树适用于全键值、键值范围或键前缀查找：  全值匹配：和索引中的所有列进行匹配 匹配最左前缀：只使用索引的第一列 匹配列">
 <meta property="article:published_time" content="2020-02-12T08:32:38.000Z">
 <meta property="article:modified_time" content="2020-02-13T05:15:43.851Z">
 <meta property="article:author" content="VC">
@@ -99,12 +99,12 @@
   .use-motion .logo-line-before i { left: initial; }
   .use-motion .logo-line-after i { right: initial; }
   </style>
-</noscript>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
     <div class="headband"></div>
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -153,9 +153,34 @@
     <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
   </ul>
 
 </nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
 </div>
     </header>
 
@@ -224,6 +249,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql05-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql05-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -234,7 +273,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+        <h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
+<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
 <p><strong>B 树索引</strong></p>
 <p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
 <p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
@@ -252,9 +292,9 @@
 <ul>
 <li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
 <li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。<a id="more"></a>
-</li>
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
 </ul>
+<a id="more"></a>
 <p><strong>哈希索引</strong></p>
 <p>hash index 只有在精确匹配索引所有列的时候才有效。对于一行数据，存储引擎对所有<em>索引列</em>计算一个 hash code。</p>
 <p>MySQL 中只有 Memory 引擎显式支持哈希索引。此外其还支持非唯一哈希索引，哈希值相同是，索引会以链表的形式存放多个记录指针到同一个哈希条目中。</p>
@@ -265,31 +305,43 @@
 <p>MyISAM 支持空间索引，可以用作地理数据存储，用所有维度来索引数据，必须使用 GIS 相关函数<code>MBRCONTAINS()</code>等来维护数据，但并不完善。PostgreSQL 中的 PostGIS 较好。</p>
 <p><strong>全文索引</strong></p>
 <p>详见第 7 章</p>
-<h2 id="索引的优点"><a href="#索引的优点" class="headerlink" title="索引的优点"></a>索引的优点</h2><p>三大优点：</p>
+<h2 id="索引的优点"><a class="markdownIt-Anchor" href="#索引的优点"></a> 索引的优点</h2>
+<p>三大优点：</p>
 <ol>
 <li>减少服务器需要扫描的数据量</li>
 <li>帮助服务器避免排序和临时表</li>
 <li>将随机 IO 变为顺序 IO</li>
 </ol>
-<h2 id="高性能的索引策略"><a href="#高性能的索引策略" class="headerlink" title="高性能的索引策略"></a>高性能的索引策略</h2><h3 id="独立的列"><a href="#独立的列" class="headerlink" title="独立的列"></a>独立的列</h3><p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
-<h3 id="前缀索引和索引选择性"><a href="#前缀索引和索引选择性" class="headerlink" title="前缀索引和索引选择性"></a>前缀索引和索引选择性</h3><p>索引很长的字符列会让索引变得大且慢，一个策略是模拟 hash 索引。</p>
+<h2 id="高性能的索引策略"><a class="markdownIt-Anchor" href="#高性能的索引策略"></a> 高性能的索引策略</h2>
+<h3 id="独立的列"><a class="markdownIt-Anchor" href="#独立的列"></a> 独立的列</h3>
+<p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
+<h3 id="前缀索引和索引选择性"><a class="markdownIt-Anchor" href="#前缀索引和索引选择性"></a> 前缀索引和索引选择性</h3>
+<p>索引很长的字符列会让索引变得大且慢，一个策略是模拟 hash 索引。</p>
 <p>此外还可以只索引开头的部分字符，节约索引空间，提升效率，但会降低索引的选择性。<strong>索引的选择性</strong>是指，不重复的索引值（基数，cardinality）和记录总数的比值。</p>
 <p>为了确定前缀的合适长度，需要将常见值和常见的前缀进行比较。</p>
-<p>方法一：定性比较<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, city <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改前缀长度，寻找合适长度</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, <span class="keyword">LEFT</span>(city, <span class="number">3</span>) <span class="keyword">AS</span> pref <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure></p>
-<p>方法二：计算选择度，定量比较<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> city)/<span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> city_demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">3</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel3,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">4</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel4,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">5</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel5,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">6</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel6</span><br><span class="line"><span class="keyword">FROM</span> city_demo;</span><br></pre></td></tr></table></figure><br>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
-<p><strong>创建前缀索引</strong><br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> city_demo <span class="keyword">ADD</span> <span class="keyword">KEY</span> (city(<span class="number">7</span>));</span><br></pre></td></tr></table></figure><br>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
+<p>方法一：定性比较</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, city <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改前缀长度，寻找合适长度</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, <span class="keyword">LEFT</span>(city, <span class="number">3</span>) <span class="keyword">AS</span> pref <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>方法二：计算选择度，定量比较</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> city)/<span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> city_demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">3</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel3,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">4</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel4,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">5</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel5,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">6</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel6</span><br><span class="line"><span class="keyword">FROM</span> city_demo;</span><br></pre></td></tr></table></figure>
+<p>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
+<p><strong>创建前缀索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> city_demo <span class="keyword">ADD</span> <span class="keyword">KEY</span> (city(<span class="number">7</span>));</span><br></pre></td></tr></table></figure>
+<p>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
 <p>一个常见场景是针对很长的十六进制唯一 ID 使用前缀索引。</p>
 <p>后缀索引（suffix index）也有用途，例如查找某个域名的邮箱地址。MySQL 原生并不支持，但可以把字符串反转后存储，创建前缀索引。通过触发器来维护。</p>
-<h3 id="多列索引"><a href="#多列索引" class="headerlink" title="多列索引"></a>多列索引</h3><p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x 引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR 条件的联合，AND 条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
+<h3 id="多列索引"><a class="markdownIt-Anchor" href="#多列索引"></a> 多列索引</h3>
+<p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x 引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR 条件的联合，AND 条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
 <p>出现索引合并意味着索引建得比较糟糕：</p>
 <ul>
 <li>当出现多个索引相交（多个 AND），通常需要创建一个包含多个列的索引</li>
 <li>当出现联合操作（多个 OR 条件），通常需要耗费大量 CPU 和内存用于缓存、排序和合并</li>
 <li>更重要的是，优化器不会吧这些计算到查询成本中，优化器只关心随机页面读取。有时运行这样查询不如直接全表扫描。可通过<code>optimizer_switch</code>关闭索引合并，也可以使用<code>IGNORE INDEX</code>提示让优化器忽略有些索引。</li>
 </ul>
-<h3 id="选择合适的索引顺序"><a href="#选择合适的索引顺序" class="headerlink" title="选择合适的索引顺序"></a>选择合适的索引顺序</h3><p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
+<h3 id="选择合适的索引顺序"><a class="markdownIt-Anchor" href="#选择合适的索引顺序"></a> 选择合适的索引顺序</h3>
+<p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
 <p>当不想需要考虑排序和分组时，将选择性最高的列放在前面通常是最好的。</p>
-<h3 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h3><p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB 的聚簇索引在同一个结构中保存了 B-Tree 索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
+<h3 id="聚簇索引"><a class="markdownIt-Anchor" href="#聚簇索引"></a> 聚簇索引</h3>
+<p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB 的聚簇索引在同一个结构中保存了 B-Tree 索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
 <p>InnoDB 默认通过主键聚集数据，没有主键会选择一个唯一的非空索引代替，如果没有这样 的索引，InnoDB 会隐式定义一个主键作为聚簇索引。</p>
 <p>聚簇索引的优点：</p>
 <ul>
@@ -313,8 +365,10 @@
 <p><strong>在 InnoDB 表中按主键顺序插入行</strong></p>
 <p>如果表中没有什么数据需要聚集，可以定义一个代理键（surrogate key）作为主键，最简单的就是自增列，可以保证数据行顺序写入。</p>
 <p>最好避免随机的（不连续且范围很大）聚簇索引，特别是对于 IO 密集型的应用。从这个角度，使用 UUID 作为聚簇索引很糟糕，插入的花费时间更长，索引占用的空间更大。</p>
-<p>顺序主键什么时候会造成坏的结果？<br>对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
-<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
+<p>顺序主键什么时候会造成坏的结果？<br />
+对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
+<h3 id="覆盖索引"><a class="markdownIt-Anchor" href="#覆盖索引"></a> 覆盖索引</h3>
+<p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
 <ul>
 <li>索引条目通常远小于数据行大小，只读取索引会极大减小数据访问量。</li>
 <li>索引按照列值顺序存储，范围查询有优势</li>
@@ -323,25 +377,38 @@
 </ul>
 <p>MySQL 只能使用 B 树索引做覆盖索引（其他索引类型不存储索引列的值）。</p>
 <p>如果索引覆盖了 WHERE 条件的字段，但不是整个查询涉及的字段，MySQL 5.5 及更早版本会回表获取数据行。可以通过延迟关联（deferred join）进行优化，对能覆盖索引的字段进行子查询，得到主键后在外层查询获取所有列值。</p>
-<h3 id="使用索引扫描来做排序"><a href="#使用索引扫描来做排序" class="headerlink" title="使用索引扫描来做排序"></a>使用索引扫描来做排序</h3><p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
+<h3 id="使用索引扫描来做排序"><a class="markdownIt-Anchor" href="#使用索引扫描来做排序"></a> 使用索引扫描来做排序</h3>
+<p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
 <p>只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且各列的排序方向都一样时，MySQL 才能使用索引的结果做排序。需要关联多张表时，只有 ORDER BY 子句的字段全部属于第一张表时才能使用索引做排序。通常 ORDER BY 子句要满足最左前缀要求，除非前导列限定为常数。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> RENTAL_ID, STAFF_ID <span class="keyword">FROM</span> RENTAL </span><br><span class="line"><span class="keyword">WHERE</span> RENTAL_DATA = <span class="string">'2005-05-25'</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> INVENTORY_ID, CUSTIMER_ID</span><br></pre></td></tr></table></figure>
 <p>如上查询中能够利用建立在<code>（RENTAL_DATA，INVENTORY_ID，CUSTIMER_ID）</code>上的索引。</p>
-<h3 id="压缩索引"><a href="#压缩索引" class="headerlink" title="压缩索引"></a>压缩索引</h3><p>MyISAM 使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
-<h3 id="冗余和重复索引"><a href="#冗余和重复索引" class="headerlink" title="冗余和重复索引"></a>冗余和重复索引</h3><p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
+<h3 id="压缩索引"><a class="markdownIt-Anchor" href="#压缩索引"></a> 压缩索引</h3>
+<p>MyISAM 使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
+<h3 id="冗余和重复索引"><a class="markdownIt-Anchor" href="#冗余和重复索引"></a> 冗余和重复索引</h3>
+<p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
 <p>唯一限制和主键限制都是通过索引实现的，三个都创建相当于在主键列上创建了三个相同的索引。</p>
 <p>如果创建了索引（A，B），再创建索引（A）就是冗余索引，因为这只是前一个索引的前缀索引。索引（A，B）可以当作索引（A）使用（对于 B 树）。还有一个情况是将一个索引扩展为（A，ID），因为主键列 ID 已经包含在二级索引中了，因此这种扩展也是冗余的。</p>
-<h3 id="索引和锁"><a href="#索引和锁" class="headerlink" title="索引和锁"></a>索引和锁</h3><h2 id="索引案例学习"><a href="#索引案例学习" class="headerlink" title="索引案例学习"></a>索引案例学习</h2><h3 id="多种条件过滤"><a href="#多种条件过滤" class="headerlink" title="多种条件过滤"></a>多种条件过滤</h3><p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+<h3 id="索引和锁"><a class="markdownIt-Anchor" href="#索引和锁"></a> 索引和锁</h3>
+<h2 id="索引案例学习"><a class="markdownIt-Anchor" href="#索引案例学习"></a> 索引案例学习</h2>
+<h3 id="多种条件过滤"><a class="markdownIt-Anchor" href="#多种条件过滤"></a> 多种条件过滤</h3>
+<p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
 <p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
-<h3 id="避免多个范围条件"><a href="#避免多个范围条件" class="headerlink" title="避免多个范围条件"></a>避免多个范围条件</h3><p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
-<h3 id="优化排序"><a href="#优化排序" class="headerlink" title="优化排序"></a>优化排序</h3><p>对于分页查询<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure><br>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure></p>
-<h2 id="维护索引和表"><a href="#维护索引和表" class="headerlink" title="维护索引和表"></a>维护索引和表</h2><p>维护表的三个目的：</p>
+<h3 id="避免多个范围条件"><a class="markdownIt-Anchor" href="#避免多个范围条件"></a> 避免多个范围条件</h3>
+<p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a class="markdownIt-Anchor" href="#优化排序"></a> 优化排序</h3>
+<p>对于分页查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="维护索引和表"><a class="markdownIt-Anchor" href="#维护索引和表"></a> 维护索引和表</h2>
+<p>维护表的三个目的：</p>
 <ul>
 <li>找到并修复损坏的表</li>
 <li>维护准确的索引统计信息</li>
 <li>减少碎片</li>
 </ul>
-<h3 id="找到并修复损坏的表"><a href="#找到并修复损坏的表" class="headerlink" title="找到并修复损坏的表"></a>找到并修复损坏的表</h3><p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
+<h3 id="找到并修复损坏的表"><a class="markdownIt-Anchor" href="#找到并修复损坏的表"></a> 找到并修复损坏的表</h3>
+<p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
 <p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
 <p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
 <p>MyISAM 的表损坏（corruption）通常是系统崩溃导致的。InnoDB 一般不会出现损坏，如果发生损坏，可能是</p>
@@ -351,7 +418,8 @@
 <li>InnoDB 本身缺陷（不太可能）</li>
 </ul>
 <p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
-<h3 id="更新索引统计信息"><a href="#更新索引统计信息" class="headerlink" title="更新索引统计信息"></a>更新索引统计信息</h3><p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
+<h3 id="更新索引统计信息"><a class="markdownIt-Anchor" href="#更新索引统计信息"></a> 更新索引统计信息</h3>
+<p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
 <ul>
 <li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM 返回精确值，InnoDB 返回估算值。</li>
 <li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
@@ -366,7 +434,8 @@
 <p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics 表</code>获取。</p>
 <p>InnoDB 会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过 1/16 或插入 20 亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
 <p>InnoDB 打开某些<code>information_schema</code>表，使用 SHOW TABLE STATUS 或 SHOW INDEX，或 MySQL 客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
-<h3 id="减少索引和数据碎片"><a href="#减少索引和数据碎片" class="headerlink" title="减少索引和数据碎片"></a>减少索引和数据碎片</h3><p>B 树索引会碎片化，造成查询效率降低。</p>
+<h3 id="减少索引和数据碎片"><a class="markdownIt-Anchor" href="#减少索引和数据碎片"></a> 减少索引和数据碎片</h3>
+<p>B 树索引会碎片化，造成查询效率降低。</p>
 <p>表的数据存储碎片化有三种类型：</p>
 <ul>
 <li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
@@ -381,7 +450,8 @@
 <li>InnoDB 可先删除索引再重新创建</li>
 <li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
 </ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>三个原则：</p>
+<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
+<p>三个原则：</p>
 <ol>
 <li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
 <li>顺序访问数据很快：顺序 IO 不需要磁盘寻道，对于排序的查询也更快</li>
@@ -425,6 +495,7 @@
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -471,7 +542,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#索引基础"><span class="nav-number">1.</span> <span class="nav-text">索引基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引的优点"><span class="nav-number">2.</span> <span class="nav-text">索引的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高性能的索引策略"><span class="nav-number">3.</span> <span class="nav-text">高性能的索引策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#独立的列"><span class="nav-number">3.1.</span> <span class="nav-text">独立的列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前缀索引和索引选择性"><span class="nav-number">3.2.</span> <span class="nav-text">前缀索引和索引选择性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多列索引"><span class="nav-number">3.3.</span> <span class="nav-text">多列索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择合适的索引顺序"><span class="nav-number">3.4.</span> <span class="nav-text">选择合适的索引顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-number">3.5.</span> <span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#覆盖索引"><span class="nav-number">3.6.</span> <span class="nav-text">覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用索引扫描来做排序"><span class="nav-number">3.7.</span> <span class="nav-text">使用索引扫描来做排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#压缩索引"><span class="nav-number">3.8.</span> <span class="nav-text">压缩索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#冗余和重复索引"><span class="nav-number">3.9.</span> <span class="nav-text">冗余和重复索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引和锁"><span class="nav-number">3.10.</span> <span class="nav-text">索引和锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引案例学习"><span class="nav-number">4.</span> <span class="nav-text">索引案例学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多种条件过滤"><span class="nav-number">4.1.</span> <span class="nav-text">多种条件过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免多个范围条件"><span class="nav-number">4.2.</span> <span class="nav-text">避免多个范围条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化排序"><span class="nav-number">4.3.</span> <span class="nav-text">优化排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#维护索引和表"><span class="nav-number">5.</span> <span class="nav-text">维护索引和表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#找到并修复损坏的表"><span class="nav-number">5.1.</span> <span class="nav-text">找到并修复损坏的表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新索引统计信息"><span class="nav-number">5.2.</span> <span class="nav-text">更新索引统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少索引和数据碎片"><span class="nav-number">5.3.</span> <span class="nav-text">减少索引和数据碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#索引基础"><span class="nav-number">1.</span> <span class="nav-text"> 索引基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引的优点"><span class="nav-number">2.</span> <span class="nav-text"> 索引的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高性能的索引策略"><span class="nav-number">3.</span> <span class="nav-text"> 高性能的索引策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#独立的列"><span class="nav-number">3.1.</span> <span class="nav-text"> 独立的列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前缀索引和索引选择性"><span class="nav-number">3.2.</span> <span class="nav-text"> 前缀索引和索引选择性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多列索引"><span class="nav-number">3.3.</span> <span class="nav-text"> 多列索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择合适的索引顺序"><span class="nav-number">3.4.</span> <span class="nav-text"> 选择合适的索引顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-number">3.5.</span> <span class="nav-text"> 聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#覆盖索引"><span class="nav-number">3.6.</span> <span class="nav-text"> 覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用索引扫描来做排序"><span class="nav-number">3.7.</span> <span class="nav-text"> 使用索引扫描来做排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#压缩索引"><span class="nav-number">3.8.</span> <span class="nav-text"> 压缩索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#冗余和重复索引"><span class="nav-number">3.9.</span> <span class="nav-text"> 冗余和重复索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引和锁"><span class="nav-number">3.10.</span> <span class="nav-text"> 索引和锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引案例学习"><span class="nav-number">4.</span> <span class="nav-text"> 索引案例学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多种条件过滤"><span class="nav-number">4.1.</span> <span class="nav-text"> 多种条件过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#避免多个范围条件"><span class="nav-number">4.2.</span> <span class="nav-text"> 避免多个范围条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化排序"><span class="nav-number">4.3.</span> <span class="nav-text"> 优化排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#维护索引和表"><span class="nav-number">5.</span> <span class="nav-text"> 维护索引和表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#找到并修复损坏的表"><span class="nav-number">5.1.</span> <span class="nav-text"> 找到并修复损坏的表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新索引统计信息"><span class="nav-number">5.2.</span> <span class="nav-text"> 更新索引统计信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少索引和数据碎片"><span class="nav-number">5.3.</span> <span class="nav-text"> 减少索引和数据碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text"> 总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -485,20 +556,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -571,6 +642,10 @@
 
 
 
+  
+<script src="/js/local-search.js"></script>
+
+
 
 
 
@@ -585,6 +660,37 @@
   
 
   
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'zh-cn' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </body>
 </html>

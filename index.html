@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="default">
 <head>
-  <meta charset="UTF-8">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 4.2.0">
@@ -40,8 +40,8 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
   };
 </script>
@@ -94,12 +94,12 @@
   .use-motion .logo-line-before i { left: initial; }
   .use-motion .logo-line-after i { right: initial; }
   </style>
-</noscript>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
     <div class="headband"></div>
 
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -148,9 +148,34 @@
     <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
   </ul>
 
 </nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
 </div>
     </header>
 
@@ -170,6 +195,111 @@
             
 
   <div class="posts-expand">
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/03/high-perf-mysql10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/high-perf-mysql10/" class="post-title-link" itemprop="url">Mysql 复制</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-03-13 19:51:55" itemprop="dateCreated datePublished" datetime="2020-03-13T19:51:55+08:00">2020-03-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-18 11:54:57" itemprop="dateModified" datetime="2020-03-18T11:54:57+08:00">2020-03-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/03/high-perf-mysql10/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/high-perf-mysql10/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
+<p>复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。</p>
+<p>MySQL 支持两种复制方式：</p>
+<ul>
+<li>基于行的复制</li>
+<li>基于语句的复制（也称为逻辑复制）</li>
+</ul>
+<p>两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。</p>
+<p>MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中的新特性或语法。对于小版本号升级通常是兼容的。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/03/high-perf-mysql10/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
         
   
   
@@ -214,6 +344,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql06-02/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql06-02/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -224,10 +368,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="优化特定类型的查询"><a href="#优化特定类型的查询" class="headerlink" title="优化特定类型的查询"></a>优化特定类型的查询</h2><h3 id="优化-COUNT-查询"><a href="#优化-COUNT-查询" class="headerlink" title="优化 COUNT() 查询"></a>优化 COUNT() 查询</h3><p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
+          <h2 id="优化特定类型的查询"><a class="markdownIt-Anchor" href="#优化特定类型的查询"></a> 优化特定类型的查询</h2>
+<h3 id="优化-count-查询"><a class="markdownIt-Anchor" href="#优化-count-查询"></a> 优化 COUNT() 查询</h3>
+<p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
 <p>对于没有任何WHERE条件的COUNT(*)，MyISAM可以直接返回结果。</p>
-<p>可以利用MyISAM此特性对特定语句进行优化<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure></p>
-<p>一个查询中统计一个列不同值的数量<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure></p>
+<p>可以利用MyISAM此特性对特定语句进行优化</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<p>一个查询中统计一个列不同值的数量</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure>
 <p>在对精度要求不高的时候可以使用近似值代替</p>
           <!--noindex-->
             <div class="post-button">
@@ -295,6 +443,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql06-01/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql06-01/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -306,18 +468,29 @@
 
       
           <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
-<h2 id="查询速度为什么会变慢"><a href="#查询速度为什么会变慢" class="headerlink" title="查询速度为什么会变慢"></a>查询速度为什么会变慢</h2><p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
-<h2 id="慢查询基础：优化数据访问"><a href="#慢查询基础：优化数据访问" class="headerlink" title="慢查询基础：优化数据访问"></a>慢查询基础：优化数据访问</h2><p>分析步骤</p>
+<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
+<p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
+<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
+<p>分析步骤</p>
 <ol>
 <li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
 <li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
 </ol>
-<h3 id="是否向数据库请求了多余的数据"><a href="#是否向数据库请求了多余的数据" class="headerlink" title="是否向数据库请求了多余的数据"></a>是否向数据库请求了多余的数据</h3><ul>
-<li><p>查询不需要的记录<br>  使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
+<ul>
+<li>
+<p>查询不需要的记录<br />
+使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
 </li>
-<li><p>取出全部列<br>  不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br>  内存和CPU的消耗。<br>  有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
+<li>
+<p>取出全部列<br />
+不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br />
+内存和CPU的消耗。<br />
+有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
 </li>
-<li><p>重复查询相同的数据<br>  利用缓存，减少重复查询。</p>
+<li>
+<p>重复查询相同的数据<br />
+利用缓存，减少重复查询。</p>
 </li>
 </ul>
           <!--noindex-->
@@ -392,6 +565,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql05-2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql05-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -402,10 +589,17 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="索引案例学习"><a href="#索引案例学习" class="headerlink" title="索引案例学习"></a>索引案例学习</h2><h3 id="多种条件过滤"><a href="#多种条件过滤" class="headerlink" title="多种条件过滤"></a>多种条件过滤</h3><p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+          <h2 id="索引案例学习"><a class="markdownIt-Anchor" href="#索引案例学习"></a> 索引案例学习</h2>
+<h3 id="多种条件过滤"><a class="markdownIt-Anchor" href="#多种条件过滤"></a> 多种条件过滤</h3>
+<p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
 <p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
-<h3 id="避免多个范围条件"><a href="#避免多个范围条件" class="headerlink" title="避免多个范围条件"></a>避免多个范围条件</h3><p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
-<h3 id="优化排序"><a href="#优化排序" class="headerlink" title="优化排序"></a>优化排序</h3><p>对于分页查询<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure><br>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure><br>
+<h3 id="避免多个范围条件"><a class="markdownIt-Anchor" href="#避免多个范围条件"></a> 避免多个范围条件</h3>
+<p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a class="markdownIt-Anchor" href="#优化排序"></a> 优化排序</h3>
+<p>对于分页查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql05-2/#more" rel="contents">
@@ -478,6 +672,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql05-1/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql05-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -488,7 +696,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+          <h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
+<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
 <p><strong>B 树索引</strong></p>
 <p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
 <p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
@@ -506,7 +715,8 @@
 <ul>
 <li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
 <li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql05-1/#more" rel="contents">
@@ -564,7 +774,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-22 17:36:56" itemprop="dateModified" datetime="2020-02-22T17:36:56+08:00">2020-02-22</time>
+                <time title="Modified: 2020-03-16 21:22:23" itemprop="dateModified" datetime="2020-03-16T21:22:23+08:00">2020-03-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -579,6 +789,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql06-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql06-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -590,18 +814,28 @@
 
       
           <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
-<h2 id="查询速度为什么会变慢"><a href="#查询速度为什么会变慢" class="headerlink" title="查询速度为什么会变慢"></a>查询速度为什么会变慢</h2><p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
-<h2 id="慢查询基础：优化数据访问"><a href="#慢查询基础：优化数据访问" class="headerlink" title="慢查询基础：优化数据访问"></a>慢查询基础：优化数据访问</h2><p>分析步骤</p>
+<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
+<p>查询需要在不同的地方花费时间，包括网络，CPU 计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的 IO 操作。</p>
+<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
+<p>分析步骤</p>
 <ol>
-<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
-<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
+<li>确认应用程序是否检索大量不必要的的数据，太多行或太多列。</li>
+<li>确认 MySQL 服务器层是否在分析大量不必要的数据行。</li>
 </ol>
-<h3 id="是否向数据库请求了多余的数据"><a href="#是否向数据库请求了多余的数据" class="headerlink" title="是否向数据库请求了多余的数据"></a>是否向数据库请求了多余的数据</h3><ul>
-<li><p>查询不需要的记录<br>  使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
+<ul>
+<li>
+<p>查询不需要的记录<br />
+使用 SELECT 查询所有结果，获取前面的 N 行后关闭，实际上 MySQL 已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
 </li>
-<li><p>取出全部列<br>  不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br>  内存和CPU的消耗。<br>  有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
+<li>
+<p>取出全部列<br />
+不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的 IO、内存和 CPU 的消耗。<br />
+有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据，需要进行权衡。</p>
 </li>
-<li><p>重复查询相同的数据<br>  利用缓存，减少重复查询。</p>
+<li>
+<p>重复查询相同的数据<br />
+利用缓存，减少重复查询。</p>
 </li>
 </ul>
           <!--noindex-->
@@ -676,6 +910,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql05-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql05-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -686,7 +934,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="索引基础"><a href="#索引基础" class="headerlink" title="索引基础"></a>索引基础</h2><p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+          <h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
+<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
 <p><strong>B 树索引</strong></p>
 <p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
 <p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
@@ -704,7 +953,8 @@
 <ul>
 <li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
 <li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql05-md/#more" rel="contents">
@@ -777,6 +1027,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql04-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql04-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -787,11 +1051,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="选择优化的数据类型"><a href="#选择优化的数据类型" class="headerlink" title="选择优化的数据类型"></a>选择优化的数据类型</h2><p>选择数据类型的原则</p>
+          <h2 id="选择优化的数据类型"><a class="markdownIt-Anchor" href="#选择优化的数据类型"></a> 选择优化的数据类型</h2>
+<p>选择数据类型的原则</p>
 <ul>
 <li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
 <li>简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符串低。</li>
-<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。
+<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql04-md/#more" rel="contents">
@@ -864,6 +1130,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/high-perf-mysql01-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql01-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -874,17 +1154,21 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="逻辑架构"><a href="#逻辑架构" class="headerlink" title="逻辑架构"></a>逻辑架构</h2><p>三层架构：</p>
+          <h2 id="逻辑架构"><a class="markdownIt-Anchor" href="#逻辑架构"></a> 逻辑架构</h2>
+<p>三层架构：</p>
 <ul>
-<li>连接与线程处理  </li>
+<li>连接与线程处理</li>
 </ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br>注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
+<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br />
+注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
 <ul>
 <li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
 </ul>
-<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br>Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
+<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br />
+Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
 <ul>
-<li>存储引擎
+<li>存储引擎</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/02/high-perf-mysql01-md/#more" rel="contents">
@@ -907,9 +1191,121 @@
   
   
 
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/12/ML_algorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/ML_algorithm/" class="post-title-link" itemprop="url">常见机器学习算法的优缺点</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-12-20 20:03:55" itemprop="dateCreated datePublished" datetime="2019-12-20T20:03:55+08:00">2019-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-17 11:00:57" itemprop="dateModified" datetime="2020-03-17T11:00:57+08:00">2020-03-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index">
+                    <span itemprop="name">AI</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2019/12/ML_algorithm/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/12/ML_algorithm/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>想要寻找一个合适的算法不容易，实际应用中，我们一般采用启发式实验。</p>
+<p>没有免费的午餐定理 (NFL)：核心在于，假设了所有问题出现的机会相同，或所有问题同等重要。当需求是解决一切问题时，“哪个算法更好”就毫无意义。HG2G 中“深思”面对“宇宙、生命以及一切的中继答案是什么？”这样一个问题，用最复杂的算法算出一个 42 和随便说一个 42 是一样的。</p>
+<h2 id="偏差与方差"><a class="markdownIt-Anchor" href="#偏差与方差"></a> 偏差与方差</h2>
+<ul>
+<li>偏差：描述的是估计值的期望 E 与真实值 Y 之间的差距。偏差越大，越偏离真实数据。</li>
+<li>方差：描述的是预测值的离散程度，方差越大，数据分布约分散。</li>
+<li>模型的真实误差可以看成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>i</mi><mi>a</mi><msup><mi>s</mi><mn>2</mn></msup><mo>+</mo><mi>v</mi><mi>a</mi><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">bias^2 + var + \sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.897438em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">a</span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> 是噪音</li>
+</ul>
+<p>偏差与方差窘境：</p>
+<ul>
+<li>学得不好，偏差大</li>
+<li>学得好，敏感性高，方差大。</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/ML_algorithm/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
   </div>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
 
 
 
@@ -974,20 +1370,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -1060,6 +1456,10 @@
 
 
 
+  
+<script src="/js/local-search.js"></script>
+
+
 
 
 
@@ -1074,6 +1474,40 @@
   
 
   
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'zh-cn' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </body>
 </html>

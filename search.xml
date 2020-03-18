@@ -1,0 +1,1814 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Mysql 复制</title>
+    <url>/2020/03/high-perf-mysql10/</url>
+    <content><![CDATA[<h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
+<p>复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。</p>
+<p>MySQL 支持两种复制方式：</p>
+<ul>
+<li>基于行的复制</li>
+<li>基于语句的复制（也称为逻辑复制）</li>
+</ul>
+<p>两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。</p>
+<p>MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中的新特性或语法。对于小版本号升级通常是兼容的。</p>
+<a id="more"></a>
+<blockquote>
+<p>这里记下经历过的一个坑，oracle 10g 小版本不同也不兼容无法恢复 rman 备份。主库版本是 10.2.0.5，尝试在 10.2.0.1、10.2.0.3 下都无法恢复备份。MySQL 也说了通常，最好还是看一下更新的 changelog。</p>
+</blockquote>
+<p>复制主要开销在于：</p>
+<ul>
+<li>备库从主库读取二进制日志文件时的 IO 开销</li>
+<li>从高吞吐主库复制到多个备库时唤醒复制线程的开销</li>
+</ul>
+<p>复制的常见用途</p>
+<ul>
+<li>数据分布：在不同的物理位置分布数据备份</li>
+<li>负载均衡：对读密集型应用进行优化</li>
+<li>备份：复制可以作为备份的补充，但不能取代备份</li>
+<li>高可用性和故障切换：避免单点失败造成的系统宕机</li>
+<li>MySQL 升级测试：用高版本 MySQL 作为备库，进行新版本测试</li>
+</ul>
+<p>复制的三个步骤：</p>
+<ol>
+<li>主库把数据更改记录到二进制日志中
+<ul>
+<li>发生在事务提交后实际更新数据之前，按照事务提交顺序而不是语句执行顺序记录</li>
+</ul>
+</li>
+<li>备库将主库上的日志复制到自己的中继日志（Relay Log）中</li>
+<li>备库读取中继日志中的事件，将其重放到备库数据之上
+<ul>
+<li>在主库上并发运行的查询在备库上只能串行化执行，因为只有一个 SQL 线程来重放中继日志中的事件，这会成为很多工作负载的性能瓶颈</li>
+</ul>
+</li>
+</ol>
+<p><img src="https://i.loli.net/2020/03/13/PKl7ELqwzZdOiFk.png" alt="" /></p>
+<h2 id="配置"><a class="markdownIt-Anchor" href="#配置"></a> 配置</h2>
+<p>假设有 server1（192.168.0.1），server2（192.168.0.2）</p>
+<ol>
+<li>创建复制账号</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">GRANT</span> <span class="keyword">REPLICATION</span> <span class="keyword">SLAVE</span>, <span class="keyword">REPLICATION</span> <span class="keyword">CLIENT</span> <span class="keyword">ON</span> *.*</span><br><span class="line"><span class="keyword">TO</span> repl@<span class="string">'192.168.0.%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'PASSWORD'</span>;</span><br></pre></td></tr></table></figure>
+<p>在主库和备库都创建这个账号，尽管这个账号无法执行 select 等查询，但可以从二进制日志获取数据。</p>
+<blockquote>
+<p>复制账号事实上只需要主库上的<code>REPLICATION SLAVE</code>权限，不一定需要每一端服务器都有<code>REPLICATION CLIENT</code>权限，如此设置原因有：</p>
+<ul>
+<li>用来监控和管理复制的账号需要此权限，针对这两种目的使用同一个账号更方便</li>
+<li>备库上的设置和主库完全相同，方便交换主备库</li>
+</ul>
+</blockquote>
+<ol start="2">
+<li>配置主库和备库</li>
+</ol>
+<p>在主库的<code>my.cnf</code>文件中设置如下，重启服务器</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 开启二进制日志</span><br><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line"># 指定唯一的 server id</span><br><span class="line">server_id &#x3D; 10</span><br></pre></td></tr></table></figure>
+<p>备库中类似，同样需要重启：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line">server_id &#x3D; 2</span><br><span class="line"># 指定中继日志的位置和名称</span><br><span class="line">relay_log &#x3D; &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-relay-bin</span><br><span class="line"># 一下两个不是必须</span><br><span class="line">log_slave_updates &#x3D; 1</span><br><span class="line">read_only &#x3D; 1</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>启动复制</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;server1&#39;,</span><br><span class="line">MASTER_USER&#x3D;&#39;repl&#39;,</span><br><span class="line">MASTER_PASSWORD&#x3D;&#39;PASSWORD&#39;,</span><br><span class="line">MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000001&#39;,</span><br><span class="line">MASTER_LOG_POS&#x3D;0;</span><br></pre></td></tr></table></figure>
+<p>可以通过<code>SHOW SLAVE STATUS</code>查看是否成功，使用<code>START SLAVE</code>开始复制。</p>
+<h3 id="新备库初始化"><a class="markdownIt-Anchor" href="#新备库初始化"></a> 新备库初始化</h3>
+<p>当主库已经运行一段时间要新增一个备库的时候，需要初始化备库，保持主库和备库同步需要满足如下条件：</p>
+<ul>
+<li>在某个时间点主库的快照</li>
+<li>主库当前的二进制文件，和获得数据快照时在该二进制日志文件中的偏移量</li>
+<li>从快照时间到现在的二进制日志</li>
+</ul>
+<p>从其他服务器克隆备库的方法：</p>
+<ul>
+<li>冷备份，重启主库后使用一个新的二进制日志文件，备库指向这个新文件</li>
+<li>热备份，如果仅使用了 MyISAM 标，可在主库运行时使用<code>mysqlhotcopy</code>或<code>rsync</code>来复制数据</li>
+<li>mysqldump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases --master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用快照或备份，确保从备份时间开始的二进制日志都存在，恢复备份后，使用<code>CHANGE MATER TO</code>指定二进制日志坐标</li>
+<li>其他热备工具如 Xtrabackup</li>
+<li>使用另外的备库，注意不能使用<code>SHOW MATER STATUS</code>来获取主库的日志坐标，而是在获取快照时使用<code>SHOW SLAVE STATUS</code>来获取备库在主库上的执行位置。</li>
+</ul>
+<h2 id="复制的原理"><a class="markdownIt-Anchor" href="#复制的原理"></a> 复制的原理</h2>
+<p>基于语句的复制（统计查询并记录开销大）和基于行的复制（全表更新开销大）各有优缺点，MySQL 能在两种模式间动态切换，默认情况下使用基于语句的复制。</p>
+<p>基于语句的复制</p>
+<ul>
+<li>优点：主备模式不同时，逻辑复制能在多种情况下工作。例如，主备上的表的定义不同但数据类型兼容、列的顺序不同等情况。很容易修改备库上的 schema，将其升级成主库</li>
+<li>缺点：在使用触发器或者存储过程的时候比较容易出问题</li>
+</ul>
+<p>基于行的复制</p>
+<ul>
+<li>优点：几乎没有无法处理的场景，除了修改 schema。这种方式可以减少锁的使用。</li>
+<li>缺点：无法知道执行了哪些 SQL</li>
+</ul>
+<p>设置<code>log_slave_updates</code>选项可以让备库变成其他服务器的主库，实现复制事件的传递<br />
+<img src="https://i.loli.net/2020/03/14/gqfI9St6ov3ar5N.png" alt="" /></p>
+<p>复制过滤选项允许仅复制服务器上的部分数据，有两种过滤方式：</p>
+<ul>
+<li>在主库上过滤记录到二进制日志中的事件</li>
+<li>在备库上过滤记录到中继日志的事件<br />
+<img src="https://i.loli.net/2020/03/14/qsNnhFJKXct9kRw.png" alt="" /></li>
+</ul>
+<p>使用复制过滤比较容易出问题，要慎重。更好的办法是阻止一些特殊的语句被复制，通常是设置<code>SQL_LOG_BIN=0</code>。</p>
+<h2 id="复制拓扑"><a class="markdownIt-Anchor" href="#复制拓扑"></a> 复制拓扑</h2>
+<p>基本原则：</p>
+<ul>
+<li>一个备库只能有一个相应的主库</li>
+<li>每个备库都必须有唯一的服务器 ID</li>
+<li>一个主库可以有多个备库</li>
+<li><code>log_slave_updates</code>选项，可以让备库传递复制</li>
+</ul>
+<h3 id="一主多备"><a class="markdownIt-Anchor" href="#一主多备"></a> 一主多备</h3>
+<p>结构简单，备库之间没有交互，通常用途：</p>
+<ul>
+<li>为不同角色使用不同的备库（如添加不同的索引或使用不同的存储引擎）</li>
+<li>把一个备库作为候补主库</li>
+<li>灾备</li>
+<li>测试、培训、开发等</li>
+</ul>
+<h3 id="主-主复制"><a class="markdownIt-Anchor" href="#主-主复制"></a> 主 - 主复制</h3>
+<p>主动 - 主动模式：在并发修改数据的时候容易起冲突<br />
+<img src="https://i.loli.net/2020/03/14/G7gwk3uDPpQjs1V.png" alt="" /></p>
+<p>主动 - 被动模式：其中一台服务器为只读<br />
+<img src="https://i.loli.net/2020/03/14/eqC9LlbSkNDPXgO.png" alt="" /><br />
+服务器的配置是对称的，使得切换主动和被动服务器非常方便，便于维护。</p>
+<p>例如，<code>ALTER TABLE</code>操作可能会锁住整个表，非常耗时，影响服务。在主-主配置下，可以先停止主动服务器上的备库复制线程（从被动库复制），在被动库上执行耗时操作后交换角色，重启先前主动库上的复制线程，后台执行操作。这样两个库上的操作都在“后台”完成。</p>
+<p>配置：</p>
+<ol>
+<li>确保两机有相同的数据</li>
+<li>启用二进制日志，选择唯一 ID，创建复制账号</li>
+<li>启用备库更新的日志记录，用于故障转移和故障恢复</li>
+<li>把被动库配置成只读，防止数据冲突</li>
+<li>启动实例</li>
+<li>将对方设置为备库</li>
+</ol>
+<p>主动服务器上发生更新后，更新被记录在二进制日志中，通过复制传递到被动服务器的中继日志中。被动服务器重放查询并记录到自己的二进制日志中。由于时间的服务器 ID 和主动服务器的相同，主动服务器将忽略这些事件。</p>
+<h3 id="有备库的主-主结构"><a class="markdownIt-Anchor" href="#有备库的主-主结构"></a> 有备库的主 - 主结构</h3>
+<p><img src="https://i.loli.net/2020/03/14/lucwmEgK7fDnWhZ.png" alt="" /></p>
+<h3 id="环形复制"><a class="markdownIt-Anchor" href="#环形复制"></a> 环形复制</h3>
+<p><img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /><br />
+环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。</p>
+<h3 id="分发主库"><a class="markdownIt-Anchor" href="#分发主库"></a> 分发主库</h3>
+<p><img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /><br />
+当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。</p>
+<h3 id="树结构"><a class="markdownIt-Anchor" href="#树结构"></a> 树结构</h3>
+<p><img src="https://i.loli.net/2020/03/14/DQmJUlYt6PRNxoM.png" alt="" /></p>
+<h3 id="定制化方案"><a class="markdownIt-Anchor" href="#定制化方案"></a> 定制化方案</h3>
+<ul>
+<li>选择性复制：每个备库只拥有主库的部分数据，将数据驻留在内存中。有点类似水平数据划分，但是主库中拥有所有数据。</li>
+<li>分离功能：将 OLTP 服务器的数据复制到专门的 OLAP 备库上，这个备库可以使用不同的硬件、配置、索引或存储引擎</li>
+<li>数据归档：选择性阻止 delete 语句的传递，在备库上保留猪肚上删除过的数据</li>
+<li>全文检索：在备库中使用 MyISAM 支持全文检索，主库使用支持事务的 InnoDB</li>
+<li>模拟多主库复制<br />
+<img src="https://i.loli.net/2020/03/14/sRBtKmiPOTgqfuI.png" alt="" /><br />
+<img src="https://i.loli.net/2020/03/14/T5PxH3v87iA6EZg.png" alt="" /></li>
+<li>创建日志服务器：使用复制代替<code>mysqlbinlog</code>工具实现备份恢复</li>
+</ul>
+<h2 id="复制和容量规划"><a class="markdownIt-Anchor" href="#复制和容量规划"></a> 复制和容量规划</h2>
+<p>考虑备库吞吐量的使用不能只使用总查询/备库数量，每台机器还需要加上主库分发的写数据的工作量。备库的扩展不是线性的，查询数量增加 4 倍可能要增加 17 倍的服务器。</p>
+<h2 id="todo"><a class="markdownIt-Anchor" href="#todo"></a> TODO</h2>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>查询性能优化-02</title>
+    <url>/2020/02/high-perf-mysql06-02/</url>
+    <content><![CDATA[<h2 id="优化特定类型的查询"><a class="markdownIt-Anchor" href="#优化特定类型的查询"></a> 优化特定类型的查询</h2>
+<h3 id="优化-count-查询"><a class="markdownIt-Anchor" href="#优化-count-查询"></a> 优化 COUNT() 查询</h3>
+<p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
+<p>对于没有任何WHERE条件的COUNT(*)，MyISAM可以直接返回结果。</p>
+<p>可以利用MyISAM此特性对特定语句进行优化</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<p>一个查询中统计一个列不同值的数量</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure>
+<p>在对精度要求不高的时候可以使用近似值代替</p>
+<a id="more"></a>
+<h3 id="优化关联查询"><a class="markdownIt-Anchor" href="#优化关联查询"></a> 优化关联查询</h3>
+<ul>
+<li>确保ON或者USING子句中的列上有索引。创建索引的时候要考虑关联的顺序，当表A和表B通过列c关联的时候，如果优化器的关联顺序是B、A，则只需要在A.c（内层）上创建索引。</li>
+<li>确保GROUP BY和ORDER BY中的表达式只涉及一个表中的列，这样MySQL才能使用索引进行优化。</li>
+<li>升级时注意，关联语法、运算符优先级等可能发生变化。</li>
+</ul>
+<h3 id="优化-group-by-和-distinct"><a class="markdownIt-Anchor" href="#优化-group-by-和-distinct"></a> 优化 GROUP BY 和 DISTINCT</h3>
+<p>在GROUP BY子句中使用查找表的标识列分组的效率比其他列高。但当所需字段为非分组列时，部分服务器可能禁用这种写法（ORACLE是不支持的），强行使用也可能带来问题。</p>
+<p>如果没有ORDER BY子句显式地指定排序列，当使用GROUP BY子句时，结果集会自动按照分组的字段进行排列。如果不关心结果集的顺序，这种默认排序有导致了需要文件排序操作，则可以使用 ORDER BY NULL，让MySQL不进行文件排序。</p>
+<p>可以直接在GROUP BY子句中使用DESC或ASC指定排序方向。</p>
+<p>尽可能将 GROUP BY WITH ROLLUP的 ROLLUP 部分放在应用程序中进行。</p>
+<h3 id="优化-limit-分页"><a class="markdownIt-Anchor" href="#优化-limit-分页"></a> 优化 LIMIT 分页</h3>
+<p>分页查询中，非常靠后的页偏移量很大，很多的记录被抛弃，代价很高。</p>
+<p>优化此类分页查询的最简单办法就是尽可能地使用索引覆盖扫描，而不是所有的列，然后再进行一次关联操作返回需要的列。</p>
+<p>对于部分情况（主键排序），可以记录上次查询中最后一条记录的ID作为下一次查询的条件，避免使用偏移量。如</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> rental</span><br><span class="line"><span class="keyword">WHERE</span> rental_id &lt; <span class="number">16030</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> rental_id <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">20</span>。</span><br></pre></td></tr></table></figure>
+<h3 id="优化-sql_calc_found_rows"><a class="markdownIt-Anchor" href="#优化-sql_calc_found_rows"></a> 优化 SQL_CALC_FOUND_ROWS</h3>
+<p>分页时可以在LIMIT语句中加上 SQL_CALC_FOUND_ROWS hint，可以获得所有满足条件的行数以便计算页数，但事实上它就是通过扫描所有行实现的，因此改提示的代价很高。</p>
+<p>实践中可以不显示页数，只显示下一页，假设每页显示20条，那么就一次查询21条，如果21条存在则激活“下一页”按钮。另一种做法是一次缓存较多的数据。</p>
+<h3 id="优化-union-查询"><a class="markdownIt-Anchor" href="#优化-union-查询"></a> 优化 UNION 查询</h3>
+<p>WHERE、LIMIT、ORDER BY等子句需要手动“下推”</p>
+<p>除非必须消除重复行，否则使用 UNION ALL 避免唯一性检查</p>
+<h3 id="使用用户自定义变量"><a class="markdownIt-Anchor" href="#使用用户自定义变量"></a> 使用用户自定义变量</h3>
+<p>用户自定义变量是一个用来存储内容的临时容器，在连接MySQL的整个过程中都存在。可以使用SET和SELECT语句来定义：</p>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line">&gt; SET @one      := 1;</span><br><span class="line">&gt; SET @min_actor:= (SELECT MIN(actor_id) FROM actor);</span><br><span class="line">&gt; SET @last_week:= CURRENT_DATE - INTERVAL 1 WEEK;</span><br></pre></td></tr></table></figure>
+<p>然后可以在任何使用表达式的地方使用这些自定义变量。</p>
+<p>不能使用用户自定义变量的场景：</p>
+<ul>
+<li>使用自定义变量的查询无法使用查询缓存。</li>
+<li>不能在使用常量或标识符的地方使用自定义变量，如表名、列名和LIMIT子句中。</li>
+<li>用户自定义变量的生命周期为一个连接，不可以跨连接通信。</li>
+<li>如果使用连接池或者持久化连接，自定义变量可能让看起来毫无关系的代码发生交互。</li>
+<li>不能显式声明变量类型，其为动态类型。</li>
+<li>优化器在某些场景可能会将这些变量优化掉，导致意想不到的错误。</li>
+<li>赋值表达式需要使用括号，<code>:=</code>的优先级很低。</li>
+<li>使用未定义变量不会报语法错误</li>
+</ul>
+<p>总之使用时要注意<strong>赋值的顺序和赋值的时间</strong></p>
+<p>应用场景：</p>
+<ul>
+<li>优化排名语句</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> @curr_cnt := <span class="number">0</span> , @prev_cnt := <span class="number">0</span> , @<span class="keyword">rank</span> := <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id, </span><br><span class="line">    @curr_cnt := cnt <span class="keyword">AS</span> cnt, </span><br><span class="line">    @<span class="keyword">rank</span>     := <span class="keyword">IF</span>(@prev_cnt &lt;&gt; @curr_cnt, @<span class="keyword">rank</span> + <span class="number">1</span>, @<span class="keyword">rank</span>) <span class="keyword">AS</span> <span class="keyword">rank</span>,</span><br><span class="line">    @prev_cnt := @curr_cnt <span class="keyword">AS</span> dummy</span><br><span class="line"><span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> actor_id, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt </span><br><span class="line">    <span class="keyword">FROM</span> sakila.film_actor </span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> actor_id</span><br><span class="line">    <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span></span><br><span class="line">    <span class="keyword">LIMIT</span> <span class="number">10</span> </span><br><span class="line">)<span class="keyword">AS</span> der;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>更新的同时获取数据</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> t1 <span class="keyword">SET</span> lastUpdated = <span class="keyword">NOW</span>() <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span> <span class="keyword">AND</span> @<span class="keyword">now</span> = <span class="keyword">NOW</span>();</span><br><span class="line"><span class="keyword">SELECT</span> @<span class="keyword">now</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>统计更新和插入的数量</li>
+</ul>
+<p>当使用了 <code>INSERT ON DUPLICATE KEY UPDATE</code>时想知道更新数可以使用</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t1(c1, c2) <span class="keyword">VALUES</span>(<span class="number">4</span>, <span class="number">4</span>), (<span class="number">2</span>, <span class="number">1</span>), (<span class="number">3</span>, <span class="number">1</span>)</span><br><span class="line"><span class="keyword">ON</span> <span class="keyword">DUPLICATE</span> <span class="keyword">KEY</span> <span class="keyword">UPDATE</span></span><br><span class="line">    c1 = <span class="keyword">VALUES</span>(c1) + (<span class="number">0</span> * (@x := @x + <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<ul>
+<li>确定取值的顺序</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="comment">-- where 语句 在 select 之前执行</span></span><br><span class="line"><span class="keyword">SELECT</span> actor_id, @<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span> <span class="keyword">AS</span> cnt</span><br><span class="line"><span class="keyword">FROM</span> sakila.actor</span><br><span class="line"><span class="keyword">WHERE</span> @<span class="keyword">rownum</span> &lt;= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--  Using where; Using index </span></span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">| actor_id | cnt  |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">|       58 |    1 |</span><br><span class="line">|       92 |    2 |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="comment">-- 让赋值和取值发生在查询的同一个阶段（子句）可结果以上问题</span></span><br><span class="line"><span class="keyword">SELECT</span> actor_id, @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt</span><br><span class="line"><span class="keyword">FROM</span> sakila.actor</span><br><span class="line"><span class="keyword">WHERE</span> (@<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span>) &lt;= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using index</span></span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">| actor_id | cnt  |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">|       58 |    1 |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> @<span class="keyword">rownum</span>:=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id,first_name, </span><br><span class="line">    @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt <span class="keyword">FROM</span> sakila.actor <span class="keyword">WHERE</span> (@<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span>) &lt;= <span class="number">1</span> </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> first_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using filesort</span></span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">| actor_id | first_name | cnt  |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">|        1 | PENELOPE   |  200 |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这个语句的执行顺序貌似是 where -&gt; order by -&gt;select</span></span><br><span class="line"><span class="comment">-- @rownum &lt;= 2 会返回三条</span></span><br><span class="line"><span class="comment">-- 子句中表达式的执行可能和子句的执行顺序不一致？</span></span><br><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id,first_name, </span><br><span class="line">    @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt <span class="keyword">FROM</span> sakila.actor <span class="keyword">WHERE</span> @<span class="keyword">rownum</span> &lt;= <span class="number">1</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> first_name, <span class="keyword">least</span>(<span class="number">0</span>, @<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> +<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using temporary; Using filesort</span></span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">| actor_id | first_name | cnt  |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">|        2 | NICK       |    2 |</span><br><span class="line">|        1 | PENELOPE   |    1 |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br></pre></td></tr></table></figure>
+<h4 id="order-by-问题留待讨论"><a class="markdownIt-Anchor" href="#order-by-问题留待讨论"></a> order by 问题留待讨论</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 想法是，当没有order by子句时迭代式执行</span></span><br><span class="line"><span class="keyword">for</span> row in table&#123;</span><br><span class="line">    where()</span><br><span class="line">    select()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当有order by 语句时</span></span><br><span class="line"><span class="keyword">for</span> row in table&#123;</span><br><span class="line">    where()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> row in filtered&#123;</span><br><span class="line">    select()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">order_by()</span><br></pre></td></tr></table></figure>
+<p><img src="https://i.loli.net/2020/02/16/kAuNf25xScyZL9e.png" alt="MySQL - SQL语句执行顺序" /></p>
+<ul>
+<li>lazy UNION</li>
+</ul>
+<p>当<code>user</code>表找不到数据时，才查询 <code>user_archived</code></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">GREATEST</span>(@<span class="keyword">found</span> := <span class="number">-1</span>, <span class="keyword">id</span>) <span class="keyword">AS</span> <span class="keyword">id</span>, <span class="string">'user'</span> <span class="keyword">AS</span> which_tbl</span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="keyword">id</span>, <span class="string">'user_archived'</span></span><br><span class="line">    <span class="keyword">FROM</span> user_archived <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span> <span class="keyword">AND</span> @<span class="keyword">found</span> <span class="keyword">IS</span> <span class="literal">NULL</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="number">1</span>, <span class="string">'reset'</span> <span class="keyword">FROM</span> DUAL <span class="keyword">WHERE</span> (@<span class="keyword">found</span> := <span class="literal">NULL</span>) <span class="keyword">IS</span> <span class="keyword">NOT</span> <span class="literal">NULL</span></span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h3>
+<p>优化需要三管齐下：不做、少做、快速地做。</p>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>查询性能优化-01</title>
+    <url>/2020/02/high-perf-mysql06-01/</url>
+    <content><![CDATA[<p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
+<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
+<p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
+<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
+<p>分析步骤</p>
+<ol>
+<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
+<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
+</ol>
+<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
+<ul>
+<li>
+<p>查询不需要的记录<br />
+使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+</li>
+<li>
+<p>取出全部列<br />
+不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br />
+内存和CPU的消耗。<br />
+有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
+</li>
+<li>
+<p>重复查询相同的数据<br />
+利用缓存，减少重复查询。</p>
+</li>
+</ul>
+<a id="more"></a>
+<h3 id="mysql-是否扫描额外的记录"><a class="markdownIt-Anchor" href="#mysql-是否扫描额外的记录"></a> MySQL 是否扫描额外的记录</h3>
+<p>衡量查询开销的三个指标：</p>
+<ul>
+<li>响应时间</li>
+<li>扫描的行数</li>
+<li>返回的行数</li>
+</ul>
+<p><strong>响应时间</strong> = 服务时间 + 排队时间。服务时间是数据库处理查询真正花的时间。排队时间是为了等待某些资源花费的时间——可能是IO，也可能是锁等等。可以使用“快速上限估计法”估算查询响应时间：了解一个查询需要哪些索引以及它的执行计划，然后计算大概需要多少个顺序和随机IO，乘以其在具体硬件条件下一次IO消耗的时间。</p>
+<p><strong>扫描的行数和返回的行数</strong>对查询速度的影响很大。但并不是所有的行的访问代价都是相同的，较短的行的访问速度快，内存中的行比磁盘中的行访问速度快。扫描行与返回行的比值通常很小，一般在1:1和10:1之间。</p>
+<p>MySQL中有好几种<strong>访问方式</strong>可以返回一行结果，有些要扫描很多行，有些甚至无需扫描行。<br />
+EXPLAIN 语句中的 type 列反应了<strong>访问类型</strong>。速度从慢到快，扫描行数从多到少分别是：</p>
+<ul>
+<li>全表扫描</li>
+<li>索引扫描</li>
+<li>范围扫描</li>
+<li>唯一索引查询</li>
+<li>常数引用</li>
+</ul>
+<p>一般 MySQL 能使用如下三种方式应用 WHERE 条件，从好到坏依次为：</p>
+<ul>
+<li>在索引中使用 WHERE 语句过滤不匹配的记录。（在存储引擎层完成）</li>
+<li>使用索引覆盖扫描（在 Extra 列中出现 Using index）来返回记录，直接从索引中过滤不需要的记录，并返回命中的结果，在 MySQL 服务器完成，但无须回表查询。</li>
+<li>在数据表中返回数据，然后过滤不满足条件的记录（在 Extra 列中出现 Using Where）。在 MySQL 服务器完成，先从数据表读出数据然后过滤。</li>
+</ul>
+<p>如果发现查询需要扫描大量的数据，但只返回很少的行，可以尝试一下技巧：</p>
+<ul>
+<li>使用索引覆盖扫描，把需要的列都放到索引中</li>
+<li>改变表结构，如使用单独的汇总表</li>
+<li>重写这个复杂的查询，让优化器能以更优化的方式执行。</li>
+</ul>
+<h2 id="重构查询的方式"><a class="markdownIt-Anchor" href="#重构查询的方式"></a> 重构查询的方式</h2>
+<h3 id="一个复杂查询还是多个简单查询"><a class="markdownIt-Anchor" href="#一个复杂查询还是多个简单查询"></a> 一个复杂查询还是多个简单查询</h3>
+<p>传统的实现中强调数据库完成尽可能多的工作，其逻辑在于认为网络通信<br />
+查询解析和优化是一件代价很高的事情。但这对于MySQL不适用，MySQL在设计上让连接和断开链接都很轻量，对小结果集友好。</p>
+<p>在其他条件相同的时候，使用尽可能少的查询更有利。但有的时候，将一个大查询分解成为多个小查询是必要的。</p>
+<h3 id="切分查询"><a class="markdownIt-Anchor" href="#切分查询"></a> 切分查询</h3>
+<p>如定期删除数据时，用一个大的语句一次性完成需要锁住很多数据、占满整个事务日志、耗尽系统资源、阻塞很多小的但重要的查询。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 大查询</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> message <span class="keyword">WHERE</span> created &lt; DATA_SUB(<span class="keyword">NOW</span>(), INTERBAL <span class="number">3</span> <span class="keyword">MONTH</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 小查询 一次删除一万条</span></span><br><span class="line">rows_affected = 0</span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    rows_affected = do_query(</span><br><span class="line">        <span class="string">"DELETE FROM message WHERE created &lt; DATA_SUB(NOW(), INTERBAL 3 MONTH) </span></span><br><span class="line"><span class="string">        LIMIT 10000"</span></span><br><span class="line">    ) </span><br><span class="line">&#125; <span class="keyword">while</span> rows_affected &gt; <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="分解关联查询"><a class="markdownIt-Anchor" href="#分解关联查询"></a> 分解关联查询</h3>
+<p>分解关联查询将关联操作转移到应用程序中，优势如下：</p>
+<ul>
+<li>让缓存的效率更高。很多应用程序会缓存单表查询的结果进行复用。另外，对于 MySQL 的查询缓存（query cacheA）来说，关联中的表发生了变化就无法使用缓存了，拆分后如果某个表很少改变，那就可以重复利用查询缓存。</li>
+<li>单个查询减少锁的竞争。</li>
+<li>在应用层关联更容易对数据库进行拆分，更容易提高性能和扩展性</li>
+<li>拆分查询有时可以指定查询条件中的查询顺序（使用 IN()），提高效率</li>
+<li>减少冗余记录的查询</li>
+<li>拆分后相当于在应用中实现了哈希关联，而不是使用嵌套循环关联（<strong>MySQL新版本中已经实现了哈希关联</strong>）</li>
+</ul>
+<h2 id="执行查询的基础"><a class="markdownIt-Anchor" href="#执行查询的基础"></a> 执行查询的基础</h2>
+<p><img src="https://i.loli.net/2020/02/13/wi3ozX8YHSvcpex.png" alt="" /></p>
+<h3 id="mysql-客户端服务器通信协议"><a class="markdownIt-Anchor" href="#mysql-客户端服务器通信协议"></a> MySQL 客户端/服务器通信协议</h3>
+<p>MySQL 客户端和服务器之间的通信协议是“半双工”的。发送和接受无法同时进行，无法也无须将一个消息切成小块独立发送。</p>
+<p>这种协议让通信简单快速，也从很多地方限制了MySQL。一个明显的限制是无法进行流量控制，一段发送的消息全部发完另一端才能响应。多数连接 MySQL 的库函数可以获取全部结果难道缓存中或逐行获取数据。默认一般是全部获取到内存中。MySQL 通常要等所有数据发送完成后才能释放资源，接收全部数据并缓存可以尽早释放相应的资源。对于很大的查询结果集，为了减少内存的消耗可以不缓存而直接处理，但相应的服务器被该资源长时间占用。</p>
+<p>一个 MySQL 连接为一个线程，使用 <code>SHOW FULL PROCESSLIST;</code> 命令可以查询线程状态。</p>
+<h3 id="查询缓存-query-cache"><a class="markdownIt-Anchor" href="#查询缓存-query-cache"></a> 查询缓存 Query Cache</h3>
+<p>如果查询缓存是打开的，MySQL 会优先检查是否命中缓存中的数据。这个检查通过一个对大小写敏感的哈希查找实现，即使有一个字节不同（包括注释和空格）。</p>
+<p>如果命中了查询缓存，会检查用户权限，通过则直接从缓存中获取结果。</p>
+<h3 id="优化查询处理"><a class="markdownIt-Anchor" href="#优化查询处理"></a> 优化查询处理</h3>
+<p>将一个 SQL 转换为一个执行计划包括几个子阶段：解析 SQL，预处理，优化 SQL 执行计划。</p>
+<p>语法解析器对语句进行语法验证，生成解析树。</p>
+<p>预处理器则根据一些 MySQL 规则进一步检查解析树是否合法，如检查数据表和列是否存在，名字和别名是否有歧义。然后进行权限验证。</p>
+<p>优化器将检查合法的语法树转化为执行计划。MySQL 使用基于成本的优化器。最初，成本的最小单位是随机读取一个4K数据页的成本，后来成本计算公式变得更加复杂，并引入了一些因子来进行估算，如执行一次 WHERE 比较的成本。可以通过 <code>SHOW STATUS LIKE 'Last_query_cost';</code> 得知上条语句的查询成本。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">&gt;  SELECT COUNT(*) FROM sakila.film_actor;</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">| count(*) |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">|     5462 |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">&gt; <span class="keyword">SHOW</span> <span class="keyword">STATUS</span> <span class="keyword">LIKE</span> <span class="string">'Last_query_cost'</span>;</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">| Variable_name   | Value       |</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">| Last_query_cost | 1104.399000 |</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>结果表示 MySQL 的优化器认为大概需要 1104 个数据页的随机查找才能完成上面的查询。这通过每个表或索引的页面个数、索引的基数、索引和数据行的长度、索引分布情况计算得出。</p>
+<p>导致 MySQL 优化器选择错误执行计划的可能原因：</p>
+<ul>
+<li>统计信息不准确。InnoDB 因其 MVCC 架构不能维护一个数据表的准确行数统计信息。</li>
+<li>执行计划中的成本不等于实际成本。收到页面读取方式（顺序/随机）、页面存储位置（内存/磁盘），是否缓存等影响。</li>
+<li>成本模型无法真实反应执行速度</li>
+<li>MySQL 没有考虑其它并发执行的查询的影响。</li>
+<li>有时基于固定规则执行。如存在全文搜索 MATCH() 子句，则存在全文索引的时候就使用全文索引。</li>
+<li>不考虑其他不受控制的操作的成本。如执行存储过程或用户自定义函数的成本。</li>
+<li>无法估计可能的执行计划</li>
+</ul>
+<p>MySQL 能处理的优化类型：</p>
+<ul>
+<li>重新定义关联表的顺序</li>
+<li>将外连接转化为内链接</li>
+<li>使用等价变换规则。如将 <code>(a&lt;b AND b&lt;c) AND a=5</code> 改写为 <code>b&gt;5 AND b=c AND a=5</code></li>
+<li>优化 COUNT(), MIN()和MAX()。有时，要找某一列的最小值需要查询B 树索引的最左端（EXPLAIN 中看到 Select tables optimized away），类似的，最大值找索引的最后一个记录。MyISAM 维护了数据表行数的精确值，对于没有筛选条件的 COUNT(*) 查询可以直接使用。</li>
+<li>预估并转化为常数表达式。检测到表达式可以转化为常数时，将其转化。对数学表达式，甚至一个查询（如带MIN()，MAX()，主键或唯一键查找语句) 都能转化为常数。</li>
+<li>覆盖索引扫描</li>
+<li>子查询优化</li>
+<li>提前终止查询。如 LIMIT 子句或条件不成立返回空结果。</li>
+<li>等值传播。如果两个列的值通过等式关联，则把一个列的WHERE条件传递到另一个列上使得存储引擎可以更高效地过滤数据。</li>
+<li>列表 IN() 的比较。MySQL 中 IN() 并非不等同于多个OR条件子句。MySQL将 IN() 列表中的数据先进行排序，然后通过二分查找的方式确定列表中的值是否满足条件，IN()列表中有大量取值时速度相较OR快很多。</li>
+</ul>
+<p><strong>嵌套循环关联</strong>：先在一个表中循环取出单条数据，然后再嵌套循环到下一个表中寻找匹配的行，依次下去，直到找到所有表中匹配的行为止。然后根据各个表匹配的行，返回需要的各个列。MySQL 会尝试在最有一个关联表中找到所有匹配的行，然后回溯到上一层关联表继续查找。<br />
+本质上，MySQL 对多有类型的查询都以这样的方式运行。FROM 子句遇到子查询是，先执行子查询并将结果放在一个临时表中，然后将临时表当作普通表一样对待。<em>在MySQL 中每一个查询，每一个片段（包括子查询，甚至单表select）都可能是关联。</em></p>
+<p><strong>执行计划</strong>：MySQL 生成查询的一颗指令树，然后通过存储引擎完成这颗指令树并返回结果。最终的执行计划包含了查询的所有信息。在对某个查询执行<code>EXPLAIN EXTENDED</code>后，再执行<code>SHOW WARNINGS</code>就可以看到重构的查询，其与原查询语义相同，但查询语句可能不同。</p>
+<p>MySQL的执行计划是一颗左侧深度优先的树。<br />
+<img src="https://i.loli.net/2020/02/13/8xDFghPGLit1Wp9.png" alt="" /></p>
+<p><strong>关联查询优化器</strong>通过评估多表关联时不同顺序的成本来选择代价最小的关联顺序。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 自动优化顺序</span></span><br><span class="line"><span class="keyword">SELECT</span> film.film_id, film.title, film.release_year, actor.actor_id, actor.last_name</span><br><span class="line"><span class="keyword">FROM</span> film</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> actor <span class="keyword">USING</span>(actor_id)</span><br><span class="line"></span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line">| <span class="keyword">id</span>   | select_type | <span class="keyword">table</span>      | <span class="keyword">type</span>   | possible_keys          | <span class="keyword">key</span>                 | key_len | <span class="keyword">ref</span>                       | <span class="keyword">rows</span> | Extra       |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | actor      | <span class="keyword">index</span>  | PRIMARY                | idx_actor_last_name | <span class="number">137</span>     | <span class="literal">NULL</span>                      |  <span class="number">200</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film_actor | <span class="keyword">ref</span>    | PRIMARY,idx_fk_film_id | PRIMARY             | <span class="number">2</span>       | sakila.actor.actor_id     |   <span class="number">13</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film       | eq_ref | PRIMARY                | PRIMARY             | <span class="number">2</span>       | sakila.film_actor.film_id |    <span class="number">1</span> |             |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 固定顺序</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="keyword">STRAIGHT_JOIN</span> film.film_id, film.title, film.release_year, actor.actor_id, actor.last_name</span><br><span class="line"><span class="keyword">FROM</span> film</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> actor <span class="keyword">USING</span>(actor_id)</span><br><span class="line"></span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br><span class="line">| <span class="keyword">id</span>   | select_type | <span class="keyword">table</span>      | <span class="keyword">type</span>   | possible_keys          | <span class="keyword">key</span>            | key_len | <span class="keyword">ref</span>                        | <span class="keyword">rows</span> | Extra       |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film       | <span class="keyword">ALL</span>    | PRIMARY                | <span class="literal">NULL</span>           | <span class="literal">NULL</span>    | <span class="literal">NULL</span>                       | <span class="number">1000</span> |             |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film_actor | <span class="keyword">ref</span>    | PRIMARY,idx_fk_film_id | idx_fk_film_id | <span class="number">2</span>       | sakila.film.film_id        |    <span class="number">2</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | actor      | eq_ref | PRIMARY                | PRIMARY        | <span class="number">2</span>       | sakila.film_actor.actor_id |    <span class="number">1</span> |             |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>通过对比两种关联顺序，相比原顺序，优化后的顺序第一个关联表只需要扫描更少的行数，而第二和第三个关联表都是根据索引查询速度很快，因而优化后查询速度更快。通过 Last_query_cost也可以看出来。</p>
+<p><strong>排序优化</strong>。从性能角度考虑，应尽可能避免排序或者尽可能避免对大量数据及逆行排序。</p>
+<p>当不能使用索引生成排序结果的时候，MySQL将利用内存或磁盘进行排序（文件排序 filesort）。</p>
+<p>内存足够时，MySQL 使用内存进行“快速排序”。内存不够时，将数据分块 ，对每个独立的块使用“快速排序”，结果保存在磁盘上，将排好的块进行合并，返回排序结果。</p>
+<p>MySQL的两种排序算法：</p>
+<ul>
+<li>两次传输排序：读取行指针和需要排序的行，完成排序后根据结果读取需要的数据行。第二次读取数据行会产生大量的随机IO，成本高。</li>
+<li>单次传输排序：读取查询所需的所有列，然后根据给定列进行排序，最后直接返回排序结果。此算法只需一次顺序IO读取所有数据。缺点是，如果需要返回的列非常多、非常大会占用大量的空间，造成浪费。单条排序记录很大所以可能有更多的排序块需要合并。</li>
+</ul>
+<p>进行文件排序时，占用的临时空间可能很大。MySQL 为每行排序数据分配一个足以容纳其最长字符串的定长空间。</p>
+<p>在关联查询中如果需要排序，分两种情况处理。</p>
+<ul>
+<li>ORDER BY 子句中的所有列来自关联的第一个表。MySQL 在关联第一个变的时候就进行文件排序，Extra 字段为 <code>Using filesort</code>。</li>
+<li>除此之外。MySQL先进行所有关联再进行文件排序。Extra 字段为 <code>Using temporary; Using filesort</code>。</li>
+</ul>
+<p>LIMIT 子句在排序之后应用。MySQL 5.6进行了改进，不再对所有结果进行排序，而是根据实际情况，选择抛弃不满足条件的结果，然后进行排序。</p>
+<h3 id="查询执行引擎"><a class="markdownIt-Anchor" href="#查询执行引擎"></a> 查询执行引擎</h3>
+<p>查询执行过程有大量操作需要通过调用存储引擎的接口（handler API）完成。查询中的每一个表由一个handler的实例表示。MySQL 在优化阶段就为每个表创建了一个handler实例。</p>
+<p>并不是所有操作都由handler完成，如果是所有存储引擎共有的特性则由服务器层实现。</p>
+<h3 id="返回结果给客户端"><a class="markdownIt-Anchor" href="#返回结果给客户端"></a> 返回结果给客户端</h3>
+<p>MySQL 返回结果集是一个增量、逐步返回的过程。如在关联操作中，一旦服务器处理完最后一个关联表，开始生成第一条结果时，MySQL就可以开始向客户端逐步返回结果集了。这样处理服务器无须存储太多结果，节省内存，另外也能让客户端第一时间获得结果。</p>
+<p>结果集的每一行都会以一个满足MySQL通信协议的封包发送，再通过TCP协议传输，传输过程中可能对MySQL的封包进行缓存然后批量传输。</p>
+<h2 id="mysql-查询优化器的局限性"><a class="markdownIt-Anchor" href="#mysql-查询优化器的局限性"></a> MySQL 查询优化器的局限性</h2>
+<ul>
+<li>关联子查询</li>
+</ul>
+<p>MySQL 的<code>IN(sub query)</code>语句效率不高，可改写为关联查询。<strong>MariaDB 进行了一定的优化，可以跟踪一下。</strong></p>
+<p>使用子查询有时候也会比关联查询更加清晰、快速：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 关联查询，需要 DISTICT 剔除重复数据</span></span><br><span class="line"><span class="comment">-- 查询过程中会产生临时中间表，影响效率</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> film.film_id <span class="keyword">FROM</span> film </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 子查询</span></span><br><span class="line"><span class="keyword">SELECT</span>  film.film_id <span class="keyword">FROM</span> film </span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span>(<span class="keyword">SELECT</span> * <span class="keyword">from</span> film_actor</span><br><span class="line"><span class="keyword">WHERE</span> film.film_id = film_actor.film_id)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>UNION 的限制</li>
+</ul>
+<p>有时候MySQL无法将限制条件从外层“下推”到内层，使得原本能够限制部分返回结果的条件无法应用到每层查询的优化上。</p>
+<p>如当使用 UNION 和 LIMIT语句，将两个结果集合并后取部分结果集，MySQL会将两个表的所有结果都存放到临时表中，可以在两个UNION子查询中都添加LIMIT进行优化。</p>
+<ul>
+<li>索引合并优化</li>
+</ul>
+<p>当 WHERE 子句中包含多个复杂条件的时候，MySQL能够访问单个表的多个索引以合并和交叉过滤的方式定位需要查找的行。、</p>
+<ul>
+<li>等值传递</li>
+</ul>
+<p>当有一个很大了IN()列表时，等值传播的特性会带来很大开销。</p>
+<ul>
+<li>并行执行</li>
+</ul>
+<p>MySQL 无法并行执行查询</p>
+<ul>
+<li>哈希关联</li>
+</ul>
+<p>MariaDB 支持 hash join。<br />
+MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
+<p>版本对照</p>
+<table>
+<thead>
+<tr>
+<th>MariaDB</th>
+<th>MySQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10.0-1</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td>10.1-3</td>
+<td>5.7</td>
+</tr>
+<tr>
+<td>10.3-4</td>
+<td>8.0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>松散索引扫描</li>
+</ul>
+<p>相当于Oracle中的跳跃索引扫描（skip index scan）</p>
+<p>MySQL 只在某些特定场景下可以使用松散索引扫描，如在一个分组查询中找到最大（小）值</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> actor_id, <span class="keyword">MAX</span>(film_id)</span><br><span class="line"><span class="keyword">FROM</span> film_actor</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> actor_id</span><br></pre></td></tr></table></figure>
+<p>有索引(actor_id, film_id)，可以跳跃式的扫描每个actor_id段的最后一个记录，就是相应的 <code>MAX(film_id)</code>。</p>
+<ul>
+<li>最大值和最小值优化</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">MIN</span>(actor_id) <span class="keyword">FROM</span> actor <span class="keyword">WHERE</span> first_name = <span class="string">'PENELOPE'</span>;</span><br></pre></td></tr></table></figure>
+<p>以上查询中，<code>first_name</code>字段没有索引，MySQL会进行全表扫描。而事实上因为主键actor_id是升序排列的，因此在找到第一个满足<code>first_name = 'PENELOPE'</code>的记录时就可以结束查询。因此可以改写为：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> actor_id <span class="keyword">FROM</span> actor <span class="keyword">USE</span> <span class="keyword">INDEX</span>(PRIMARY)</span><br><span class="line"><span class="keyword">WHERE</span> first_name = <span class="string">'PENELOPE'</span> <span class="keyword">LIMIT</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在同一张表上查询和更新</li>
+</ul>
+<p>MySQL不允许对同一张表同时进行查询和更新。但是可以通过使用生成表的形式绕过限制，关联时不是关联自身，而是关联临时表。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> tb <span class="keyword">as</span> outer_tb</span><br><span class="line">    <span class="keyword">set</span> cnt = (</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> tb <span class="keyword">AS</span> inner_tb</span><br><span class="line">        <span class="keyword">WHERE</span> inner_tb.type = outer_tb.type</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ERROR 1093 (HY000): Table 'outer_tb' is specified twice, both as a target for 'UPDATE' and as a separate source for data</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> tb</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span>(</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="keyword">type</span>, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt</span><br><span class="line">        <span class="keyword">FROM</span> tb</span><br><span class="line">        <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="keyword">type</span></span><br><span class="line">    ) <span class="keyword">AS</span> der <span class="keyword">USING</span>(<span class="keyword">type</span>)</span><br><span class="line"><span class="keyword">SET</span> tb.cnt = der.cnt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>hint
+<ul>
+<li>HIGH_PRIORITY / LOW_PRIORITY</li>
+<li>DELAYED</li>
+<li>STRAIGHT_JOIN</li>
+<li>SQL_SMALL_RESULT / SQL_BIG_RESULT：前者告诉优化器结果集会很小，可以将结果放在林村中的索引临时表，避免排序操作；后者说明结果集非常大，建议使用磁盘临时表进行排序操作。</li>
+<li>SQL_BUFFER_RESULT</li>
+<li>SQL_CACHE / SQL_NO_CACHE</li>
+<li>SQL_CALC_FOUND_ROWS</li>
+<li>FOR UPDATE / LOCK IN SHARE MODE</li>
+<li>USE INDEX / IGNORE INDEX / FORCE INDEX</li>
+</ul>
+</li>
+</ul>
+<p>因版本而异，详见官方手册</p>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>创建高性能的索引-02</title>
+    <url>/2020/02/high-perf-mysql05-2/</url>
+    <content><![CDATA[<h2 id="索引案例学习"><a class="markdownIt-Anchor" href="#索引案例学习"></a> 索引案例学习</h2>
+<h3 id="多种条件过滤"><a class="markdownIt-Anchor" href="#多种条件过滤"></a> 多种条件过滤</h3>
+<p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
+<h3 id="避免多个范围条件"><a class="markdownIt-Anchor" href="#避免多个范围条件"></a> 避免多个范围条件</h3>
+<p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a class="markdownIt-Anchor" href="#优化排序"></a> 优化排序</h3>
+<p>对于分页查询</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="维护索引和表"><a class="markdownIt-Anchor" href="#维护索引和表"></a> 维护索引和表</h2>
+<p>维护表的三个目的：</p>
+<ul>
+<li>找到并修复损坏的表</li>
+<li>维护准确的索引统计信息</li>
+<li>减少碎片</li>
+</ul>
+<h3 id="找到并修复损坏的表"><a class="markdownIt-Anchor" href="#找到并修复损坏的表"></a> 找到并修复损坏的表</h3>
+<p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
+<p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
+<p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
+<p>MyISAM 的表损坏（corruption）通常是系统崩溃导致的。InnoDB 一般不会出现损坏，如果发生损坏，可能是</p>
+<ul>
+<li>硬件问题，如内存或磁盘故障（有可能）</li>
+<li>数据库管理员的错误操作，如在 MySQL 外部直接操作数据文件（有可能）</li>
+<li>InnoDB 本身缺陷（不太可能）</li>
+</ul>
+<p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
+<h3 id="更新索引统计信息"><a class="markdownIt-Anchor" href="#更新索引统计信息"></a> 更新索引统计信息</h3>
+<p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
+<ul>
+<li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM 返回精确值，InnoDB 返回估算值。</li>
+<li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
+</ul>
+<p>可以通过<code>ANALYZE TABLE</code>来生成统计信息。如果存储引擎提供的扫描行数是不准确的，或者执行计划本身太复杂无法准确获取各个阶段的行数，优化器会使用索引统计信息来估算扫描行数。</p>
+<p>每种存储引擎实现索引统计信息的方式不同：</p>
+<ul>
+<li>Mymory 引擎不存储索引统计信息</li>
+<li>MyISAM 将索引统计信息存储在磁盘中，ANALYZE TABLE 需要全索引扫描计算索引基数，此过程中需要锁表</li>
+<li>InnoDB 不再磁盘中存储索引统计信息，通过随机的索引访问进行评估将其存储在内存中。</li>
+</ul>
+<p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics 表</code>获取。</p>
+<p>InnoDB 会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过 1/16 或插入 20 亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
+<p>InnoDB 打开某些<code>information_schema</code>表，使用 SHOW TABLE STATUS 或 SHOW INDEX，或 MySQL 客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
+<h3 id="减少索引和数据碎片"><a class="markdownIt-Anchor" href="#减少索引和数据碎片"></a> 减少索引和数据碎片</h3>
+<p>B 树索引会碎片化，造成查询效率降低。</p>
+<p>表的数据存储碎片化有三种类型：</p>
+<ul>
+<li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
+<li>行间碎片（Intra-row fragmentation）：逻辑上顺序的页，在磁盘上不是顺序存储的。对全表扫描和聚簇索引扫描之类的操作影响很大</li>
+<li>剩余空间碎片（Free space fragmentation）：数据页中有大量空余空间，读取数据时读取大量不需要的数据，造成浪费</li>
+</ul>
+<p>MyISAM 中三种都可能发生，InnoDB 中不会出现行碎片。</p>
+<p>解决方式</p>
+<ol>
+<li>OPTIMIZE TABLE 或 导入再导出</li>
+<li>MyISAM 可通过排序算法重建索引</li>
+<li>InnoDB 可先删除索引再重新创建</li>
+<li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
+</ol>
+<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
+<p>三个原则：</p>
+<ol>
+<li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
+<li>顺序访问数据很快：顺序 IO 不需要磁盘寻道，对于排序的查询也更快</li>
+<li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
+</ol>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>创建高性能的索引-01</title>
+    <url>/2020/02/high-perf-mysql05-1/</url>
+    <content><![CDATA[<h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
+<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+<p><strong>B 树索引</strong></p>
+<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
+<p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
+<p>B 树适用于全键值、键值范围或键前缀查找：</p>
+<ul>
+<li>全值匹配：和索引中的所有列进行匹配</li>
+<li>匹配最左前缀：只使用索引的第一列</li>
+<li>匹配列前缀：只匹配某一列的开头部分</li>
+<li>匹配范围值：匹配值处于某个区间</li>
+<li>精确匹配某一列并范围匹配另一列</li>
+<li>只访问索引的查询</li>
+</ul>
+<p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
+<p>B 树索引的限制：</p>
+<ul>
+<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
+<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
+</ul>
+<a id="more"></a>
+<p><strong>哈希索引</strong></p>
+<p>hash index 只有在精确匹配索引所有列的时候才有效。对于一行数据，存储引擎对所有<em>索引列</em>计算一个 hash code。</p>
+<p>MySQL 中只有 Memory 引擎显式支持哈希索引。此外其还支持非唯一哈希索引，哈希值相同是，索引会以链表的形式存放多个记录指针到同一个哈希条目中。</p>
+<p>哈希索引无法用于排序，不支持部分列匹配。</p>
+<p>InnoDB 引擎支持“自适应哈希索引（adaptive hash index）”，当 InnoDB 注意到某些索引值被使用得相对平凡是，它会在 B 树索引之上再创建一个哈希索引。这是一个内部行为，用户无法控制或配置。</p>
+<p>可以维护一个 hash 列，查询时手动指定使用 hash 函数，实现类似哈希索引的效果。</p>
+<p><strong>空间数据索引（R-Tree）</strong></p>
+<p>MyISAM 支持空间索引，可以用作地理数据存储，用所有维度来索引数据，必须使用 GIS 相关函数<code>MBRCONTAINS()</code>等来维护数据，但并不完善。PostgreSQL 中的 PostGIS 较好。</p>
+<p><strong>全文索引</strong></p>
+<p>详见第 7 章</p>
+<h2 id="索引的优点"><a class="markdownIt-Anchor" href="#索引的优点"></a> 索引的优点</h2>
+<p>三大优点：</p>
+<ol>
+<li>减少服务器需要扫描的数据量</li>
+<li>帮助服务器避免排序和临时表</li>
+<li>将随机 IO 变为顺序 IO</li>
+</ol>
+<h2 id="高性能的索引策略"><a class="markdownIt-Anchor" href="#高性能的索引策略"></a> 高性能的索引策略</h2>
+<h3 id="独立的列"><a class="markdownIt-Anchor" href="#独立的列"></a> 独立的列</h3>
+<p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
+<h3 id="前缀索引和索引选择性"><a class="markdownIt-Anchor" href="#前缀索引和索引选择性"></a> 前缀索引和索引选择性</h3>
+<p>索引很长的字符列会让索引变得大且慢，一个策略是模拟 hash 索引。</p>
+<p>此外还可以只索引开头的部分字符，节约索引空间，提升效率，但会降低索引的选择性。<strong>索引的选择性</strong>是指，不重复的索引值（基数，cardinality）和记录总数的比值。</p>
+<p>为了确定前缀的合适长度，需要将常见值和常见的前缀进行比较。</p>
+<p>方法一：定性比较</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, city <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改前缀长度，寻找合适长度</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, <span class="keyword">LEFT</span>(city, <span class="number">3</span>) <span class="keyword">AS</span> pref <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>方法二：计算选择度，定量比较</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> city)/<span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> city_demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">3</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel3,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">4</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel4,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">5</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel5,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">6</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel6</span><br><span class="line"><span class="keyword">FROM</span> city_demo;</span><br></pre></td></tr></table></figure>
+<p>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
+<p><strong>创建前缀索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> city_demo <span class="keyword">ADD</span> <span class="keyword">KEY</span> (city(<span class="number">7</span>));</span><br></pre></td></tr></table></figure>
+<p>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
+<p>一个常见场景是针对很长的十六进制唯一 ID 使用前缀索引。</p>
+<p>后缀索引（suffix index）也有用途，例如查找某个域名的邮箱地址。MySQL 原生并不支持，但可以把字符串反转后存储，创建前缀索引。通过触发器来维护。</p>
+<h3 id="多列索引"><a class="markdownIt-Anchor" href="#多列索引"></a> 多列索引</h3>
+<p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x 引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR 条件的联合，AND 条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
+<p>出现索引合并意味着索引建得比较糟糕：</p>
+<ul>
+<li>当出现多个索引相交（多个 AND），通常需要创建一个包含多个列的索引</li>
+<li>当出现联合操作（多个 OR 条件），通常需要耗费大量 CPU 和内存用于缓存、排序和合并</li>
+<li>更重要的是，优化器不会吧这些计算到查询成本中，优化器只关心随机页面读取。有时运行这样查询不如直接全表扫描。可通过<code>optimizer_switch</code>关闭索引合并，也可以使用<code>IGNORE INDEX</code>提示让优化器忽略有些索引。</li>
+</ul>
+<h3 id="选择合适的索引顺序"><a class="markdownIt-Anchor" href="#选择合适的索引顺序"></a> 选择合适的索引顺序</h3>
+<p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
+<p>当不想需要考虑排序和分组时，将选择性最高的列放在前面通常是最好的。</p>
+<h3 id="聚簇索引"><a class="markdownIt-Anchor" href="#聚簇索引"></a> 聚簇索引</h3>
+<p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB 的聚簇索引在同一个结构中保存了 B-Tree 索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
+<p>InnoDB 默认通过主键聚集数据，没有主键会选择一个唯一的非空索引代替，如果没有这样 的索引，InnoDB 会隐式定义一个主键作为聚簇索引。</p>
+<p>聚簇索引的优点：</p>
+<ul>
+<li>相关数据共同存储，减少随机 IO</li>
+<li>数据访问更快</li>
+<li>使用覆盖索引扫描的查询可以直接使用页节点中的主键值  ——<em>不太理解</em></li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>数据存放在内存中时没有优势</li>
+<li>插入顺序，如果不是按照主键顺序插入数据，那么在数据插入完成后最好使用 OPTIMIZE TABLE 命令重新组织一下表</li>
+<li>更新聚簇索引列的代价很高，因为会强制将每个被更新的行移动到新的位置</li>
+<li>基于聚簇索引的表在插入行或更新主键时，可能面临“页分裂（page split）”问题。当行的主键值要求不许将这一行插入到某个已满的页中是，存储引擎会将该页分裂成两个页面来容纳该行（两个页可能隔得很远），页分裂会导致表占用更多磁盘空间</li>
+<li>聚簇索引可能导致全表扫面变慢，尤其是行比较稀疏，或者因为页分裂导致数据存储不连续的时候</li>
+<li><strong>二级索引访问需要两次索引查找</strong>：二级索引的叶节点不存储地址而是存储行的主键，通过二级索引查找行，需要先在二级索引的叶节点中找到对应的主键值，然后根据主键值在聚簇索引中找到对应的行。</li>
+</ul>
+<p><strong>InnoDB 和 MyISAM 的数据分布对比</strong></p>
+<p><strong>MyISAM</strong>：按照数据插入的顺序存储在磁盘上。索引的叶节点存储数据的物理地址，主键索引和其他索引没有什么不同</p>
+<p><strong>InnoDB</strong>：在 InnoDB 中聚簇索引就是表，不需要独立的行存储，聚簇索引的每个叶节点都包含了主键值、事务 ID、回滚指针以及剩余的列。如果使用主键的列前缀索引，InnoDB 也会包含完整的主键列。</p>
+<p>二级索引中叶节点存储的不是“行指针”，而是主键值，这样的策略减少了行移动或数据页分裂时二级索引的维护工作，但当主键值较长时会让二级索引占用更多的空间。</p>
+<p><strong>在 InnoDB 表中按主键顺序插入行</strong></p>
+<p>如果表中没有什么数据需要聚集，可以定义一个代理键（surrogate key）作为主键，最简单的就是自增列，可以保证数据行顺序写入。</p>
+<p>最好避免随机的（不连续且范围很大）聚簇索引，特别是对于 IO 密集型的应用。从这个角度，使用 UUID 作为聚簇索引很糟糕，插入的花费时间更长，索引占用的空间更大。</p>
+<p>顺序主键什么时候会造成坏的结果？<br />
+对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
+<h3 id="覆盖索引"><a class="markdownIt-Anchor" href="#覆盖索引"></a> 覆盖索引</h3>
+<p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
+<ul>
+<li>索引条目通常远小于数据行大小，只读取索引会极大减小数据访问量。</li>
+<li>索引按照列值顺序存储，范围查询有优势</li>
+<li>一些存储引擎如 MyISAM 在内存中只缓存索引，数据则依赖于操作系统缓存，只扫描索引减少系统调用。</li>
+<li>对于聚簇索引，如果二级索引能够实现覆盖查询，可以避免对主键索引的二级查询。</li>
+</ul>
+<p>MySQL 只能使用 B 树索引做覆盖索引（其他索引类型不存储索引列的值）。</p>
+<p>如果索引覆盖了 WHERE 条件的字段，但不是整个查询涉及的字段，MySQL 5.5 及更早版本会回表获取数据行。可以通过延迟关联（deferred join）进行优化，对能覆盖索引的字段进行子查询，得到主键后在外层查询获取所有列值。</p>
+<h3 id="使用索引扫描来做排序"><a class="markdownIt-Anchor" href="#使用索引扫描来做排序"></a> 使用索引扫描来做排序</h3>
+<p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
+<p>只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且各列的排序方向都一样时，MySQL 才能使用索引的结果做排序。需要关联多张表时，只有 ORDER BY 子句的字段全部属于第一张表时才能使用索引做排序。通常 ORDER BY 子句要满足最左前缀要求，除非前导列限定为常数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> RENTAL_ID, STAFF_ID <span class="keyword">FROM</span> RENTAL </span><br><span class="line"><span class="keyword">WHERE</span> RENTAL_DATA = <span class="string">'2005-05-25'</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> INVENTORY_ID, CUSTIMER_ID</span><br></pre></td></tr></table></figure>
+<p>如上查询中能够利用建立在<code>（RENTAL_DATA，INVENTORY_ID，CUSTIMER_ID）</code>上的索引。</p>
+<h3 id="压缩索引"><a class="markdownIt-Anchor" href="#压缩索引"></a> 压缩索引</h3>
+<p>MyISAM 使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
+<h3 id="冗余和重复索引"><a class="markdownIt-Anchor" href="#冗余和重复索引"></a> 冗余和重复索引</h3>
+<p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
+<p>唯一限制和主键限制都是通过索引实现的，三个都创建相当于在主键列上创建了三个相同的索引。</p>
+<p>如果创建了索引（A，B），再创建索引（A）就是冗余索引，因为这只是前一个索引的前缀索引。索引（A，B）可以当作索引（A）使用（对于 B 树）。还有一个情况是将一个索引扩展为（A，ID），因为主键列 ID 已经包含在二级索引中了，因此这种扩展也是冗余的。</p>
+<h3 id="索引和锁"><a class="markdownIt-Anchor" href="#索引和锁"></a> 索引和锁</h3>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>查询性能优化</title>
+    <url>/2020/02/high-perf-mysql06-md/</url>
+    <content><![CDATA[<p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
+<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
+<p>查询需要在不同的地方花费时间，包括网络，CPU 计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的 IO 操作。</p>
+<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
+<p>分析步骤</p>
+<ol>
+<li>确认应用程序是否检索大量不必要的的数据，太多行或太多列。</li>
+<li>确认 MySQL 服务器层是否在分析大量不必要的数据行。</li>
+</ol>
+<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
+<ul>
+<li>
+<p>查询不需要的记录<br />
+使用 SELECT 查询所有结果，获取前面的 N 行后关闭，实际上 MySQL 已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
+</li>
+<li>
+<p>取出全部列<br />
+不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的 IO、内存和 CPU 的消耗。<br />
+有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据，需要进行权衡。</p>
+</li>
+<li>
+<p>重复查询相同的数据<br />
+利用缓存，减少重复查询。</p>
+</li>
+</ul>
+<a id="more"></a>
+<h3 id="mysql-是否扫描额外的记录"><a class="markdownIt-Anchor" href="#mysql-是否扫描额外的记录"></a> MySQL 是否扫描额外的记录</h3>
+<p>衡量查询开销的三个指标：</p>
+<ul>
+<li>响应时间</li>
+<li>扫描的行数</li>
+<li>返回的行数</li>
+</ul>
+<p><strong>响应时间</strong> = 服务时间 + 排队时间。服务时间是数据库处理查询真正花的时间。排队时间是为了等待某些资源花费的时间——可能是 IO，也可能是锁等等。可以使用“快速上限估计法”估算查询响应时间：了解一个查询需要哪些索引以及它的执行计划，然后计算大概需要多少个顺序和随机 IO，乘以其在具体硬件条件下一次 IO 消耗的时间。</p>
+<p><strong>扫描的行数和返回的行数</strong>对查询速度的影响很大。但并不是所有的行的访问代价都是相同的，较短的行的访问速度快，内存中的行比磁盘中的行访问速度快。扫描行与返回行的比值通常很小，一般在 1:1 和 10:1 之间。</p>
+<p>MySQL 中有好几种<strong>访问方式</strong>可以返回一行结果，有些要扫描很多行，有些甚至无需扫描行。<br />
+EXPLAIN 语句中的 type 列反应了<strong>访问类型</strong>。速度从慢到快，扫描行数从多到少分别是：</p>
+<ul>
+<li>全表扫描</li>
+<li>索引扫描</li>
+<li>范围扫描</li>
+<li>唯一索引查询</li>
+<li>常数引用</li>
+</ul>
+<p>一般 MySQL 能使用如下三种方式应用 WHERE 条件，从好到坏依次为：</p>
+<ul>
+<li>在索引中使用 WHERE 语句过滤不匹配的记录。（在存储引擎层完成）</li>
+<li>使用索引覆盖扫描（在 Extra 列中出现 Using index）来返回记录，直接从索引中过滤不需要的记录，并返回命中的结果，在 MySQL 服务器完成，但无须回表查询。</li>
+<li>在数据表中返回数据，然后过滤不满足条件的记录（在 Extra 列中出现 Using Where）。在 MySQL 服务器完成，先从数据表读出数据然后过滤。</li>
+</ul>
+<p>如果发现查询需要扫描大量的数据，但只返回很少的行，可以尝试一下技巧：</p>
+<ul>
+<li>使用索引覆盖扫描，把需要的列都放到索引中</li>
+<li>改变表结构，如使用单独的汇总表</li>
+<li>重写这个复杂的查询，让优化器能以更优化的方式执行。</li>
+</ul>
+<h2 id="重构查询的方式"><a class="markdownIt-Anchor" href="#重构查询的方式"></a> 重构查询的方式</h2>
+<h3 id="一个复杂查询还是多个简单查询"><a class="markdownIt-Anchor" href="#一个复杂查询还是多个简单查询"></a> 一个复杂查询还是多个简单查询</h3>
+<p>传统的实现中强调数据库完成尽可能多的工作，其逻辑在于认为网络通信<br />
+查询解析和优化是一件代价很高的事情。但这对于 MySQL 不适用，MySQL 在设计上让连接和断开链接都很轻量，对小结果集友好。</p>
+<p>在其他条件相同的时候，使用尽可能少的查询更有利。但有的时候，将一个大查询分解成为多个小查询是必要的。</p>
+<h3 id="切分查询"><a class="markdownIt-Anchor" href="#切分查询"></a> 切分查询</h3>
+<p>如定期删除数据时，用一个大的语句一次性完成需要锁住很多数据、占满整个事务日志、耗尽系统资源、阻塞很多小的但重要的查询。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 大查询</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> message <span class="keyword">WHERE</span> created &lt; DATA_SUB(<span class="keyword">NOW</span>(), INTERBAL <span class="number">3</span> <span class="keyword">MONTH</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 小查询 一次删除一万条</span></span><br><span class="line">rows_affected = 0</span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    rows_affected = do_query(</span><br><span class="line">        <span class="string">"DELETE FROM message WHERE created &lt; DATA_SUB(NOW(), INTERBAL 3 MONTH) </span></span><br><span class="line"><span class="string">        LIMIT 10000"</span></span><br><span class="line">    ) </span><br><span class="line">&#125; <span class="keyword">while</span> rows_affected &gt; <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<h3 id="分解关联查询"><a class="markdownIt-Anchor" href="#分解关联查询"></a> 分解关联查询</h3>
+<p>分解关联查询将关联操作转移到应用程序中，优势如下：</p>
+<ul>
+<li>让缓存的效率更高。很多应用程序会缓存单表查询的结果进行复用。另外，对于 MySQL 的查询缓存（query cacheA）来说，关联中的表发生了变化就无法使用缓存了，拆分后如果某个表很少改变，那就可以重复利用查询缓存。</li>
+<li>单个查询减少锁的竞争。</li>
+<li>在应用层关联更容易对数据库进行拆分，更容易提高性能和扩展性</li>
+<li>拆分查询有时可以指定查询条件中的查询顺序（使用 IN()），提高效率</li>
+<li>减少冗余记录的查询</li>
+<li>拆分后相当于在应用中实现了哈希关联，而不是使用嵌套循环关联（<strong>MySQL 新版本中已经实现了哈希关联</strong>）</li>
+</ul>
+<h2 id="执行查询的基础"><a class="markdownIt-Anchor" href="#执行查询的基础"></a> 执行查询的基础</h2>
+<p><img src="https://i.loli.net/2020/02/13/wi3ozX8YHSvcpex.png" alt="" /></p>
+<h3 id="mysql-客户端服务器通信协议"><a class="markdownIt-Anchor" href="#mysql-客户端服务器通信协议"></a> MySQL 客户端/服务器通信协议</h3>
+<p>MySQL 客户端和服务器之间的通信协议是“半双工”的。发送和接受无法同时进行，无法也无须将一个消息切成小块独立发送。</p>
+<p>这种协议让通信简单快速，也从很多地方限制了 MySQL。一个明显的限制是无法进行流量控制，一段发送的消息全部发完另一端才能响应。多数连接 MySQL 的库函数可以获取全部结果难道缓存中或逐行获取数据。默认一般是全部获取到内存中。MySQL 通常要等所有数据发送完成后才能释放资源，接收全部数据并缓存可以尽早释放相应的资源。对于很大的查询结果集，为了减少内存的消耗可以不缓存而直接处理，但相应的服务器被该资源长时间占用。</p>
+<p>一个 MySQL 连接为一个线程，使用 <code>SHOW FULL PROCESSLIST;</code> 命令可以查询线程状态。</p>
+<h3 id="查询缓存-query-cache"><a class="markdownIt-Anchor" href="#查询缓存-query-cache"></a> 查询缓存 Query Cache</h3>
+<p>如果查询缓存是打开的，MySQL 会优先检查是否命中缓存中的数据。这个检查通过一个对大小写敏感的哈希查找实现，即使有一个字节不同（包括注释和空格）。</p>
+<p>如果命中了查询缓存，会检查用户权限，通过则直接从缓存中获取结果。</p>
+<h3 id="优化查询处理"><a class="markdownIt-Anchor" href="#优化查询处理"></a> 优化查询处理</h3>
+<p>将一个 SQL 转换为一个执行计划包括几个子阶段：解析 SQL，预处理，优化 SQL 执行计划。</p>
+<p>语法解析器对语句进行语法验证，生成解析树。</p>
+<p>预处理器则根据一些 MySQL 规则进一步检查解析树是否合法，如检查数据表和列是否存在，名字和别名是否有歧义。然后进行权限验证。</p>
+<p>优化器将检查合法的语法树转化为执行计划。MySQL 使用基于成本的优化器。最初，成本的最小单位是随机读取一个 4K 数据页的成本，后来成本计算公式变得更加复杂，并引入了一些因子来进行估算，如执行一次 WHERE 比较的成本。可以通过 <code>SHOW STATUS LIKE 'Last_query_cost';</code> 得知上条语句的查询成本。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">&gt;  SELECT COUNT(*) FROM sakila.film_actor;</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">| count(*) |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">|     5462 |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">&gt; <span class="keyword">SHOW</span> <span class="keyword">STATUS</span> <span class="keyword">LIKE</span> <span class="string">'Last_query_cost'</span>;</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">| Variable_name   | Value       |</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">| Last_query_cost | 1104.399000 |</span><br><span class="line">+<span class="comment">-----------------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>结果表示 MySQL 的优化器认为大概需要 1104 个数据页的随机查找才能完成上面的查询。这通过每个表或索引的页面个数、索引的基数、索引和数据行的长度、索引分布情况计算得出。</p>
+<p>导致 MySQL 优化器选择错误执行计划的可能原因：</p>
+<ul>
+<li>统计信息不准确。InnoDB 因其 MVCC 架构不能维护一个数据表的准确行数统计信息。</li>
+<li>执行计划中的成本不等于实际成本。收到页面读取方式（顺序/随机）、页面存储位置（内存/磁盘），是否缓存等影响。</li>
+<li>成本模型无法真实反应执行速度</li>
+<li>MySQL 没有考虑其它并发执行的查询的影响。</li>
+<li>有时基于固定规则执行。如存在全文搜索 MATCH() 子句，则存在全文索引的时候就使用全文索引。</li>
+<li>不考虑其他不受控制的操作的成本。如执行存储过程或用户自定义函数的成本。</li>
+<li>无法估计可能的执行计划</li>
+</ul>
+<p>MySQL 能处理的优化类型：</p>
+<ul>
+<li>重新定义关联表的顺序</li>
+<li>将外连接转化为内链接</li>
+<li>使用等价变换规则。如将 <code>(a&lt;b AND b&lt;c) AND a=5</code> 改写为 <code>b&gt;5 AND b=c AND a=5</code></li>
+<li>优化 COUNT(), MIN() 和 MAX()。有时，要找某一列的最小值需要查询 B 树索引的最左端（EXPLAIN 中看到 Select tables optimized away），类似的，最大值找索引的最后一个记录。MyISAM 维护了数据表行数的精确值，对于没有筛选条件的 COUNT(*) 查询可以直接使用。</li>
+<li>预估并转化为常数表达式。检测到表达式可以转化为常数时，将其转化。对数学表达式，甚至一个查询（如带 MIN()，MAX()，主键或唯一键查找语句） 都能转化为常数。</li>
+<li>覆盖索引扫描</li>
+<li>子查询优化</li>
+<li>提前终止查询。如 LIMIT 子句或条件不成立返回空结果。</li>
+<li>等值传播。如果两个列的值通过等式关联，则把一个列的 WHERE 条件传递到另一个列上使得存储引擎可以更高效地过滤数据。</li>
+<li>列表 IN() 的比较。MySQL 中 IN() 并非不等同于多个 OR 条件子句。MySQL 将 IN() 列表中的数据先进行排序，然后通过二分查找的方式确定列表中的值是否满足条件，IN() 列表中有大量取值时速度相较 OR 快很多。</li>
+</ul>
+<p><strong>嵌套循环关联</strong>：先在一个表中循环取出单条数据，然后再嵌套循环到下一个表中寻找匹配的行，依次下去，直到找到所有表中匹配的行为止。然后根据各个表匹配的行，返回需要的各个列。MySQL 会尝试在最有一个关联表中找到所有匹配的行，然后回溯到上一层关联表继续查找。<br />
+本质上，MySQL 对多有类型的查询都以这样的方式运行。FROM 子句遇到子查询是，先执行子查询并将结果放在一个临时表中，然后将临时表当作普通表一样对待。<em>在 MySQL 中每一个查询，每一个片段（包括子查询，甚至单表 select）都可能是关联。</em></p>
+<p><strong>执行计划</strong>：MySQL 生成查询的一颗指令树，然后通过存储引擎完成这颗指令树并返回结果。最终的执行计划包含了查询的所有信息。在对某个查询执行<code>EXPLAIN EXTENDED</code>后，再执行<code>SHOW WARNINGS</code>就可以看到重构的查询，其与原查询语义相同，但查询语句可能不同。</p>
+<p>MySQL 的执行计划是一颗左侧深度优先的树。<br />
+<img src="https://i.loli.net/2020/02/13/8xDFghPGLit1Wp9.png" alt="" /></p>
+<p><strong>关联查询优化器</strong>通过评估多表关联时不同顺序的成本来选择代价最小的关联顺序。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 自动优化顺序</span></span><br><span class="line"><span class="keyword">SELECT</span> film.film_id, film.title, film.release_year, actor.actor_id, actor.last_name</span><br><span class="line"><span class="keyword">FROM</span> film</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> actor <span class="keyword">USING</span>(actor_id)</span><br><span class="line"></span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line">| <span class="keyword">id</span>   | select_type | <span class="keyword">table</span>      | <span class="keyword">type</span>   | possible_keys          | <span class="keyword">key</span>                 | key_len | <span class="keyword">ref</span>                       | <span class="keyword">rows</span> | Extra       |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | actor      | <span class="keyword">index</span>  | PRIMARY                | idx_actor_last_name | <span class="number">137</span>     | <span class="literal">NULL</span>                      |  <span class="number">200</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film_actor | <span class="keyword">ref</span>    | PRIMARY,idx_fk_film_id | PRIMARY             | <span class="number">2</span>       | sakila.actor.actor_id     |   <span class="number">13</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film       | eq_ref | PRIMARY                | PRIMARY             | <span class="number">2</span>       | sakila.film_actor.film_id |    <span class="number">1</span> |             |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+---------------------+---------+---------------------------+------+-------------+</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 固定顺序</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="keyword">STRAIGHT_JOIN</span> film.film_id, film.title, film.release_year, actor.actor_id, actor.last_name</span><br><span class="line"><span class="keyword">FROM</span> film</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> actor <span class="keyword">USING</span>(actor_id)</span><br><span class="line"></span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br><span class="line">| <span class="keyword">id</span>   | select_type | <span class="keyword">table</span>      | <span class="keyword">type</span>   | possible_keys          | <span class="keyword">key</span>            | key_len | <span class="keyword">ref</span>                        | <span class="keyword">rows</span> | Extra       |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film       | <span class="keyword">ALL</span>    | PRIMARY                | <span class="literal">NULL</span>           | <span class="literal">NULL</span>    | <span class="literal">NULL</span>                       | <span class="number">1000</span> |             |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | film_actor | <span class="keyword">ref</span>    | PRIMARY,idx_fk_film_id | idx_fk_film_id | <span class="number">2</span>       | sakila.film.film_id        |    <span class="number">2</span> | <span class="keyword">Using</span> <span class="keyword">index</span> |</span><br><span class="line">|    <span class="number">1</span> | SIMPLE      | actor      | eq_ref | PRIMARY                | PRIMARY        | <span class="number">2</span>       | sakila.film_actor.actor_id |    <span class="number">1</span> |             |</span><br><span class="line">+<span class="comment">------+-------------+------------+--------+------------------------+----------------+---------+----------------------------+------+-------------+</span></span><br></pre></td></tr></table></figure>
+<p>通过对比两种关联顺序，相比原顺序，优化后的顺序第一个关联表只需要扫描更少的行数，而第二和第三个关联表都是根据索引查询速度很快，因而优化后查询速度更快。通过 Last_query_cost 也可以看出来。</p>
+<p>当表的数量过多，需要关联的表超过<code>optimizer_search_depth</code>时，使用 <a href="http://ourmysql.com/archives/1207" target="_blank" rel="noopener">贪婪模式</a> 进行搜索。</p>
+<p><strong>排序优化</strong>。从性能角度考虑，应尽可能避免排序或者尽可能避免对大量数据及逆行排序。</p>
+<p>当不能使用索引生成排序结果的时候，MySQL 将利用内存或磁盘进行排序（文件排序 filesort）。</p>
+<p>内存足够时，MySQL 使用内存进行“快速排序”。内存不够时，将数据分块 ，对每个独立的块使用“快速排序”，结果保存在磁盘上，将排好的块进行合并，返回排序结果。</p>
+<p>MySQL 的两种排序算法：</p>
+<ul>
+<li>两次传输排序：读取行指针和需要排序的行，完成排序后根据结果读取需要的数据行。第二次读取数据行会产生大量的随机 IO，成本高。</li>
+<li>单次传输排序：读取查询所需的所有列，然后根据给定列进行排序，最后直接返回排序结果。此算法只需一次顺序 IO 读取所有数据。缺点是，如果需要返回的列非常多、非常大会占用大量的空间，造成浪费。单条排序记录很大所以可能有更多的排序块需要合并。</li>
+</ul>
+<p>进行文件排序时，占用的临时空间可能很大。MySQL 为每行排序数据分配一个足以容纳其最长字符串的定长空间。</p>
+<p>在关联查询中如果需要排序，分两种情况处理。</p>
+<ul>
+<li>ORDER BY 子句中的所有列来自关联的第一个表。MySQL 在关联第一个变的时候就进行文件排序，Extra 字段为 <code>Using filesort</code>。</li>
+<li>除此之外。MySQL 先进行所有关联再进行文件排序。Extra 字段为 <code>Using temporary; Using filesort</code>。</li>
+</ul>
+<p>LIMIT 子句在排序之后应用。MySQL 5.6 进行了改进，不再对所有结果进行排序，而是根据实际情况，选择抛弃不满足条件的结果，然后进行排序。</p>
+<h3 id="查询执行引擎"><a class="markdownIt-Anchor" href="#查询执行引擎"></a> 查询执行引擎</h3>
+<p>查询执行过程有大量操作需要通过调用存储引擎的接口（handler API）完成。查询中的每一个表由一个 handler 的实例表示。MySQL 在优化阶段就为每个表创建了一个 handler 实例。</p>
+<p>并不是所有操作都由 handler 完成，如果是所有存储引擎共有的特性则由服务器层实现。</p>
+<h3 id="返回结果给客户端"><a class="markdownIt-Anchor" href="#返回结果给客户端"></a> 返回结果给客户端</h3>
+<p>MySQL 返回结果集是一个增量、逐步返回的过程。如在关联操作中，一旦服务器处理完最后一个关联表，开始生成第一条结果时，MySQL 就可以开始向客户端逐步返回结果集了。这样处理服务器无须存储太多结果，节省内存，另外也能让客户端第一时间获得结果。</p>
+<p>结果集的每一行都会以一个满足 MySQL 通信协议的封包发送，再通过 TCP 协议传输，传输过程中可能对 MySQL 的封包进行缓存然后批量传输。</p>
+<h2 id="mysql-查询优化器的局限性"><a class="markdownIt-Anchor" href="#mysql-查询优化器的局限性"></a> MySQL 查询优化器的局限性</h2>
+<ul>
+<li>关联子查询</li>
+</ul>
+<p>MySQL 的<code>IN(sub query)</code>语句效率不高，可改写为关联查询。<strong>MariaDB 进行了一定的优化，可以跟踪一下。</strong></p>
+<p>使用子查询有时候也会比关联查询更加清晰、快速：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 关联查询，需要 DISTICT 剔除重复数据</span></span><br><span class="line"><span class="comment">-- 查询过程中会产生临时中间表，影响效率</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> film.film_id <span class="keyword">FROM</span> film </span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> film_actor <span class="keyword">USING</span>(film_id)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 子查询</span></span><br><span class="line"><span class="keyword">SELECT</span>  film.film_id <span class="keyword">FROM</span> film </span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span>(<span class="keyword">SELECT</span> * <span class="keyword">from</span> film_actor</span><br><span class="line"><span class="keyword">WHERE</span> film.film_id = film_actor.film_id)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>UNION 的限制</li>
+</ul>
+<p>有时候 MySQL 无法将限制条件从外层“下推”到内层，使得原本能够限制部分返回结果的条件无法应用到每层查询的优化上。</p>
+<p>如当使用 UNION 和 LIMIT 语句，将两个结果集合并后取部分结果集，MySQL 会将两个表的所有结果都存放到临时表中，可以在两个 UNION 子查询中都添加 LIMIT 进行优化。</p>
+<ul>
+<li>索引合并优化</li>
+</ul>
+<p>当 WHERE 子句中包含多个复杂条件的时候，MySQL 能够访问单个表的多个索引以合并和交叉过滤的方式定位需要查找的行。、</p>
+<ul>
+<li>等值传递</li>
+</ul>
+<p>当有一个很大了 IN() 列表时，等值传播的特性会带来很大开销。</p>
+<ul>
+<li>并行执行</li>
+</ul>
+<p>MySQL 无法并行执行查询</p>
+<ul>
+<li>哈希关联</li>
+</ul>
+<p>MariaDB 支持 hash join。<br />
+MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
+<p>版本对照</p>
+<table>
+<thead>
+<tr>
+<th>MariaDB</th>
+<th>MySQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10.0-1</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td>10.1-3</td>
+<td>5.7</td>
+</tr>
+<tr>
+<td>10.3-4</td>
+<td>8.0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>松散索引扫描</li>
+</ul>
+<p>相当于 Oracle 中的跳跃索引扫描（skip index scan）</p>
+<p>MySQL 只在某些特定场景下可以使用松散索引扫描，如在一个分组查询中找到最大（小）值</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> actor_id, <span class="keyword">MAX</span>(film_id)</span><br><span class="line"><span class="keyword">FROM</span> film_actor</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> actor_id</span><br></pre></td></tr></table></figure>
+<p>有索引 (actor_id, film_id)，可以跳跃式的扫描每个 actor_id 段的最后一个记录，就是相应的 <code>MAX(film_id)</code>。</p>
+<ul>
+<li>最大值和最小值优化</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">MIN</span>(actor_id) <span class="keyword">FROM</span> actor <span class="keyword">WHERE</span> first_name = <span class="string">'PENELOPE'</span>;</span><br></pre></td></tr></table></figure>
+<p>以上查询中，<code>first_name</code>字段没有索引，MySQL 会进行全表扫描。而事实上因为主键 actor_id 是升序排列的，因此在找到第一个满足<code>first_name = 'PENELOPE'</code>的记录时就可以结束查询。因此可以改写为：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> actor_id <span class="keyword">FROM</span> actor <span class="keyword">USE</span> <span class="keyword">INDEX</span>(PRIMARY)</span><br><span class="line"><span class="keyword">WHERE</span> first_name = <span class="string">'PENELOPE'</span> <span class="keyword">LIMIT</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在同一张表上查询和更新</li>
+</ul>
+<p>MySQL 不允许对同一张表同时进行查询和更新。但是可以通过使用生成表的形式绕过限制，关联时不是关联自身，而是关联临时表。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> tb <span class="keyword">as</span> outer_tb</span><br><span class="line">    <span class="keyword">set</span> cnt = (</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> tb <span class="keyword">AS</span> inner_tb</span><br><span class="line">        <span class="keyword">WHERE</span> inner_tb.type = outer_tb.type</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ERROR 1093 (HY000): Table 'outer_tb' is specified twice, both as a target for 'UPDATE' and as a separate source for data</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> tb</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span>(</span><br><span class="line">        <span class="keyword">SELECT</span> <span class="keyword">type</span>, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt</span><br><span class="line">        <span class="keyword">FROM</span> tb</span><br><span class="line">        <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="keyword">type</span></span><br><span class="line">    ) <span class="keyword">AS</span> der <span class="keyword">USING</span>(<span class="keyword">type</span>)</span><br><span class="line"><span class="keyword">SET</span> tb.cnt = der.cnt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>hint
+<ul>
+<li>HIGH_PRIORITY / LOW_PRIORITY</li>
+<li>DELAYED</li>
+<li>STRAIGHT_JOIN</li>
+<li>SQL_SMALL_RESULT / SQL_BIG_RESULT：前者告诉优化器结果集会很小，可以将结果放在林村中的索引临时表，避免排序操作；后者说明结果集非常大，建议使用磁盘临时表进行排序操作。</li>
+<li>SQL_BUFFER_RESULT</li>
+<li>SQL_CACHE / SQL_NO_CACHE</li>
+<li>SQL_CALC_FOUND_ROWS</li>
+<li>FOR UPDATE / LOCK IN SHARE MODE</li>
+<li>USE INDEX / IGNORE INDEX / FORCE INDEX</li>
+</ul>
+</li>
+</ul>
+<p>因版本而异，详见官方手册</p>
+<h2 id="优化特定类型的查询"><a class="markdownIt-Anchor" href="#优化特定类型的查询"></a> 优化特定类型的查询</h2>
+<h3 id="优化-count-查询"><a class="markdownIt-Anchor" href="#优化-count-查询"></a> 优化 COUNT() 查询</h3>
+<p>在 COUNT() 的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
+<p>对于没有任何 WHERE 条件的 COUNT(*)，MyISAM 可以直接返回结果。</p>
+<p>可以利用 MyISAM 此特性对特定语句进行优化</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前 5 条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+<p>一个查询中统计一个列不同值的数量</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure>
+<p>在对精度要求不高的时候可以使用近似值代替</p>
+<h3 id="优化关联查询"><a class="markdownIt-Anchor" href="#优化关联查询"></a> 优化关联查询</h3>
+<ul>
+<li>确保 ON 或者 USING 子句中的列上有索引。创建索引的时候要考虑关联的顺序，当表 A 和表 B 通过列 c 关联的时候，如果优化器的关联顺序是 B、A，则只需要在 A.c（内层）上创建索引。</li>
+<li>确保 GROUP BY 和 ORDER BY 中的表达式只涉及一个表中的列，这样 MySQL 才能使用索引进行优化。</li>
+<li>升级时注意，关联语法、运算符优先级等可能发生变化。</li>
+</ul>
+<h3 id="优化-group-by-和-distinct"><a class="markdownIt-Anchor" href="#优化-group-by-和-distinct"></a> 优化 GROUP BY 和 DISTINCT</h3>
+<p>在 GROUP BY 子句中使用查找表的标识列分组的效率比其他列高。但当所需字段为非分组列时，部分服务器可能禁用这种写法（ORACLE 是不支持的），强行使用也可能带来问题。</p>
+<p>如果没有 ORDER BY 子句显式地指定排序列，当使用 GROUP BY 子句时，结果集会自动按照分组的字段进行排列。如果不关心结果集的顺序，这种默认排序有导致了需要文件排序操作，则可以使用 ORDER BY NULL，让 MySQL 不进行文件排序。</p>
+<p>可以直接在 GROUP BY 子句中使用 DESC 或 ASC 指定排序方向。</p>
+<p>尽可能将 GROUP BY WITH ROLLUP 的 ROLLUP 部分放在应用程序中进行。</p>
+<h3 id="优化-limit-分页"><a class="markdownIt-Anchor" href="#优化-limit-分页"></a> 优化 LIMIT 分页</h3>
+<p>分页查询中，非常靠后的页偏移量很大，很多的记录被抛弃，代价很高。</p>
+<p>优化此类分页查询的最简单办法就是尽可能地使用索引覆盖扫描，而不是所有的列，然后再进行一次关联操作返回需要的列。</p>
+<p>对于部分情况（主键排序），可以记录上次查询中最后一条记录的 ID 作为下一次查询的条件，避免使用偏移量。如</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> rental</span><br><span class="line"><span class="keyword">WHERE</span> rental_id &lt; <span class="number">16030</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> rental_id <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">20</span>。</span><br></pre></td></tr></table></figure>
+<h3 id="优化-sql_calc_found_rows"><a class="markdownIt-Anchor" href="#优化-sql_calc_found_rows"></a> 优化 SQL_CALC_FOUND_ROWS</h3>
+<p>分页时可以在 LIMIT 语句中加上 SQL_CALC_FOUND_ROWS hint，可以获得所有满足条件的行数以便计算页数，但事实上它就是通过扫描所有行实现的，因此改提示的代价很高。</p>
+<p>实践中可以不显示页数，只显示下一页，假设每页显示 20 条，那么就一次查询 21 条，如果 21 条存在则激活“下一页”按钮。另一种做法是一次缓存较多的数据。</p>
+<h3 id="优化-union-查询"><a class="markdownIt-Anchor" href="#优化-union-查询"></a> 优化 UNION 查询</h3>
+<p>WHERE、LIMIT、ORDER BY 等子句需要手动“下推”</p>
+<p>除非必须消除重复行，否则使用 UNION ALL 避免唯一性检查</p>
+<h3 id="使用用户自定义变量"><a class="markdownIt-Anchor" href="#使用用户自定义变量"></a> 使用用户自定义变量</h3>
+<p>用户自定义变量是一个用来存储内容的临时容器，在连接 MySQL 的整个过程中都存在。可以使用 SET 和 SELECT 语句来定义：</p>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line">&gt; SET @one      := 1;</span><br><span class="line">&gt; SET @min_actor:= (SELECT MIN(actor_id) FROM actor);</span><br><span class="line">&gt; SET @last_week:= CURRENT_DATE - INTERVAL 1 WEEK;</span><br></pre></td></tr></table></figure>
+<p>然后可以在任何使用表达式的地方使用这些自定义变量。</p>
+<p>不能使用用户自定义变量的场景：</p>
+<ul>
+<li>使用自定义变量的查询无法使用查询缓存。</li>
+<li>不能在使用常量或标识符的地方使用自定义变量，如表名、列名和 LIMIT 子句中。</li>
+<li>用户自定义变量的生命周期为一个连接，不可以跨连接通信。</li>
+<li>如果使用连接池或者持久化连接，自定义变量可能让看起来毫无关系的代码发生交互。</li>
+<li>不能显式声明变量类型，其为动态类型。</li>
+<li>优化器在某些场景可能会将这些变量优化掉，导致意想不到的错误。</li>
+<li>赋值表达式需要使用括号，<code>:=</code>的优先级很低。</li>
+<li>使用未定义变量不会报语法错误</li>
+</ul>
+<p>总之使用时要注意<strong>赋值的顺序和赋值的时间</strong></p>
+<p>应用场景：</p>
+<ul>
+<li>优化排名语句</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> @curr_cnt := <span class="number">0</span> , @prev_cnt := <span class="number">0</span> , @<span class="keyword">rank</span> := <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id, </span><br><span class="line">    @curr_cnt := cnt <span class="keyword">AS</span> cnt, </span><br><span class="line">    @<span class="keyword">rank</span>     := <span class="keyword">IF</span>(@prev_cnt &lt;&gt; @curr_cnt, @<span class="keyword">rank</span> + <span class="number">1</span>, @<span class="keyword">rank</span>) <span class="keyword">AS</span> <span class="keyword">rank</span>,</span><br><span class="line">    @prev_cnt := @curr_cnt <span class="keyword">AS</span> dummy</span><br><span class="line"><span class="keyword">FROM</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> actor_id, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt </span><br><span class="line">    <span class="keyword">FROM</span> sakila.film_actor </span><br><span class="line">    <span class="keyword">GROUP</span> <span class="keyword">BY</span> actor_id</span><br><span class="line">    <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span></span><br><span class="line">    <span class="keyword">LIMIT</span> <span class="number">10</span> </span><br><span class="line">)<span class="keyword">AS</span> der;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>更新的同时获取数据</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> t1 <span class="keyword">SET</span> lastUpdated = <span class="keyword">NOW</span>() <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span> <span class="keyword">AND</span> @<span class="keyword">now</span> = <span class="keyword">NOW</span>();</span><br><span class="line"><span class="keyword">SELECT</span> @<span class="keyword">now</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>统计更新和插入的数量</li>
+</ul>
+<p>当使用了 <code>INSERT ON DUPLICATE KEY UPDATE</code>时想知道更新数可以使用</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t1(c1, c2) <span class="keyword">VALUES</span>(<span class="number">4</span>, <span class="number">4</span>), (<span class="number">2</span>, <span class="number">1</span>), (<span class="number">3</span>, <span class="number">1</span>)</span><br><span class="line"><span class="keyword">ON</span> <span class="keyword">DUPLICATE</span> <span class="keyword">KEY</span> <span class="keyword">UPDATE</span></span><br><span class="line">    c1 = <span class="keyword">VALUES</span>(c1) + (<span class="number">0</span> * (@x := @x + <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<ul>
+<li>确定取值的顺序</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="comment">-- where 语句 在 select 之前执行</span></span><br><span class="line"><span class="keyword">SELECT</span> actor_id, @<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span> <span class="keyword">AS</span> cnt</span><br><span class="line"><span class="keyword">FROM</span> sakila.actor</span><br><span class="line"><span class="keyword">WHERE</span> @<span class="keyword">rownum</span> &lt;= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">--  Using where; Using index </span></span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">| actor_id | cnt  |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">|       58 |    1 |</span><br><span class="line">|       92 |    2 |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="comment">-- 让赋值和取值发生在查询的同一个阶段（子句）可结果以上问题</span></span><br><span class="line"><span class="keyword">SELECT</span> actor_id, @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt</span><br><span class="line"><span class="keyword">FROM</span> sakila.actor</span><br><span class="line"><span class="keyword">WHERE</span> (@<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span>) &lt;= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using index</span></span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">| actor_id | cnt  |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line">|       58 |    1 |</span><br><span class="line">+<span class="comment">----------+------+</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> @<span class="keyword">rownum</span>:=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id,first_name, </span><br><span class="line">    @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt <span class="keyword">FROM</span> sakila.actor <span class="keyword">WHERE</span> (@<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> + <span class="number">1</span>) &lt;= <span class="number">1</span> </span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> first_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using filesort</span></span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">| actor_id | first_name | cnt  |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">|        1 | PENELOPE   |  200 |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这个语句的执行顺序貌似是 where -&gt; order by -&gt;select</span></span><br><span class="line"><span class="comment">-- @rownum &lt;= 2 会返回三条</span></span><br><span class="line"><span class="comment">-- 子句中表达式的执行可能和子句的执行顺序不一致？</span></span><br><span class="line"><span class="keyword">SET</span> @<span class="keyword">rownum</span> := <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> actor_id,first_name, </span><br><span class="line">    @<span class="keyword">rownum</span> <span class="keyword">AS</span> cnt <span class="keyword">FROM</span> sakila.actor <span class="keyword">WHERE</span> @<span class="keyword">rownum</span> &lt;= <span class="number">1</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> first_name, <span class="keyword">least</span>(<span class="number">0</span>, @<span class="keyword">rownum</span> := @<span class="keyword">rownum</span> +<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Using where; Using temporary; Using filesort</span></span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">| actor_id | first_name | cnt  |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br><span class="line">|        2 | NICK       |    2 |</span><br><span class="line">|        1 | PENELOPE   |    1 |</span><br><span class="line">+<span class="comment">----------+------------+------+</span></span><br></pre></td></tr></table></figure>
+<h4 id="order-by-问题留待讨论"><a class="markdownIt-Anchor" href="#order-by-问题留待讨论"></a> order by 问题留待讨论</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 想法是，当没有 order by 子句时迭代式执行</span></span><br><span class="line"><span class="keyword">for</span> row in table&#123;</span><br><span class="line">    where()</span><br><span class="line">    select()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当有 order by 语句时</span></span><br><span class="line"><span class="keyword">for</span> row in table&#123;</span><br><span class="line">    where()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> row in filtered&#123;</span><br><span class="line">    select()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">order_by()</span><br></pre></td></tr></table></figure>
+<p><img src="https://i.loli.net/2020/02/16/kAuNf25xScyZL9e.png" alt="MySQL - SQL 语句执行顺序" /></p>
+<ul>
+<li>lazy UNION</li>
+</ul>
+<p>当<code>user</code>表找不到数据时，才查询 <code>user_archived</code></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">GREATEST</span>(@<span class="keyword">found</span> := <span class="number">-1</span>, <span class="keyword">id</span>) <span class="keyword">AS</span> <span class="keyword">id</span>, <span class="string">'user'</span> <span class="keyword">AS</span> which_tbl</span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="keyword">id</span>, <span class="string">'user_archived'</span></span><br><span class="line">    <span class="keyword">FROM</span> user_archived <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1</span> <span class="keyword">AND</span> @<span class="keyword">found</span> <span class="keyword">IS</span> <span class="literal">NULL</span></span><br><span class="line"><span class="keyword">UNION</span> <span class="keyword">ALL</span></span><br><span class="line">    <span class="keyword">SELECT</span> <span class="number">1</span>, <span class="string">'reset'</span> <span class="keyword">FROM</span> DUAL <span class="keyword">WHERE</span> (@<span class="keyword">found</span> := <span class="literal">NULL</span>) <span class="keyword">IS</span> <span class="keyword">NOT</span> <span class="literal">NULL</span></span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h3>
+<p>优化需要三管齐下：不做、少做、快速地做。</p>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>创建高性能的索引</title>
+    <url>/2020/02/high-perf-mysql05-md/</url>
+    <content><![CDATA[<h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
+<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
+<p><strong>B 树索引</strong></p>
+<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
+<p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
+<p>B 树适用于全键值、键值范围或键前缀查找：</p>
+<ul>
+<li>全值匹配：和索引中的所有列进行匹配</li>
+<li>匹配最左前缀：只使用索引的第一列</li>
+<li>匹配列前缀：只匹配某一列的开头部分</li>
+<li>匹配范围值：匹配值处于某个区间</li>
+<li>精确匹配某一列并范围匹配另一列</li>
+<li>只访问索引的查询</li>
+</ul>
+<p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
+<p>B 树索引的限制：</p>
+<ul>
+<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
+<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
+<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
+</ul>
+<a id="more"></a>
+<p><strong>哈希索引</strong></p>
+<p>hash index 只有在精确匹配索引所有列的时候才有效。对于一行数据，存储引擎对所有<em>索引列</em>计算一个 hash code。</p>
+<p>MySQL 中只有 Memory 引擎显式支持哈希索引。此外其还支持非唯一哈希索引，哈希值相同是，索引会以链表的形式存放多个记录指针到同一个哈希条目中。</p>
+<p>哈希索引无法用于排序，不支持部分列匹配。</p>
+<p>InnoDB 引擎支持“自适应哈希索引（adaptive hash index）”，当 InnoDB 注意到某些索引值被使用得相对平凡是，它会在 B 树索引之上再创建一个哈希索引。这是一个内部行为，用户无法控制或配置。</p>
+<p>可以维护一个 hash 列，查询时手动指定使用 hash 函数，实现类似哈希索引的效果。</p>
+<p><strong>空间数据索引（R-Tree）</strong></p>
+<p>MyISAM 支持空间索引，可以用作地理数据存储，用所有维度来索引数据，必须使用 GIS 相关函数<code>MBRCONTAINS()</code>等来维护数据，但并不完善。PostgreSQL 中的 PostGIS 较好。</p>
+<p><strong>全文索引</strong></p>
+<p>详见第 7 章</p>
+<h2 id="索引的优点"><a class="markdownIt-Anchor" href="#索引的优点"></a> 索引的优点</h2>
+<p>三大优点：</p>
+<ol>
+<li>减少服务器需要扫描的数据量</li>
+<li>帮助服务器避免排序和临时表</li>
+<li>将随机 IO 变为顺序 IO</li>
+</ol>
+<h2 id="高性能的索引策略"><a class="markdownIt-Anchor" href="#高性能的索引策略"></a> 高性能的索引策略</h2>
+<h3 id="独立的列"><a class="markdownIt-Anchor" href="#独立的列"></a> 独立的列</h3>
+<p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
+<h3 id="前缀索引和索引选择性"><a class="markdownIt-Anchor" href="#前缀索引和索引选择性"></a> 前缀索引和索引选择性</h3>
+<p>索引很长的字符列会让索引变得大且慢，一个策略是模拟 hash 索引。</p>
+<p>此外还可以只索引开头的部分字符，节约索引空间，提升效率，但会降低索引的选择性。<strong>索引的选择性</strong>是指，不重复的索引值（基数，cardinality）和记录总数的比值。</p>
+<p>为了确定前缀的合适长度，需要将常见值和常见的前缀进行比较。</p>
+<p>方法一：定性比较</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, city <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改前缀长度，寻找合适长度</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, <span class="keyword">LEFT</span>(city, <span class="number">3</span>) <span class="keyword">AS</span> pref <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>方法二：计算选择度，定量比较</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> city)/<span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> city_demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">3</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel3,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">4</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel4,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">5</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel5,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">6</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel6</span><br><span class="line"><span class="keyword">FROM</span> city_demo;</span><br></pre></td></tr></table></figure>
+<p>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
+<p><strong>创建前缀索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> city_demo <span class="keyword">ADD</span> <span class="keyword">KEY</span> (city(<span class="number">7</span>));</span><br></pre></td></tr></table></figure>
+<p>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
+<p>一个常见场景是针对很长的十六进制唯一 ID 使用前缀索引。</p>
+<p>后缀索引（suffix index）也有用途，例如查找某个域名的邮箱地址。MySQL 原生并不支持，但可以把字符串反转后存储，创建前缀索引。通过触发器来维护。</p>
+<h3 id="多列索引"><a class="markdownIt-Anchor" href="#多列索引"></a> 多列索引</h3>
+<p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x 引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR 条件的联合，AND 条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
+<p>出现索引合并意味着索引建得比较糟糕：</p>
+<ul>
+<li>当出现多个索引相交（多个 AND），通常需要创建一个包含多个列的索引</li>
+<li>当出现联合操作（多个 OR 条件），通常需要耗费大量 CPU 和内存用于缓存、排序和合并</li>
+<li>更重要的是，优化器不会吧这些计算到查询成本中，优化器只关心随机页面读取。有时运行这样查询不如直接全表扫描。可通过<code>optimizer_switch</code>关闭索引合并，也可以使用<code>IGNORE INDEX</code>提示让优化器忽略有些索引。</li>
+</ul>
+<h3 id="选择合适的索引顺序"><a class="markdownIt-Anchor" href="#选择合适的索引顺序"></a> 选择合适的索引顺序</h3>
+<p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
+<p>当不想需要考虑排序和分组时，将选择性最高的列放在前面通常是最好的。</p>
+<h3 id="聚簇索引"><a class="markdownIt-Anchor" href="#聚簇索引"></a> 聚簇索引</h3>
+<p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB 的聚簇索引在同一个结构中保存了 B-Tree 索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
+<p>InnoDB 默认通过主键聚集数据，没有主键会选择一个唯一的非空索引代替，如果没有这样 的索引，InnoDB 会隐式定义一个主键作为聚簇索引。</p>
+<p>聚簇索引的优点：</p>
+<ul>
+<li>相关数据共同存储，减少随机 IO</li>
+<li>数据访问更快</li>
+<li>使用覆盖索引扫描的查询可以直接使用页节点中的主键值  ——<em>不太理解</em></li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>数据存放在内存中时没有优势</li>
+<li>插入顺序，如果不是按照主键顺序插入数据，那么在数据插入完成后最好使用 OPTIMIZE TABLE 命令重新组织一下表</li>
+<li>更新聚簇索引列的代价很高，因为会强制将每个被更新的行移动到新的位置</li>
+<li>基于聚簇索引的表在插入行或更新主键时，可能面临“页分裂（page split）”问题。当行的主键值要求不许将这一行插入到某个已满的页中是，存储引擎会将该页分裂成两个页面来容纳该行（两个页可能隔得很远），页分裂会导致表占用更多磁盘空间</li>
+<li>聚簇索引可能导致全表扫面变慢，尤其是行比较稀疏，或者因为页分裂导致数据存储不连续的时候</li>
+<li><strong>二级索引访问需要两次索引查找</strong>：二级索引的叶节点不存储地址而是存储行的主键，通过二级索引查找行，需要先在二级索引的叶节点中找到对应的主键值，然后根据主键值在聚簇索引中找到对应的行。</li>
+</ul>
+<p><strong>InnoDB 和 MyISAM 的数据分布对比</strong></p>
+<p><strong>MyISAM</strong>：按照数据插入的顺序存储在磁盘上。索引的叶节点存储数据的物理地址，主键索引和其他索引没有什么不同</p>
+<p><strong>InnoDB</strong>：在 InnoDB 中聚簇索引就是表，不需要独立的行存储，聚簇索引的每个叶节点都包含了主键值、事务 ID、回滚指针以及剩余的列。如果使用主键的列前缀索引，InnoDB 也会包含完整的主键列。</p>
+<p>二级索引中叶节点存储的不是“行指针”，而是主键值，这样的策略减少了行移动或数据页分裂时二级索引的维护工作，但当主键值较长时会让二级索引占用更多的空间。</p>
+<p><strong>在 InnoDB 表中按主键顺序插入行</strong></p>
+<p>如果表中没有什么数据需要聚集，可以定义一个代理键（surrogate key）作为主键，最简单的就是自增列，可以保证数据行顺序写入。</p>
+<p>最好避免随机的（不连续且范围很大）聚簇索引，特别是对于 IO 密集型的应用。从这个角度，使用 UUID 作为聚簇索引很糟糕，插入的花费时间更长，索引占用的空间更大。</p>
+<p>顺序主键什么时候会造成坏的结果？<br />
+对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
+<h3 id="覆盖索引"><a class="markdownIt-Anchor" href="#覆盖索引"></a> 覆盖索引</h3>
+<p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
+<ul>
+<li>索引条目通常远小于数据行大小，只读取索引会极大减小数据访问量。</li>
+<li>索引按照列值顺序存储，范围查询有优势</li>
+<li>一些存储引擎如 MyISAM 在内存中只缓存索引，数据则依赖于操作系统缓存，只扫描索引减少系统调用。</li>
+<li>对于聚簇索引，如果二级索引能够实现覆盖查询，可以避免对主键索引的二级查询。</li>
+</ul>
+<p>MySQL 只能使用 B 树索引做覆盖索引（其他索引类型不存储索引列的值）。</p>
+<p>如果索引覆盖了 WHERE 条件的字段，但不是整个查询涉及的字段，MySQL 5.5 及更早版本会回表获取数据行。可以通过延迟关联（deferred join）进行优化，对能覆盖索引的字段进行子查询，得到主键后在外层查询获取所有列值。</p>
+<h3 id="使用索引扫描来做排序"><a class="markdownIt-Anchor" href="#使用索引扫描来做排序"></a> 使用索引扫描来做排序</h3>
+<p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
+<p>只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且各列的排序方向都一样时，MySQL 才能使用索引的结果做排序。需要关联多张表时，只有 ORDER BY 子句的字段全部属于第一张表时才能使用索引做排序。通常 ORDER BY 子句要满足最左前缀要求，除非前导列限定为常数。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> RENTAL_ID, STAFF_ID <span class="keyword">FROM</span> RENTAL </span><br><span class="line"><span class="keyword">WHERE</span> RENTAL_DATA = <span class="string">'2005-05-25'</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> INVENTORY_ID, CUSTIMER_ID</span><br></pre></td></tr></table></figure>
+<p>如上查询中能够利用建立在<code>（RENTAL_DATA，INVENTORY_ID，CUSTIMER_ID）</code>上的索引。</p>
+<h3 id="压缩索引"><a class="markdownIt-Anchor" href="#压缩索引"></a> 压缩索引</h3>
+<p>MyISAM 使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
+<h3 id="冗余和重复索引"><a class="markdownIt-Anchor" href="#冗余和重复索引"></a> 冗余和重复索引</h3>
+<p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
+<p>唯一限制和主键限制都是通过索引实现的，三个都创建相当于在主键列上创建了三个相同的索引。</p>
+<p>如果创建了索引（A，B），再创建索引（A）就是冗余索引，因为这只是前一个索引的前缀索引。索引（A，B）可以当作索引（A）使用（对于 B 树）。还有一个情况是将一个索引扩展为（A，ID），因为主键列 ID 已经包含在二级索引中了，因此这种扩展也是冗余的。</p>
+<h3 id="索引和锁"><a class="markdownIt-Anchor" href="#索引和锁"></a> 索引和锁</h3>
+<h2 id="索引案例学习"><a class="markdownIt-Anchor" href="#索引案例学习"></a> 索引案例学习</h2>
+<h3 id="多种条件过滤"><a class="markdownIt-Anchor" href="#多种条件过滤"></a> 多种条件过滤</h3>
+<p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
+<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
+<h3 id="避免多个范围条件"><a class="markdownIt-Anchor" href="#避免多个范围条件"></a> 避免多个范围条件</h3>
+<p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
+<h3 id="优化排序"><a class="markdownIt-Anchor" href="#优化排序"></a> 优化排序</h3>
+<p>对于分页查询</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+<p>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="维护索引和表"><a class="markdownIt-Anchor" href="#维护索引和表"></a> 维护索引和表</h2>
+<p>维护表的三个目的：</p>
+<ul>
+<li>找到并修复损坏的表</li>
+<li>维护准确的索引统计信息</li>
+<li>减少碎片</li>
+</ul>
+<h3 id="找到并修复损坏的表"><a class="markdownIt-Anchor" href="#找到并修复损坏的表"></a> 找到并修复损坏的表</h3>
+<p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
+<p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
+<p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
+<p>MyISAM 的表损坏（corruption）通常是系统崩溃导致的。InnoDB 一般不会出现损坏，如果发生损坏，可能是</p>
+<ul>
+<li>硬件问题，如内存或磁盘故障（有可能）</li>
+<li>数据库管理员的错误操作，如在 MySQL 外部直接操作数据文件（有可能）</li>
+<li>InnoDB 本身缺陷（不太可能）</li>
+</ul>
+<p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
+<h3 id="更新索引统计信息"><a class="markdownIt-Anchor" href="#更新索引统计信息"></a> 更新索引统计信息</h3>
+<p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
+<ul>
+<li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM 返回精确值，InnoDB 返回估算值。</li>
+<li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
+</ul>
+<p>可以通过<code>ANALYZE TABLE</code>来生成统计信息。如果存储引擎提供的扫描行数是不准确的，或者执行计划本身太复杂无法准确获取各个阶段的行数，优化器会使用索引统计信息来估算扫描行数。</p>
+<p>每种存储引擎实现索引统计信息的方式不同：</p>
+<ul>
+<li>Mymory 引擎不存储索引统计信息</li>
+<li>MyISAM 将索引统计信息存储在磁盘中，ANALYZE TABLE 需要全索引扫描计算索引基数，此过程中需要锁表</li>
+<li>InnoDB 不再磁盘中存储索引统计信息，通过随机的索引访问进行评估将其存储在内存中。</li>
+</ul>
+<p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics 表</code>获取。</p>
+<p>InnoDB 会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过 1/16 或插入 20 亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
+<p>InnoDB 打开某些<code>information_schema</code>表，使用 SHOW TABLE STATUS 或 SHOW INDEX，或 MySQL 客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
+<h3 id="减少索引和数据碎片"><a class="markdownIt-Anchor" href="#减少索引和数据碎片"></a> 减少索引和数据碎片</h3>
+<p>B 树索引会碎片化，造成查询效率降低。</p>
+<p>表的数据存储碎片化有三种类型：</p>
+<ul>
+<li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
+<li>行间碎片（Intra-row fragmentation）：逻辑上顺序的页，在磁盘上不是顺序存储的。对全表扫描和聚簇索引扫描之类的操作影响很大</li>
+<li>剩余空间碎片（Free space fragmentation）：数据页中有大量空余空间，读取数据时读取大量不需要的数据，造成浪费</li>
+</ul>
+<p>MyISAM 中三种都可能发生，InnoDB 中不会出现行碎片。</p>
+<p>解决方式</p>
+<ol>
+<li>OPTIMIZE TABLE 或 导入再导出</li>
+<li>MyISAM 可通过排序算法重建索引</li>
+<li>InnoDB 可先删除索引再重新创建</li>
+<li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
+</ol>
+<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
+<p>三个原则：</p>
+<ol>
+<li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
+<li>顺序访问数据很快：顺序 IO 不需要磁盘寻道，对于排序的查询也更快</li>
+<li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
+</ol>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Schema 与数据类型优化</title>
+    <url>/2020/02/high-perf-mysql04-md/</url>
+    <content><![CDATA[<h2 id="选择优化的数据类型"><a class="markdownIt-Anchor" href="#选择优化的数据类型"></a> 选择优化的数据类型</h2>
+<p>选择数据类型的原则</p>
+<ul>
+<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
+<li>简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符串低。</li>
+<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。</li>
+</ul>
+<a id="more"></a>
+<h3 id="整数类型"><a class="markdownIt-Anchor" href="#整数类型"></a> 整数类型</h3>
+<p>整数计算一般使用 64 位的<strong>BIGINT</strong>类型。</p>
+<p>MySQL 可以为整数类型制定宽度，例如<code>INT(11)</code>，但对于大多数应用没有意义，不会限制值的合法范围，只是规定了交互工具用来显示字符的个数。</p>
+<h3 id="实数类型"><a class="markdownIt-Anchor" href="#实数类型"></a> 实数类型</h3>
+<p>FLOAT 和 DOUBLE 类型支持标准的浮点运算进行近似计算。</p>
+<p>DECIMAL 类型用于存储精确的小数。在<code>MySQL 5.0</code>以上，MySQL 服务器自身实现了 DECIMAL 的高精度计算，相较原生浮点计算明显更慢。</p>
+<p>DECIMAL 类型可以指定小数点前后的最大位数，如<code>DECIMAL(18,9)</code>小数点两边各存储 9 个数字，以二进制字符串的形式存储，每 4 个字节存储 9 个数字，小数点本身占一个字节，共计 9 个字节。</p>
+<p>需要精确计算时，也可以考虑使用 BIGINT 代替 DECIMAL，根据需要的精度乘以响应的倍数即可。如存储财务数据要求精确到万分之一分，则可以把所以金额乘以一百万，以整形存储。</p>
+<h3 id="字符串类型"><a class="markdownIt-Anchor" href="#字符串类型"></a> 字符串类型</h3>
+<p>从 4.1 开始每个字符串列可以定义自己的字符集和排序规则。</p>
+<p>VARCHAR 需要使用 1 或 2 个额外字节记录字符串的长度：如果列长度小于等于 255 用 1 个，否则用 2 个。VARCHAR 节省空间但是在更新时需要许多额外工作。适合使用的情况：最大长度比平均长度大很多；列很少更新；使用 UTF-8 这种每个字符字节数不同的字符集。</p>
+<p>**5.0 以上版本 VARCHAR 保留末尾空格，CHAR 会删除所有空格。**字符串长度定义不是字节数，是字符数。</p>
+<p>BINARY 和 VARBIANRY 存储二进制字符串，比较时更快。</p>
+<blockquote>
+<p>使用<code>VARCHAR(5)</code>和<code>VARCHAR(200)</code>存储 ‘hello’ 的空间开销是一样的，但 MySQL 会分配固定大小的内存块来保存内部值，尤其是使用内存临时表进行排序等操作。所以最好的策略是分配真正需要的空间。</p>
+</blockquote>
+<p>BLOB 和 TEXT 分别使用二进制和字符串方式存储大数据。BLOB 没有排序规则和字符集，而 TEXT 类型有。</p>
+<p>对于 BLOB 和 TEXT，MySQL 只对每列的前<code>max_sort_length</code>字节而不是整个串进行排序。来着两种类型不能对全部长度进行索引也不能使用索引消除排序。</p>
+<blockquote>
+<p>Memory 引擎不支持 BLOB 和 TEXT，如果查询中使用这两种类型的列并且需要使用隐式临时表，将使用 MyISAM 磁盘临时表，开销很大。应尽量避免使用这两种类型，实在无法避免可以在用到该字段时使用<code>SUBSTRING(column, length)</code>将列值转换为字符串。</p>
+</blockquote>
+<p>ENUM（枚举）类型有利有弊不太常用。</p>
+<h3 id="日期和时间"><a class="markdownIt-Anchor" href="#日期和时间"></a> 日期和时间</h3>
+<p>MySQL 中时间格式精度为秒（MariaDB 支持微秒级别的时间类型）。</p>
+<ul>
+<li>DATETIME 使用 8 字节存储，存储范围大（1001~9999），与时区无关</li>
+<li>TIMESTAMP 使用 4 字节存储，存储范围小（1970~2038），与时区相关</li>
+</ul>
+<p>通常使用 TIMESTAMP 类型，效率更高。</p>
+<h3 id="位数据类型"><a class="markdownIt-Anchor" href="#位数据类型"></a> 位数据类型</h3>
+<p>不太常用</p>
+<h3 id="选择标识符"><a class="markdownIt-Anchor" href="#选择标识符"></a> 选择标识符</h3>
+<p>选择标识列（identifier column）类型时，不仅要考虑存储类型还要考虑如何进行计算和比较，一旦选定了一种类型，还要确保所有关联表中使用同样的类型，类型之间需要精确匹配（包括 UNSIGNED 这样的属性）</p>
+<p>整数通常是 ID 列最好的选择。</p>
+<p>使用 MD5(),SHA1(),UUID() 产生的字符串的值会随机分布在很大的空间中，导致 INSERT 和一些 SELECT 语句变得很慢：</p>
+<ul>
+<li>插入值随机写到索引的不同位置，导致页分裂，磁盘随机访问等，详见第五章</li>
+<li>逻辑上相邻的行会分布在磁盘和内存的不同地方</li>
+<li>随机值使得缓存赖以工作的<code>访问局部性原理</code>失效。</li>
+</ul>
+<p>存储 UUID 值应该异出“-”符号；最好使用 UNHEX() 函数将 UUID 值转换为 16 字节的数字，存储在 BINARY(16) 列中。检索时可以通过 HEX() 函数格式化成十六进制格式。</p>
+<h3 id="特殊类型数据"><a class="markdownIt-Anchor" href="#特殊类型数据"></a> 特殊类型数据</h3>
+<p>IP 的本质是 32 位无符号整数，分成四段只是为了方便人进行阅读。MySQL 使用 INET_ATON() 和 INET_NTOA() 函数在两种表示方法之间转换。</p>
+<h2 id="mysql-schema-设计中的陷阱"><a class="markdownIt-Anchor" href="#mysql-schema-设计中的陷阱"></a> MySQL schema 设计中的陷阱</h2>
+<ul>
+<li>太多的列<br />
+MySQL 的存储引擎 API 需要在服务器曾和存储引擎层之间通过行缓冲格式拷贝数据，然后在服务器层将换缓冲内容解码成各个列。从行缓冲将编码过的列转换成行数据结构的操作代价很高。转换的代价依赖于列的数量。</li>
+<li>太多的关联<br />
+如果希望查询执行得快速且并发行好，单个查询最好在 12 个表以内做关联</li>
+<li>防止过度使用枚举</li>
+</ul>
+<h2 id="范式和反范式"><a class="markdownIt-Anchor" href="#范式和反范式"></a> 范式和反范式</h2>
+<h3 id="范式的优点和缺点"><a class="markdownIt-Anchor" href="#范式的优点和缺点"></a> 范式的优点和缺点</h3>
+<ul>
+<li>范式化的更新操作通常更快，只需修改更少的数据</li>
+<li>范式化的表通常更小，可以更好地放在内存中，执行操作更快</li>
+<li>减少 DISTINCT 或者 GROUP BY 语句的使用</li>
+</ul>
+<p>范式化设计的缺点是需要更多关联操作。范式化可能将列存放在不同的表中，而这些列如果在一个表中可以属于同一个索引。</p>
+<h3 id="反范式的有点和缺点"><a class="markdownIt-Anchor" href="#反范式的有点和缺点"></a> 反范式的有点和缺点</h3>
+<p>反范式可以避免关联，当数据比内存大是比关联要快得多，因为这样避免了随机 IO。</p>
+<p>假设想要查询付费用户最近的 10 条信息，涉及<code>user_name, account_type, message_text, message_published_time</code>等字段。使用范式化设计，字段存放在两个表格中，使用 user_id 进行关联。使用反范式化组织数据，并增加一个索引（account_type, published），就可以不通过关联进行高效查询。</p>
+<h3 id="混用范式化和反范式化"><a class="markdownIt-Anchor" href="#混用范式化和反范式化"></a> 混用范式化和反范式化</h3>
+<p>现实中往往混合使用，平衡时间和空间开销</p>
+<h2 id="缓存表和汇总表"><a class="markdownIt-Anchor" href="#缓存表和汇总表"></a> 缓存表和汇总表</h2>
+<p>有时提升性能的最好方法是在同一张表中保存衍生的冗余数据，又是也需要创建一张独立的汇总表或缓存表。</p>
+<p>汇总表：如统计过去 24 小时发送的消息数，可以创建<code>msg_per_hr</code>来存储每个小时的发帖数，从中查出完成的 23 小时的发帖数，在从原始表中查出头尾不完整的数量，相加得到。<br />
+事事计算统计值是很昂贵的操作，要么扫描表中的大部分数据，要么查询语句只能在某些特定的索引上生效，而这类特定索引一般会对 UPDATE 操作造成影响。</p>
+<p>缓存表：有时可能需要很多不同的索引组合来加速各种类型的查询。这些矛盾的需求可以通过创建一张包含部分列的缓存表解决。对缓存表使用不同的存储引擎可获得更高的效率，如主表使用 InnoDB，用 MyISAM 作为缓存表的引擎得到更小的索引占用空间，并且可以全文搜索。Elastic Search 等也可以看成是缓存表。</p>
+<h3 id="物化视图"><a class="markdownIt-Anchor" href="#物化视图"></a> 物化视图</h3>
+<p>物化视图实际上是预先计算并存储在硬盘上的表，可以通过各种策略进行刷新和更新。MySQL 并不原声支持物化视图，使用 Flexviews 可以自己实现。</p>
+<h3 id="计数器表"><a class="markdownIt-Anchor" href="#计数器表"></a> 计数器表</h3>
+<p>假设需要记录网站的点击次数，可使用 1 行记录，每次点击对改行进行更新，但写锁使得更新操作只能顺序执行。要获取更高的并发更新性能，可以将计数器保存在多行中，每次随机选择一行进行更新。</p>
+<p><code>ON DUPLICATE KEY UPDATE</code>可在主键已经存在时进行更新。</p>
+<h2 id="加快-alter-table-操作的速度"><a class="markdownIt-Anchor" href="#加快-alter-table-操作的速度"></a> 加快 ALTER TABLE 操作的速度</h2>
+<p>ALTER TABLE 是一个很费事的操作，对于常见的场景能使用的技巧：一种是离线修改后进行主库的切换；另一种是，创建新表，拷贝数据后修改表名。</p>
+<p>对于一些特殊的场景，可以只通过修改表的元数据加快操作。</p>
+<h3 id="只修改-frm-文件"><a class="markdownIt-Anchor" href="#只修改-frm-文件"></a> 只修改 .frm 文件</h3>
+<p>不需要重建表的操作：</p>
+<ul>
+<li>移除一个列的 AUTO_INCREMENT</li>
+<li>增加、移除或修改 ENUM 和 SET 常量</li>
+</ul>
+<p>操作过程：</p>
+<ol>
+<li>创建一张有相同结构的表，并进行所需要的操作</li>
+<li>执行 <code>FLUSH TABLES WITH READ LOCK</code>，关闭所有正在使用的表</li>
+<li>交换<code>.frm 文件</code></li>
+<li>执行<code>UNLOCK TABLES</code>释放锁</li>
+</ol>
+<h3 id="快速创建-myisam-索引"><a class="markdownIt-Anchor" href="#快速创建-myisam-索引"></a> 快速创建 MyISAM 索引</h3>
+<p>MyISAM 中的<code>唯一索引</code>无法通过禁用索引、载入数据、重启索引的方式导入大量数据，也可以通过直接修改元文件的方式操作</p>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL 架构和历史</title>
+    <url>/2020/02/high-perf-mysql01-md/</url>
+    <content><![CDATA[<h2 id="逻辑架构"><a class="markdownIt-Anchor" href="#逻辑架构"></a> 逻辑架构</h2>
+<p>三层架构：</p>
+<ul>
+<li>连接与线程处理</li>
+</ul>
+<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br />
+注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
+<ul>
+<li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
+</ul>
+<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br />
+Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
+<ul>
+<li>存储引擎</li>
+</ul>
+<a id="more"></a>
+<h2 id="并发控制"><a class="markdownIt-Anchor" href="#并发控制"></a> 并发控制</h2>
+<p>两种类型的锁：</p>
+<ul>
+<li>共享锁（shared lock）/ 读锁（read lock）</li>
+<li>排他锁（exclusive lock）/ 写锁（write lock）</li>
+</ul>
+<p>粒度</p>
+<ul>
+<li>
+<p>表锁<br />
+存储引擎可以管理自己的锁，MySQL 本身还是会使用各种表锁来实现不同的目的。如，服务器会对<code>ALTER TABLE</code>之类的语句使用<em>表锁</em>，而忽略存储引擎的锁机制。</p>
+</li>
+<li>
+<p>行级锁<br />
+行级锁只在存储引擎层实现（如 InnoDB 和 XtraDB），服务器层面没有实现。</p>
+</li>
+</ul>
+<h2 id="事务"><a class="markdownIt-Anchor" href="#事务"></a> 事务</h2>
+<p><strong>ACID</strong></p>
+<ul>
+<li>原子性（atomicity）</li>
+<li>一致性（consistency）</li>
+<li>隔离性（isolation）</li>
+<li>持久性（durability）</li>
+</ul>
+<p>支持事务必然会来带开销，对于一些不需要事务的查询类应用就可以选择飞事务型的存储引擎，获取更高的性能。通过<code>LOCK TABLES</code>语句同样可以为应用提供一定的保护。</p>
+<p><strong>四种隔离级别</strong></p>
+<ul>
+<li>READ UNCIMMITTED（未提交读）：造成 dirty read，实际很少使用</li>
+<li>READ COMMITTED（提交读）：不可重复读 nonrepeatable read</li>
+<li>REPEATABLE READ：依然会有幻读（Phantom Read） 的问题，进一步通过多版本并发控制（Multi version Concurrency Control，MVCC）解决。是 MySQL 的默认隔离级别。</li>
+<li>SERIALIZABLE：在读取的每一行上都加上锁，可能导致大量的超时和锁争用，实际很少使用。</li>
+</ul>
+<p><strong>事务日志</strong><br />
+使用事务日志，修改数据表式可以先在内存中修改，并把操作行为记录到硬盘上的事务日志，事务日志采用追加方式，写日志操作相对写数据要快。事务日志持久化后，内存中被修改的数据可以在后台慢慢刷回到硬盘。（预写式日志 Write-Adead Logging）</p>
+<p><strong>MySQL 中的事务</strong></p>
+<ul>
+<li>默认自动提交，可通过<code>SET AUTOCOMMIT = 0</code>禁用</li>
+<li>在同一个事务中使用多种存储引擎是不可靠的</li>
+<li>除了自动加的隐式锁，还可以使用特定语句进行显式锁定,如下语句（ORACLE 里也有）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT ... FOR UPDATE</span><br></pre></td></tr></table></figure>
+<h2 id="多版本并发控制"><a class="markdownIt-Anchor" href="#多版本并发控制"></a> 多版本并发控制</h2>
+<p>MVCC 没有统一的实现标准，有多种实现机制。MVCC 可以看成是行级锁的一个变种，但它在很多情况下避免了加锁操作，开销更低。读操作非阻塞，写操作锁定必要的行。</p>
+<p>典型的有<code>乐观锁</code>和<code>悲观锁</code></p>
+<p>InnoDB 的 MVCC 通过两个隐藏的列实现：行创建时间、行过期时间。存储的不是时间值而是系统版本号（system version number）。详见相关章节。</p>
+<h2 id="存储引擎"><a class="markdownIt-Anchor" href="#存储引擎"></a> 存储引擎</h2>
+<p>MySQL 最初基于<code>ISAM</code>构建，后来被<code>MyISAM</code>取代，如今默认的存储引擎为<code>InnoDB</code>。</p>
+<p>不同的存储引擎各有特点，需要结合实际业务选择使用。多数情况下，使用 InnoDB 综合表现最好。</p>
+<p><strong>应用场景</strong></p>
+<ul>
+<li>日志型应用：使用 MyISAM 或 Archive，开销低，插入速度快。要做分析可以主从备份，读写分离</li>
+</ul>
+<p><strong>切换表的引擎</strong></p>
+<ul>
+<li>ALTER TABLE：执行时间长</li>
+<li>导入导出：mysqldump 导出后修改建表语句导入</li>
+<li>创建与复制：创建新表，复制数据，数据量特别大可以分批处理</li>
+</ul>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常见机器学习算法的优缺点</title>
+    <url>/2019/12/ML_algorithm/</url>
+    <content><![CDATA[<p>想要寻找一个合适的算法不容易，实际应用中，我们一般采用启发式实验。</p>
+<p>没有免费的午餐定理 (NFL)：核心在于，假设了所有问题出现的机会相同，或所有问题同等重要。当需求是解决一切问题时，“哪个算法更好”就毫无意义。HG2G 中“深思”面对“宇宙、生命以及一切的中继答案是什么？”这样一个问题，用最复杂的算法算出一个 42 和随便说一个 42 是一样的。</p>
+<h2 id="偏差与方差"><a class="markdownIt-Anchor" href="#偏差与方差"></a> 偏差与方差</h2>
+<ul>
+<li>偏差：描述的是估计值的期望 E 与真实值 Y 之间的差距。偏差越大，越偏离真实数据。</li>
+<li>方差：描述的是预测值的离散程度，方差越大，数据分布约分散。</li>
+<li>模型的真实误差可以看成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>i</mi><mi>a</mi><msup><mi>s</mi><mn>2</mn></msup><mo>+</mo><mi>v</mi><mi>a</mi><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">bias^2 + var + \sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.897438em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">a</span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> 是噪音</li>
+</ul>
+<p>偏差与方差窘境：</p>
+<ul>
+<li>学得不好，偏差大</li>
+<li>学得好，敏感性高，方差大。</li>
+</ul>
+<a id="more"></a>
+<p>通常情况下</p>
+<ul>
+<li>小训练集，高偏差/低方差的分类器（例如，朴素贝叶斯 NB）要比低偏差/高方差大分类的优势大（例如，KNN），因为后者会发生过拟合（overfitting）。</li>
+<li>随着训练集增长，此时低偏差/高方差的分类器在训练集上性能变好，偏差降低，就会渐渐的表现其优势（因为它们有较低的渐近误差），而高偏差分类器的偏差难以下降。</li>
+</ul>
+<p>特征选择：最小冗余/最大相关（<em>Minimum Redundancy Maximum Relevance</em>， mRMR）</p>
+<h2 id="常见算法的优缺点"><a class="markdownIt-Anchor" href="#常见算法的优缺点"></a> 常见算法的优缺点</h2>
+<h3 id="朴素贝叶斯-naive-bayes-classifier"><a class="markdownIt-Anchor" href="#朴素贝叶斯-naive-bayes-classifier"></a> 朴素贝叶斯 Naive Bayes classifier</h3>
+<p>朴素贝叶斯假设数据之间是无关的，严重简化了模型。对于这样一个简单没顶，大部分时候表现出高偏差，低方差。</p>
+<p>属于生成式模型，收敛速度快于判别式模型</p>
+<p>优点：</p>
+<ul>
+<li>有坚实的数学理论基础，易解释，分类效率稳定，计算速度快</li>
+<li>小规模数据表现好，能处理多分类任务，适合增量式训练</li>
+<li>对缺失数据不敏感，常用于文本分类</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>需要计算先验概率</li>
+<li>使用了“属性条件独立性假设”，当属性之间有关联时效果较差</li>
+<li>对输入数据的表达形式敏感</li>
+</ul>
+<p>应用领域：</p>
+<ul>
+<li>欺诈检测</li>
+<li>文本分类</li>
+<li>人脸识别</li>
+</ul>
+<h3 id="逻辑回归-logistic-regression"><a class="markdownIt-Anchor" href="#逻辑回归-logistic-regression"></a> 逻辑回归 Logistic Regression</h3>
+<p>属于判别式模型，常和很多模型正则化方法（L0<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>，L1，L2）。能使用在线梯度下降法更新模型。</p>
+<p>优点：</p>
+<ul>
+<li>实现简单，计算量小</li>
+<li>有概率解释</li>
+<li>能通过 L2 正则化解决多重共线性问题</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>特征空间很大时，性能不好</li>
+<li>容易欠拟合，一般准确性不高</li>
+<li>不能很好地处理大量分类特征</li>
+<li>只能处理线性二分类问题（多分类使用 softmax）</li>
+</ul>
+<p>应用领域：</p>
+<ul>
+<li>适用于根据概率排名的应用，如搜索排名</li>
+</ul>
+<h3 id="线性回归"><a class="markdownIt-Anchor" href="#线性回归"></a> 线性回归</h3>
+<p>Normal Equation 优化结果：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mover accent="true"><mi>ω</mi><mo>^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow><annotation encoding="application/x-tex">\hat{\omega} = (X^TX)^{-1}X^Ty
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;">^</span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1413309999999999em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span></span></span></p>
+<p>局部加权线性回归（LWLR）优化结果：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mover accent="true"><mi>ω</mi><mo>^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>y</mi><mspace linebreak="newline"></mspace><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>e</mi><mi>x</mi><mi>p</mi><mrow><mo fence="true">(</mo><mfrac><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>j</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>k</mi><mn>2</mn></msup></mrow></mfrac><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\hat{\omega} = (X^T W X)^{-1} X^T W y  \\
+
+w_{ij} = exp\left(\frac{(x_i - x_j)^2}{2k^2}\right)
+
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;">^</span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1413309999999999em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.716668em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.441138em;vertical-align:-0.95003em;"></span><span class="mord mathdefault">e</span><span class="mord mathdefault">x</span><span class="mord mathdefault">p</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911079999999999em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></p>
+<p>LWLR 是非参数模型，每次进行回归计算都需要遍历训练样本。</p>
+<p>优点：实现简单，计算简单</p>
+<p>缺点：不能拟合非线性关系</p>
+<h3 id="knn"><a class="markdownIt-Anchor" href="#knn"></a> KNN</h3>
+<p>关键在于 K 值的选择，K 值较大能够减少噪声的影响，但会使类别之间的界限变模糊。噪声和非相关性特征向量的存在会使 K 近邻算法的准确性减小。数据密度很大时，KNN 的泛化错误率不会超过贝叶斯最优分类器错误率的两倍。</p>
+<p>优点：</p>
+<ul>
+<li>思路简单，可分类，可回归</li>
+<li>可用于非线性分类</li>
+<li>对数据没有假设，对离群点不敏感</li>
+<li>惰性学习，新增数据无需重新训练</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>样本不平衡时效果差，bias 大</li>
+<li>需要大量内存</li>
+<li>预测时需要全局计算，计算量大</li>
+</ul>
+<p>应用领域：</p>
+<ul>
+<li>文本分类</li>
+<li>模式识别</li>
+<li>多分类</li>
+</ul>
+<h3 id="决策树"><a class="markdownIt-Anchor" href="#决策树"></a> 决策树</h3>
+<p>优点：</p>
+<ul>
+<li>易于解释，可以可视化，容易提取规则</li>
+<li>可以同时处理连续变量和分类变量</li>
+<li>对属性缺失不敏感</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>容易过拟合（通过随机森林减轻）</p>
+</li>
+<li>
+<p><mark>容易忽略数据集中属性的相互关联</mark></p>
+</li>
+<li>
+<p>样本不平衡的情况下，进行属性划分时，不同的判定准则有不同的属性选择倾向；</p>
+<ul>
+<li>信息增益准则对可取数目较多的属性有所偏好（典型代表 ID3 算法）</li>
+<li>增益率准则（CART）则对可取数目较少的属性有所偏好，CART 进行属性划分时候不再简单地直接利用增益率进行划分，而是采用一种启发式规则</li>
+<li>只要是使用了信息增益，都有这个缺点，如 RF</li>
+</ul>
+</li>
+</ul>
+<p>应用领域：</p>
+<ul>
+<li>决策类</li>
+</ul>
+<h3 id="svm"><a class="markdownIt-Anchor" href="#svm"></a> SVM</h3>
+<p>优点：</p>
+<ul>
+<li>可以解决高维问题，即特征空间很大的问题</li>
+<li>小样本下也有不错的表现</li>
+<li>能处理非线性特征的相互作用（利用核函数）</li>
+<li>无局部最小值问题（相对于神经网络）</li>
+<li>不依赖所有数据</li>
+<li>泛化能力强</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>当观测样本很多，效率不高</li>
+<li>对非线性问题没有通用解决方案，很难找到一个合适的核函数</li>
+<li>对核函数的高维映射解释力不强，尤其是高斯核</li>
+<li>对缺失数据敏感</li>
+</ul>
+<p>核函数的选择：libsvm 中自带了四种核函数：线性核、多项式核、RBF 以及 sigmoid 核</p>
+<ul>
+<li>如果样本数量小于特征数，那么就没必要选择非线性核，简单的使用线性核就可以了；</li>
+<li>如果样本数量大于特征数目，这时可以使用非线性核，将样本映射到更高维度，一般可以得到更好的结果；</li>
+<li>如果样本数目和特征数目相等，该情况可以使用非线性核，原理和第二种一样</li>
+</ul>
+<p>应用：</p>
+<ul>
+<li>文本分类</li>
+<li>图像分类</li>
+</ul>
+<h3 id="人工神经网络"><a class="markdownIt-Anchor" href="#人工神经网络"></a> 人工神经网络</h3>
+<p>优点：</p>
+<ul>
+<li>分类的准确度高；</li>
+<li>并行分布处理能力强，分布存储及学习能力强，</li>
+<li>对噪声神经有较强的鲁棒性和容错能力；</li>
+<li>具备联想记忆的功能，能充分逼近复杂的非线性关系</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>神经网络需要大量的参数，如网络拓扑结构、权值和阈值的初始值；</li>
+<li>黑盒过程，不能观察之间的学习过程，输出结果难以解释，会影响到结果的可信度和可接受程度；</li>
+<li>学习时间过长，有可能陷入局部极小值，甚至可能达不到学习的目的。</li>
+</ul>
+<h3 id="k-means-聚类"><a class="markdownIt-Anchor" href="#k-means-聚类"></a> K-Means 聚类</h3>
+<p>优点</p>
+<ul>
+<li>算法简单，容易实现 ，算法速度很快；</li>
+<li>对处理大数据集，该算法是相对可伸缩的和高效率的，因为它的复杂度大约是 O(nkt)，其中 n 是所有对象的数目，k 是簇的数目，t 是迭代的次数。通常 k&lt;&lt;n。这个算法<strong>通常局部收敛</strong>。</li>
+<li>算法尝试找出使平方误差函数值最小的 k 个划分。当簇是密集的、球状或团状的，且簇与簇之间区别明显时，聚类效果较好。</li>
+</ul>
+<p>缺点</p>
+<ul>
+<li>对数据类型要求较高，适合数值型数据；</li>
+<li>可能收敛到局部最小值，在大规模数据上收敛较慢</li>
+<li>分组的数目 k 是一个输入参数，不合适的 k 可能返回较差的结果。</li>
+<li>对初始的簇心值敏感</li>
+<li>不适合于发现非凸面形状的簇，或者大小差别很大的簇</li>
+<li>对于”噪声”和孤立点数据敏感</li>
+</ul>
+<h3 id="em-最大期望算法"><a class="markdownIt-Anchor" href="#em-最大期望算法"></a> EM 最大期望算法</h3>
+<p>EM 算法是基于模型的聚类方法，是在概率模型中寻找参数最大似然估计的算法，其中概率模型依赖于无法观测的隐藏变量。E 步估计隐含变量，M 步估计其他参数，交替将极值推向最大。</p>
+<ul>
+<li>
+<p>EM 算法比 K-means 算法计算复杂，收敛也较慢，不适于大规模数据集和高维数据，</p>
+</li>
+<li>
+<p>比 K-means 算法计算结果稳定、准确。</p>
+</li>
+</ul>
+<p>应用：</p>
+<ul>
+<li>机器学习和计算机视觉的数据集聚（Data Clustering）</li>
+</ul>
+<h3 id="adaboost"><a class="markdownIt-Anchor" href="#adaboost"></a> AdaBoost</h3>
+<p>一种经典的 boosting 算法，每个模型都是基于上一次模型的错误率来建立的，增加错误分类样本的权重，而对正确分类的样本减少关注度，逐次迭代之后，可以得到一个相对较好的模型。</p>
+<p>优点：</p>
+<ul>
+<li>精度高</li>
+<li>可以使用各种方法构建子分类器，Adaboost 提供的是框架</li>
+<li>当使用简单分类器时，计算结果可以理解</li>
+<li>不需要特征筛选，不易 overfitting</li>
+<li>相对于 bagging 算法和 RF，AdaBoost 充分考虑了每个分类器的权重</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>对 outlier 敏感，对样本平衡性敏感</li>
+<li>迭代次数不易确定</li>
+</ul>
+<p><mark>Adaboost, GBDT 及 XGBoost 比较</mark></p>
+<h3 id="关联规则算法"><a class="markdownIt-Anchor" href="#关联规则算法"></a> 关联规则算法</h3>
+<p>Apriori 算法是一种挖掘关联规则的算法，用于挖掘其内含的、未知的却又实际存在的数据关系。</p>
+<p>常用的频繁项集的评估标准有支持度，置信度和提升度三个。</p>
+<p>支持度就是几个关联的数据在数据集中出现的次数占总数据集的比重。或者说几个数据关联出现的概率。如果我们有两个想分析关联性的数据 X 和 Y，则对应的支持度为：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mi>u</mi><mi>p</mi><mi>p</mi><mi>o</mi><mi>r</mi><mi>t</mi><mo stretchy="false">(</mo><mi>X</mi><mo separator="true">,</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>n</mi><mi>u</mi><mi>m</mi><mi>b</mi><mi>e</mi><mi>r</mi><mo stretchy="false">(</mo><mi>X</mi><mi>Y</mi><mo stretchy="false">)</mo></mrow><mrow><mi>n</mi><mi>u</mi><mi>m</mi><mo stretchy="false">(</mo><mi>A</mi><mi>l</mi><mi>l</mi><mi>S</mi><mi>a</mi><mi>m</mi><mi>p</mi><mi>l</mi><mi>e</mi><mi>s</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">Support(X,Y)=P(XY)=\frac{number(XY)}{num(AllSamples)}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault">u</span><span class="mord mathdefault">p</span><span class="mord mathdefault">p</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">t</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">n</span><span class="mord mathdefault">u</span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">A</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault">a</span><span class="mord mathdefault">m</span><span class="mord mathdefault">p</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord mathdefault">s</span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">n</span><span class="mord mathdefault">u</span><span class="mord mathdefault">m</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>置信度体现了一个数据出现后，另一个数据出现的概率，或者说数据的条件概率。如果我们有两个想分析关联性的数据 X 和 Y，X 对 Y 的置信度为</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>C</mi><mi>o</mi><mi>n</mi><mi>f</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false">(</mo><mi>X</mi><mo>⇐</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi mathvariant="normal">∣</mi><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi>Y</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>P</mi><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">Confidence(X \Leftarrow Y)=P(X|Y)=P(XY)/P(Y)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault">o</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord mathdefault">n</span><span class="mord mathdefault">c</span><span class="mord mathdefault">e</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span></span></span></span></span></p>
+<p>提升度表示含有 Y 的条件下，同时含有 X 的概率，与 X 总体发生的概率之比，即：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>L</mi><mi>i</mi><mi>f</mi><mi>t</mi><mo stretchy="false">(</mo><mi>X</mi><mo>⇐</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi mathvariant="normal">∣</mi><mi>Y</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>=</mo><mi>C</mi><mi>o</mi><mi>n</mi><mi>f</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false">(</mo><mi>X</mi><mo>⇐</mo><mi>Y</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">Lift(X \Leftarrow Y) = P(X|Y)/P(X) = Confidence(X \Leftarrow Y)/P(X)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">L</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">t</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault">o</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord mathdefault">n</span><span class="mord mathdefault">c</span><span class="mord mathdefault">e</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose">)</span></span></span></span></span></p>
+<p>提升度体先了 X 和 Y 之间的关联关系，提升度大于 1 则<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>X</mi><mo>⇐</mo><mi>Y</mi></mrow><annotation encoding="application/x-tex">X \Leftarrow Y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span></span></span></span>是有效的强关联规则， 提升度小于等于 1 则<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>X</mi><mo>⇐</mo><mi>Y</mi></mrow><annotation encoding="application/x-tex">X \Leftarrow Y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span></span></span></span>是无效的强关联规则 。一个特殊的情况，如果 X 和 Y 独立，则有<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>L</mi><mi>i</mi><mi>f</mi><mi>t</mi><mo stretchy="false">(</mo><mi>X</mi><mo>⇐</mo><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">Lift(X⇐Y)=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">L</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">t</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇐</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，因为此时<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mi mathvariant="normal">∣</mi><mi>Y</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(X|Y)=P(X)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right:0.22222em;">Y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose">)</span></span></span></span></p>
+<p><a href="https://bainingchao.github.io/2018/09/27/%E4%B8%80%E6%AD%A5%E6%AD%A5%E6%95%99%E4%BD%A0%E8%BD%BB%E6%9D%BE%E5%AD%A6%E5%85%B3%E8%81%94%E8%A7%84%E5%88%99Apriori%E7%AE%97%E6%B3%95/" target="_blank" rel="noopener">learn more</a></p>
+<h2 id="算法选择参考"><a class="markdownIt-Anchor" href="#算法选择参考"></a> 算法选择参考</h2>
+<p>一个简单的算法选择技巧：</p>
+<ol>
+<li>x 先逻辑回归，如果它的效果不怎么样，那么可以将它的结果作为基准来参考，在基础上与其他算法进行比较；</li>
+<li>然后试试决策树（随机森林）看看是否可以大幅度提升你的模型性能。即便最后你并没有把它当做为最终模型，你也可以使用随机森林来移除噪声变量，做特征选择；</li>
+<li>如果特征的数量和观测样本特别多，那么当资源和时间充足时（这个前提很重要），使用 SVM 不失为一种选择。</li>
+</ol>
+<p>通常情况下：GBDT&gt;=SVM&gt;=RF&gt;=Adaboost&gt;=Other…</p>
+<p>算法固然重要，<strong>但好的数据却要优于好的算法</strong>，设计优良特征是大有裨益的。假如你有一个超大数据集，那么无论你使用哪种算法可能对分类性能都没太大影响（此时就可以根据速度和易用性来进行抉择）。</p>
+<hr class="footnotes-sep" />
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>L0 正则化的值是模型参数中非零参数的个数 <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+]]></content>
+      <categories>
+        <category>AI</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Git 操作备忘</title>
+    <url>/2019/10/git_cheat_sheet/</url>
+    <content><![CDATA[<h2 id="控制"><a class="markdownIt-Anchor" href="#控制"></a> 控制</h2>
+<ul>
+<li>git init</li>
+<li>git add/rm</li>
+<li>git commit -m “informatiom”</li>
+</ul>
+<h3 id="查看修改"><a class="markdownIt-Anchor" href="#查看修改"></a> 查看修改</h3>
+<ul>
+<li>git status</li>
+<li>git diff # failure after use git add</li>
+<li>git log [–pretty=oneline//不输出作者时间等信息 ]
+<ul>
+<li>git log --graph --pretty=oneline --abbrev-commit</li>
+</ul>
+</li>
+</ul>
+<a id="more"></a>
+<p>diff</p>
+<ul>
+<li>git diff      # 输出工作区和暂存区的 different</li>
+<li>git diff --cached # 输出暂存区和本地最近的版本 (commit) 的 different</li>
+<li>git diff HEAD     # 输出工作区、暂存区 和本地最近的版本 (commit)</li>
+<li>git whatchanged --since=‘2 weeks ago’ # 查看两个星期内的修改</li>
+</ul>
+<h3 id="版本回退"><a class="markdownIt-Anchor" href="#版本回退"></a> 版本回退</h3>
+<ul>
+<li>git reset
+<ul>
+<li>git reset --hard HEAD^ # ^ 表示前一个版本，^^ 为两个，以此类推</li>
+<li>git reset --hard HEAD~100 # 表示前 100 个版本</li>
+<li>git reset --hard commit_id</li>
+</ul>
+</li>
+<li>git revert HEAD # 撤销当前提交，不需要^</li>
+<li>git reflog</li>
+</ul>
+<p>reset 直接忽略已经提交的 commit, 常用于本地；<br />
+revert 保留原有的 commit, 创建一个新的节点使其与上一个节点内容相同，多用于已经 push 到远程的提交</p>
+<h3 id="撤销修改"><a class="markdownIt-Anchor" href="#撤销修改"></a> 撤销修改</h3>
+<p>工作区</p>
+<ul>
+<li>git checkout – file<br />
+让这个文件回到最近一次 git commit 或 git add 时的状态</li>
+</ul>
+<p>缓存区</p>
+<ul>
+<li>git reset HEAD file<br />
+若已经使用 git add 则先清缓存区，再清工作区</li>
+</ul>
+<h3 id="删除文件"><a class="markdownIt-Anchor" href="#删除文件"></a> 删除文件</h3>
+<ul>
+<li>git rm</li>
+<li>git checkout – file<br />
+用版本库里的版本替换工作区的版本</li>
+</ul>
+<h3 id="远程"><a class="markdownIt-Anchor" href="#远程"></a> 远程</h3>
+<p>push</p>
+<ul>
+<li>git remote add origin <a href="mailto:git@github.com">git@github.com</a>:ViggoC/Test.git</li>
+<li>git push -u origin master</li>
+</ul>
+<p>clone</p>
+<ul>
+<li>git clone <a href="mailto:git@github.com">git@github.com</a>:Viggo/Test.git</li>
+</ul>
+<p>fetch</p>
+<ul>
+<li>git fetch --all &amp;&amp; git reset --hard origin/master # 抛弃本地所有的修改，回到远程仓库的状态。</li>
+</ul>
+<p><code>git fetch</code> 将远程主机的最新内容拉到本地，用户在检查了以后决定是否合并到工作本机分支中。而<code>git pull</code> 则将远程主机的最新内容拉下来后直接合并，即：git pull = git fetch + git merge，这样可能会产生冲突，需要手动解决。</p>
+<p>rebase</p>
+<ul>
+<li>git rebase # 把本地未 push 的分叉提交历史整理成直线，未 push 的修改都在最新远程状态之后</li>
+</ul>
+<h2 id="分支"><a class="markdownIt-Anchor" href="#分支"></a> 分支</h2>
+<h3 id="合并"><a class="markdownIt-Anchor" href="#合并"></a> 合并</h3>
+<ul>
+<li>git checkout -b dev
+<ul>
+<li>git branch dev</li>
+<li>git checkout dev</li>
+</ul>
+</li>
+<li>git merge</li>
+<li>git branch -d dev # 删除分支
+<ul>
+<li>git branch -D <name> # force delete</li>
+</ul>
+</li>
+<li>git merge --no-ff -m “merge with no-ff” dev<br />
+普通合并而非 fast forward，先创建一个新的 commit 后合并</li>
+<li>git branch -vv    # 展示本地分支关联远程仓库的情况</li>
+</ul>
+<h3 id="bug-分支"><a class="markdownIt-Anchor" href="#bug-分支"></a> Bug 分支</h3>
+<p>在 dev 中工作到一半，需要修改 bug101</p>
+<ul>
+<li>git stash</li>
+<li>git check master</li>
+<li>git check -b issue-101</li>
+<li>debug 后提交</li>
+<li>git checkout master</li>
+<li>git merge --no-ff “merge bug fix 101” issue-101</li>
+<li>git branch -d issue-101</li>
+<li>git checkout dev</li>
+<li>git stash pop
+<ul>
+<li>git stash list</li>
+<li>git stash apply stash@{}</li>
+</ul>
+</li>
+</ul>
+<h3 id="多人协作"><a class="markdownIt-Anchor" href="#多人协作"></a> 多人协作</h3>
+<ul>
+<li>查看远程库信息，使用 git remote -v；</li>
+<li>本地新建的分支如果不推送到远程，对其他人就是不可见的；</li>
+<li>从本地推送分支，使用 git push origin branch-name，如果推送失败，先用 git pull 抓取远程的新提交；</li>
+<li>在本地创建和远程分支对应的分支，使用 git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；</li>
+<li>建立本地分支和远程分支的关联，使用 git branch --set-upstream branch-name origin/branch-name；</li>
+<li>从远程抓取分支，使用 git pull，如果有冲突，要先处理冲突。</li>
+</ul>
+<h2 id="标签"><a class="markdownIt-Anchor" href="#标签"></a> 标签</h2>
+<ul>
+<li>git tag [tag-name] [-m “message”] [commit-id]</li>
+<li>git show <tag-name></li>
+<li>git push origin <tagname>     # 可以推送一个本地标签；</li>
+<li>git push origin --tags        # 可以推送全部未推送过的本地标签；</li>
+<li>git tag -d <tagname>          # 可以删除一个本地标签；</li>
+<li>git push origin :refs/tags/<tagname>  # 可以删除一个远程标签，推送“空”到远程</li>
+</ul>
+<h2 id="学习资源"><a class="markdownIt-Anchor" href="#学习资源"></a> 学习资源</h2>
+<p><a href="http://rogerdudler.github.io/git-guide/index.zh.html" target="_blank" rel="noopener">git-简明指南</a></p>
+<p><a href="https://learngitbranching.js.org/" target="_blank" rel="noopener">在线学习网站</a>：可实操的教程，通过动画展示版本关系</p>
+<p><a href="https://github.com/521xueweihan/git-tips/blob/master/assets/git.png?raw=true" target="_blank" rel="noopener">git tips 思维导图</a></p>
+<p><img src="https://i.loli.net/2020/03/15/DxK5mRwtjZO3nPH.png" alt="cheat sheet" /></p>
+]]></content>
+      <categories>
+        <category>tool</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+</search>
