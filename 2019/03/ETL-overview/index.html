@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="default">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://viggoc.github.io').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="实现方法 常见的 ETL 实现方法  借助 ETL 工具（如 Oracle 的 OWB、Informatic、Kettle 等）实现 SQL 方式实现 ETL 工具和 SQL 相结合。  借助工具可以快速的建立起 ETL 工程，屏蔽了复杂的编码任务，提高了速度，降低了难度，但是缺少灵活性。SQL 的方法优点是灵活，提高 ETL 运行效率，但是编码复杂，对技术要求比较高。往往需要结合使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ETL 概念解析">
+<meta property="og:url" content="https://viggoc.github.io/2019/03/ETL-overview/index.html">
+<meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="实现方法 常见的 ETL 实现方法  借助 ETL 工具（如 Oracle 的 OWB、Informatic、Kettle 等）实现 SQL 方式实现 ETL 工具和 SQL 相结合。  借助工具可以快速的建立起 ETL 工程，屏蔽了复杂的编码任务，提高了速度，降低了难度，但是缺少灵活性。SQL 的方法优点是灵活，提高 ETL 运行效率，但是编码复杂，对技术要求比较高。往往需要结合使用。">
+<meta property="article:published_time" content="2019-03-20T06:51:55.000Z">
+<meta property="article:modified_time" content="2020-03-18T14:37:26.445Z">
+<meta property="article:author" content="VC">
+<meta property="article:tag" content="ETL">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://viggoc.github.io/2019/03/ETL-overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>ETL 概念解析 | VC' Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VC' Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/03/ETL-overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ETL 概念解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-20 14:51:55" itemprop="dateCreated datePublished" datetime="2019-03-20T14:51:55+08:00">2019-03-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-18 22:37:26" itemprop="dateModified" datetime="2020-03-18T22:37:26+08:00">2020-03-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/data/" itemprop="url" rel="index">
+                    <span itemprop="name">data</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2019/03/ETL-overview/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/03/ETL-overview/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="实现方法"><a class="markdownIt-Anchor" href="#实现方法"></a> 实现方法</h2>
+<p>常见的 ETL 实现方法</p>
+<ol>
+<li>借助 ETL 工具（如 Oracle 的 OWB、Informatic、Kettle 等）实现</li>
+<li>SQL 方式实现</li>
+<li>ETL 工具和 SQL 相结合。</li>
+</ol>
+<p>借助工具可以快速的建立起 ETL 工程，屏蔽了复杂的编码任务，提高了速度，降低了难度，但是缺少灵活性。SQL 的方法优点是灵活，提高 ETL 运行效率，但是编码复杂，对技术要求比较高。往往需要结合使用。</p>
+<a id="more"></a>
+<h2 id="抽取"><a class="markdownIt-Anchor" href="#抽取"></a> 抽取</h2>
+<p>数据抽取主要是针对各个业务系统及不同数据源的分散数据，充分理解数据定义后，规划需要的数据源及数据定义，制定可操作的数据源抽取（增量抽取）方案。</p>
+<p>数据抽取过程中需要关注的要点：</p>
+<ul>
+<li>确认每个数据源的系统和数据结构。</li>
+<li>定义抽取方式，是人工抽取还是基于工具抽取。</li>
+<li>对于每个数据源，确定数据抽取的频度，是每天、每星期、还是每个季度等。</li>
+<li>决定抽取任务中各项任务的先后顺序，某项工作是否必须等到前面的工作成功完成后，才可以开始。</li>
+<li>决定如何处理无法抽取的输入记录。</li>
+</ul>
+<h3 id="增量抽取"><a class="markdownIt-Anchor" href="#增量抽取"></a> 增量抽取</h3>
+<h4 id="1-触发器方式"><a class="markdownIt-Anchor" href="#1-触发器方式"></a> 1、触发器方式</h4>
+<p>触发器方式是普遍采取的一种增量抽取机制。该方式是根据抽取要求，在要被抽取的源表上建立插入、修改、删除 3 个触发器，每当源表中的数据发生变化，就被相应的触发器将变化的数据写入一个增量日志表，ETL 的增量抽取则是从增量日志表中而不是直接在源表中抽取数据，同时增量日志表中抽取过的数据要及时被标记或删除。为了简单起见，增量日志表一般不存储增量数据的所有字段信息，而只是存储源表名称、更新的关键字值和更新操作类型（KNSEN、UPDATE 或 DELETE），ETL 增量抽取进程首先根据源表名称和更新的关键字值，从源表中提取对应的完整记录，再根据更新操作类型，对目标表进行相应的处理。</p>
+<p>例如，对于源表为 ORACLE 类型的数据库，采用触发器方式进行增量数据捕获的过程如下：</p>
+<p>SQL 代码</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建增量日志表 DML_LOG：</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> DML_LOG( <span class="comment">--新建 DML_LOG 表记录增量数据变化</span></span><br><span class="line"> <span class="keyword">ID</span> <span class="built_in">NUMBER</span> PRIMARY <span class="keyword">KEY</span>, <span class="comment">--自增主键</span></span><br><span class="line"> TABLE_NAME <span class="built_in">VARCHAR2</span>(<span class="number">200</span>), <span class="comment">--源表名称</span></span><br><span class="line"> RECORD_ID <span class="built_in">NUMBER</span>, <span class="comment">--源表增量记录的主键值</span></span><br><span class="line"> DML_TYPE <span class="built_in">CHAR</span>(<span class="number">1</span>), <span class="comment">--增量类型，I 表示新增：U 表示更新；D 表示删除</span></span><br><span class="line"> EXECUTE_DATE <span class="built_in">DATE</span> <span class="comment">--发生时间</span></span><br><span class="line"> )；</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 为 DML_LOG 创建一个序列 SEQ_DML_LOG 上，以便触发器写增量日志表时生成 ID 值。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 针对要监听的每一张表，创建一个触发器，例如对表 TEST 创建触发器如下：</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> <span class="keyword">REPLACE</span> <span class="keyword">TRIGGER</span> T <span class="keyword">BEFORE</span> <span class="keyword">INSERT</span> <span class="keyword">OR</span> <span class="keyword">UPDATE</span></span><br><span class="line"> <span class="keyword">OR</span> <span class="keyword">DELETE</span> <span class="keyword">ON</span> T <span class="keyword">FOR</span> <span class="keyword">EACH</span> <span class="keyword">ROW</span></span><br><span class="line"><span class="keyword">DECLARE</span> L_DML_TYPE <span class="built_in">VARCHAR2</span>(<span class="number">1</span>)；</span><br><span class="line"> <span class="keyword">BEGIN</span></span><br><span class="line"> <span class="keyword">IF</span> INSERTING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'I'</span>；<span class="comment">-- 源表有新增数据</span></span><br><span class="line"> <span class="keyword">ELSIF</span> UPDATING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'U'</span>； <span class="comment">-- 源表有更新数据</span></span><br><span class="line"> <span class="keyword">ELSIF</span> DELETING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'D'</span>； <span class="comment">-- 源表有删除数据</span></span><br><span class="line"> ENDIF；</span><br><span class="line"><span class="keyword">IF</span> DELETING <span class="keyword">THEN</span> <span class="comment">-- 源表有删除数据 </span></span><br><span class="line"> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> DML_LOG(<span class="keyword">ID</span>，TABLE_NAME，RECORD_ID，EXECUTE_DATE，DML_TYPE)</span><br><span class="line"> <span class="keyword">VALUES</span>(SEQ_DML_LOG.NEXTVAL, <span class="string">'TEST'</span>, OLD.ID, <span class="keyword">SYSDATE</span>, L_DML_TYPE)；</span><br><span class="line"><span class="keyword">ELSE</span></span><br><span class="line"> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> DML_LOG(<span class="keyword">ID</span>，TABLE_NAME，RECORD_ID，EXECUTE_DATE，DML_TYPE)</span><br><span class="line"> <span class="keyword">VALUES</span>(SEQ_DML_LOG.NEXTVAL, <span class="string">'TEST'</span>, NEW.ID, <span class="keyword">SYSDATE</span>, L_DML_TYPE)；</span><br><span class="line"> ENDIF；</span><br><span class="line"><span class="keyword">END</span>；</span><br></pre></td></tr></table></figure>
+<p>这样，对表 T 的所有 DML 操作就记录在增量日志表 DML_LOG 中，注意增量日志表中并没有完全记录增量数据本身，只是记录了增量数据的来源。进行增量 ETL 时，只需要根据增量日志表中的记录情况，反查源表得到真正的增量数据。</p>
+<p>优点：数据抽取的性能较高。</p>
+<p>缺点：要求业务表建立触发器，对业务系统有影响，需要对用户数据库进行修改，不能对多表和视图进行操作，如果目标表发生错误会造成级联事务失败，这在生产系统无法忍受，另外一个缺点是如果触发器运行过程中产生问题，有时需要重新加载整个表来恢复加载作业的运行。这类方法适用于一对一且业务逻辑不复杂的表的增量更新。</p>
+<h4 id="2-时间戳方式"><a class="markdownIt-Anchor" href="#2-时间戳方式"></a> 2、时间戳方式</h4>
+<p>实现原理是指增量抽取时，抽取进程通过比较系统时间或者源表上次抽取时的最大时间戳与抽取源表的时间戳字段的值来决定抽取哪些数据。这种方式需要在源表上增加一个时间戳字段，系统中更新修改表数据的时候，同时修改时间戳字段的值。</p>
+<p>采用时间戳进行增量更新时需要源表有相应的时间戳字段，所以对于没有时间戳的源表需要进行相应业务需要改造，增加必要的时间戳字段。</p>
+<p>有的数据库（例如 SQL SERVER）的时间戳支持自动更新，即表的其它字段的数据发生改变时，时间戳字段的值会被自动更新为记录改变的时刻。在这种情下，进行 ETL 实施时就只需要在源表加上时间戳字段就可以了。</p>
+<p>对于不支持时间戳自动更新的数据库，这就要求业务系统在更新业务数据时，通过编程的方式手工更新时间戳字段。使用时间戳方式可以正常捕获源表的插入和更新操作，但对于删除操作则无能为力，需要结合其它机制才能完成。</p>
+<p>时间戳方式通常需要一个日志表对 ETL 的更新操作进行记录，将最后一次成功更新的时间戳记录下来，以方便进行时间筛选。每次进行 ETL 增量更新时，读取日志表里的上次更新时间戳记录，作为本次增量更新的时间窗口起始时间。</p>
+<p>优点：</p>
+<ul>
+<li>实现逻辑简单，可以大批量更新数据。不仅可以对一张源表进行数据捕获，也可以对多张源表的增量数据进行捕获。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>使用时间戳方式可以正常捕获源表的插入和更新操作，但对于删除操作则无能为力，需要结合其它机制才能完成。这时可以设计一张和源表相同的数据表记录源表中删除的数据，同时记录删除时的时间戳，在对目标表更新时同时读取这张表的记录，进行删除操作。或者在目标表通过打标记的方式（update active_flag=1）进行逻辑删除。</li>
+<li>应用起来有部分局限性。即源表都需要有时间戳字段。如果部分源表（或参考表）无时间戳字段，且源表有部分字段更新时（常见于维度表的定义更新），则面临历史数据的更新问题。这时一般需要采用 SQL 语句或者下文介绍的全表对比方式进行历史数据更新。或者调整时间戳范围，做全表数据的刷新。这种情况需要对目标表的实时性要求不高，可以在系统空闲时进行处理。</li>
+</ul>
+<h4 id="3-全表删除插入方式"><a class="markdownIt-Anchor" href="#3-全表删除插入方式"></a> 3、全表删除插入方式</h4>
+<p>全表删除插入方式是指每次抽取前先删除目标表数据，抽取时全新加载数据。该方式实际上将增量抽取等同于全量抽取。对于数据量不大，全量抽取的时间代价小于执行增量抽取的算法和条件代价时，可以采用该方式。</p>
+<h4 id="4-全表比对方式"><a class="markdownIt-Anchor" href="#4-全表比对方式"></a> 4、全表比对方式</h4>
+<p>全表比对即在增量抽取时，ETL 进程逐条比较源表和目标表的记录，将新增和修改的记录读取出来。优化之后的全部比对方式是采用 MD5 校验码，需要事先为要抽取的表建立一个结构类似的临时表，该临时表记录源表的主键值以及根据源表所有字段的数据计算出来的 MD5 校验码，每次进行数据抽取时，对源表和 MD5 临时表进行 MD5 校验码的比对，</p>
+<ul>
+<li>如有不同，进行 UPDATE 操作</li>
+<li>如目标表没有存在该主键值，表示该记录还没有，则进行 INSERT 操作。</li>
+<li>对在源表中已不存在而目标表仍保留的主键值，执行 DELETE 操作。</li>
+</ul>
+<p>一般全表比对更新可以采用一些常用的 ETL 工具协助进行。</p>
+<p>优点：</p>
+<ul>
+<li>适用于涉及多张源表的抽取与转换，业务逻辑复杂的增量更新。</li>
+<li>适用于源表无时间戳字段，无法采用时间戳方式进行增量更新。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>对于大数据量数据表，效率不高。</li>
+</ul>
+<h4 id="5-日志表方式"><a class="markdownIt-Anchor" href="#5-日志表方式"></a> 5、日志表方式</h4>
+<p>对于建立了业务系统的生产数据库，可以在数据库中创建业务日志表，当特定需要监控的业务数据发生变化时，由相应的业务系统程序模块来更新维护日志表内容。增量抽取时，</p>
+<p>通过读日志表数据决定加载哪些数据及如何加载。日志表的维护需要由业务系统程序用代码来完成。</p>
+<h4 id="6-系统日志分析方式"><a class="markdownIt-Anchor" href="#6-系统日志分析方式"></a> 6、系统日志分析方式</h4>
+<p>该方式通过分析数据库自身的日志来判断变化的数据。关系型数据库系统都会将所有的 DML 操作存储在日志文件中，以实现数据库的备份和还原功能。ETL 增量抽取进程通过对数据库的日志进行分析，提取对相关源表在特定时间后发生的 DML 操作信息，就可以得知自上次抽取时刻以来该表的数据变化情况，从而指导增量抽取动作。有些数据库系统提供了访问日志的专用的程序包（例如 ORACLE 的 LOGMINDER），使数据库日志的分析工作得到大大简化。</p>
+<h4 id="7-特定数据库方式oracle"><a class="markdownIt-Anchor" href="#7-特定数据库方式oracle"></a> 7、特定数据库方式（ORACLE）</h4>
+<p>以下介绍常见的针对特有数据库系统的增景抽取方式。</p>
+<ol>
+<li>ORACLE 改变数据捕获（CHANGEDDATACAPTURE，CDC）方式：</li>
+</ol>
+<p>ORACLECDC 特性是在 ORAELE9I 数据库中引入的。CDC 能够帮助识别从上次抽取之后发生变化的数据。利用 CDC，在对源表进行 INSERT、UPCLATE 或 DELETE 等操作的同时就可以提取数据，并且变化的数据被保存在数据库的变化表中。这样就可以捕获发生变化的数据，然后利用数据库视图以一种可控的方式提供给 ETL 抽取进程，作为增量抽取的依据。CDC 方式对源表数据变化情况的捕获有两种方式：同步 CDC 和异步 CDC。同步 CDC 使用源数据库触发器来捕获变更的数据。这种方式是实时的，没有任何延迟。当 DML 操作提交后，变更表中就产生了变更数据。异步 CDC 使用数据库重做日志（REDOLOG）文件，在源数据库发生变更以后，才进行数据捕获。</p>
+<ol start="2">
+<li>ORACLE 闪回查询方式</li>
+</ol>
+<p>ORACLE9I 以上版本的数据库系统提供了闪回查询机制，允许用户查询过去某个时刻的数据库状态。这样，抽取进程可以将源数据库的当前状态和上次抽取时刻的状态进行对比，快速得出源表数据记录的变化情况。</p>
+<h4 id="8-比较和分析"><a class="markdownIt-Anchor" href="#8-比较和分析"></a> 8、比较和分析</h4>
+<p>可见，ETL 在进行增量抽取操作时，有以上各种机制可以选择。现从兼容性、完备性、性能和侵入性 3 个方面对这些机制的优劣进行比较分析。</p>
+<ul>
+<li>兼容性</li>
+</ul>
+<p>数据抽取需要面对的源系统，并不一定都是关系型数据库系统。某个 ETL 过程可能需要从若干年前的遗留系统中抽取 EXCEL 或者 CSV 文本数据。这时，所有基于关系型数据库产品的增量机制都无法工作，时间戳方式和全表比对方式可能有一定的利用价值，在最坏的情况下，只有放弃增量抽取的思路，转而采用全表删除插入方式。</p>
+<ul>
+<li>完备性</li>
+</ul>
+<p>时间戳方式不能捕获 DELETE 操作，需要结合其它方式一起使用。</p>
+<ul>
+<li>性能</li>
+</ul>
+<p>增量抽取的性能因素表现在两个方面，一是抽取进程本身的性能，二是对源系统性能的负面影响。</p>
+<p>触发器方式、日志表方式以及系统日志分析方式由于不需要在抽取过程中执行比对步骤，所以增量抽取的性能较佳。全表比对方式需要经过复杂的比对过程才能识别出更改的记录，抽取性能最差。</p>
+<p>在对源系统的性能影响方面，触发器方式由于是直接在源系统业务表上建立触发器，同时写临时表，对于频繁操作的业务系统可能会有一定的性能损失，尤其是当业务表上执行批量操作时，行级触发器将会对性能产生严重的影响；同步 CDC 方式内部采用触发器的方式实现，也同样存在性能影响的问题；全表比对方式和日志表方式对数据源系统数据库的性能没有任何影响，只是它们需要业务系统进行额外的运算和数据库操作，会有少许的时间损耗；时间戳方式、系统日志分析方式以及基于系统日志分析的方式（异步 CDC 和闪回查询）对数据库性能的影响也是非常小的。</p>
+<ul>
+<li>侵入性</li>
+</ul>
+<p>指业务系统是否要为实现增抽取机制做功能修改和额外操作，在这一点上，时间戳方式值得特别关注该方式除了要修改数据源系统表结构外，对于不支持时间戳字段自动更新的关系型数据库产品，还必须要修改业务系统的功能，让它在源表 T 执行每次操作时都要显式的更新表的时间戳字段，这在 ETL 实施过程中必须得到数据源系统高度的配合才能达到，并且在多数情况下这种要求在数据源系统看来是比较“过分”的，这也是时间戳方式无法得到广泛运用的主要原因。另外，触发器方式需要在源表上建立触发器，这种在某些场合中也遭到拒绝。还有一些需要建立临时表的方式，例如全表比对和日志表方式。可能因为开放给 ETL 进程的数据库权限的限制而无法实施。同样的情况也可能发生在基于系统日志分析的方式上，因为大多数的数据库产品只允许特定组的用户甚至只有 DBA 才能执行日志分析。闪回查询在侵入性方面的影响是最小的。</p>
+<table>
+<thead>
+<tr>
+<th>增量机制</th>
+<th>兼容性</th>
+<th>完备性</th>
+<th>抽取性能</th>
+<th>对源系统性能影响</th>
+<th>对源系统侵入性</th>
+<th>实现难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发器方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>大</td>
+<td>一般</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>时间戳方式</td>
+<td>关系型数据库，具有“字段”结构的其它数据格式</td>
+<td>低</td>
+<td>较优</td>
+<td>很小</td>
+<td>大</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>全表删除插入方式</td>
+<td>任何数据格式</td>
+<td>高</td>
+<td>极差</td>
+<td>无</td>
+<td>无</td>
+<td>容易</td>
+</tr>
+<tr>
+<td>全表比对方式</td>
+<td>关系型数据库、文本格式</td>
+<td>高</td>
+<td>差</td>
+<td>小</td>
+<td>一般</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>日志表方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>小</td>
+<td>较大</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>系统日志分析方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>很小</td>
+<td>较大</td>
+<td>难</td>
+</tr>
+<tr>
+<td>同步 CDC 方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>优</td>
+<td>大</td>
+<td>一般</td>
+<td>较难</td>
+</tr>
+<tr>
+<td>异步 CDC 方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>优</td>
+<td>很小</td>
+<td>一般</td>
+<td>较难</td>
+</tr>
+<tr>
+<td>闪回查询方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>较优</td>
+<td>很小</td>
+<td>无</td>
+<td>较容易</td>
+</tr>
+</tbody>
+</table>
+<h2 id="清洗"><a class="markdownIt-Anchor" href="#清洗"></a> 清洗</h2>
+<p>一般情况下，数据仓库分为 ODS、DW 两部分。通常的做法是从业务系统到 ODS 做清洗，将脏数据和不完整数据过滤掉，在从 ODS 到 DW 的过程中转换，进行一些业务规则的计算和聚合。</p>
+<h3 id="1-数据清洗"><a class="markdownIt-Anchor" href="#1-数据清洗"></a> 1、数据清洗</h3>
+<p>数据清洗的任务是过滤那些不符合要求的数据，将过滤的结果交给业务主管部门，确认是否过滤掉还是由业务单位修正之后再进行抽取。不符合要求的数据主要是有不完整的数据、错误的数据、重复的数据三大类。</p>
+<ul>
+<li>
+<p>不完整的数据：这一类数据主要是一些应该有的信息缺失。对于这一类数据过滤出来，按缺失的内容分别写入不同 Excel 文件向客户提交，要求在规定的时间内补全。补全后才写入数据仓库。</p>
+</li>
+<li>
+<p>错误的数据：这一类错误产生的原因是业务系统不够健全，在接收输入后没有进行判断直接写入后台数据库造成的，比如数值数据输成全角数字字符、字符串数据后面有一个回车操作、日期格式不正确、日期越界等。这一类数据也要分类，对于类似于全角字符、数据前后有不可见字符的问题，只能通过写 SQL 语句的方式找出来，然后要求客户在业务系统修正之后抽取。日期格式不正确的或者是日期越界的这一类错误会导致 ETL 运行失败，这一类错误需要去业务系统数据库用 SQL 的方式挑出来，交给业务主管部门要求限期修正，修正之后再抽取。</p>
+</li>
+<li>
+<p>重复的数据：对于这一类数据——特别是维表中会出现这种情况——将重复数据记录的所有字段导出来，让客户确认并整理。</p>
+</li>
+</ul>
+<p>数据清洗是一个反复的过程，不可能在几天内完成，只有不断的发现问题，解决问题。对于是否过滤，是否修正一般要求客户确认，对于过滤掉的数据，写入 Excel 文件或者将过滤数据写入数据表，在 ETL 开发的初期可以每天向业务单位发送过滤数据的邮件，促使他们尽快地修正错误，同时也可以做为将来验证数据的依据。数据清洗需要注意的是不要将有用的数据过滤掉，对于每个过滤规则认真进行验证，并要用户确认。</p>
+<h3 id="2-数据转换"><a class="markdownIt-Anchor" href="#2-数据转换"></a> 2、数据转换</h3>
+<p>数据转换的任务主要进行不一致的数据转换、数据粒度的转换，以及一些商务规则的计算。</p>
+<ul>
+<li>
+<p>不一致数据转换：这个过程是一个整合的过程，将不同业务系统的相同类型的数据统一，比如同一个供应商在结算系统的编码是 XX0001, 而在 CRM 中编码是 YY0001，这样在抽取过来之后统一转换成一个编码。</p>
+</li>
+<li>
+<p>数据粒度的转换：业务系统一般存储非常明细的数据，而数据仓库中数据是用来分析的，不需要非常明细的数据。一般情况下，会将业务系统数据按照数据仓库粒度进行聚合。</p>
+</li>
+<li>
+<p>商务规则的计算：不同的企业有不同的业务规则、不同的数据指标，这些指标有的时候不是简单的加加减减就能完成，这个时候需要在 ETL 中将这些数据指标计算好了之后存储在数据仓库中，以供分析使用。</p>
+</li>
+</ul>
+<h2 id="etl-日志"><a class="markdownIt-Anchor" href="#etl-日志"></a> ETL 日志</h2>
+<p>ETL 日志分为三类。</p>
+<ul>
+<li>执行过程日志：这一部分日志是在 ETL 执行过程中每执行一步的记录，记录每次运行每一步骤的起始时间，影响了多少行数据，流水账形式。</li>
+<li>错误日志：当某个模块出错的时候写错误日志，记录每次出错的时间、出错的模块以及出错的信息等。</li>
+<li>总体日志：只记录 ETL 开始时间、结束时间是否成功信息。如果使用 ETL 工具，ETL 工具会自动产生一些日志，这一类日志也可以作为 ETL 日志的一部分。记录日志的目的是随时可以知道 ETL 运行情况，如果出错了，可以知道哪里出错。</li>
+</ul>
+<p>参考文章:</p>
+<ul>
+<li><a href="https:--blog.csdn.net/hzp666/article/details/70139867" target="_blank" rel="noopener">BI的ETL中怎么做增量处理</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/data/library/techarticle/dm-1508-etlsataloadmechanism/index.html" target="_blank" rel="noopener">ETL 数据加载机制概述</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ETL/" rel="tag"># ETL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2019/10/git_cheat_sheet/" rel="next" title="Git 操作备忘">
+      Git 操作备忘 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#实现方法"><span class="nav-number">1.</span> <span class="nav-text"> 实现方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#抽取"><span class="nav-number">2.</span> <span class="nav-text"> 抽取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#增量抽取"><span class="nav-number">2.1.</span> <span class="nav-text"> 增量抽取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#清洗"><span class="nav-number">3.</span> <span class="nav-text"> 清洗</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-数据清洗"><span class="nav-number">3.1.</span> <span class="nav-text"> 1、数据清洗</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-数据转换"><span class="nav-number">3.2.</span> <span class="nav-text"> 2、数据转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etl-日志"><span class="nav-number">4.</span> <span class="nav-text"> ETL 日志</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">VC</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">VC</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'en' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</body>
+</html>

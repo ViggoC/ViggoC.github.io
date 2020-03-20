@@ -64,7 +64,7 @@
 <meta property="og:image" content="https://i.loli.net/2020/03/14/sRBtKmiPOTgqfuI.png">
 <meta property="og:image" content="https://i.loli.net/2020/03/14/T5PxH3v87iA6EZg.png">
 <meta property="article:published_time" content="2020-03-13T11:51:55.000Z">
-<meta property="article:modified_time" content="2020-03-18T03:54:57.576Z">
+<meta property="article:modified_time" content="2020-03-20T15:39:30.017Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -246,7 +246,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-18 11:54:57" itemprop="dateModified" datetime="2020-03-18T11:54:57+08:00">2020-03-18</time>
+                <time title="Modified: 2020-03-20 23:39:30" itemprop="dateModified" datetime="2020-03-20T23:39:30+08:00">2020-03-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -344,13 +344,13 @@
 <li>配置主库和备库</li>
 </ol>
 <p>在主库的<code>my.cnf</code>文件中设置如下，重启服务器</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 开启二进制日志</span><br><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line"># 指定唯一的 server id</span><br><span class="line">server_id &#x3D; 10</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启二进制日志</span></span><br><span class="line">log_bin = mysql-bin </span><br><span class="line"><span class="comment"># 指定唯一的 server id</span></span><br><span class="line">server_id = 10</span><br></pre></td></tr></table></figure>
 <p>备库中类似，同样需要重启：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line">server_id &#x3D; 2</span><br><span class="line"># 指定中继日志的位置和名称</span><br><span class="line">relay_log &#x3D; &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-relay-bin</span><br><span class="line"># 一下两个不是必须</span><br><span class="line">log_slave_updates &#x3D; 1</span><br><span class="line">read_only &#x3D; 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">log_bin = mysql-bin </span><br><span class="line">server_id = 2</span><br><span class="line"><span class="comment"># 指定中继日志的位置和名称</span></span><br><span class="line">relay_log = /var/lib/mysql/mysql-relay-bin</span><br><span class="line"><span class="comment"># 以下两个不是必须</span></span><br><span class="line">log_slave_updates = 1</span><br><span class="line">read_only = 1</span><br></pre></td></tr></table></figure>
 <ol start="3">
 <li>启动复制</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;server1&#39;,</span><br><span class="line">MASTER_USER&#x3D;&#39;repl&#39;,</span><br><span class="line">MASTER_PASSWORD&#x3D;&#39;PASSWORD&#39;,</span><br><span class="line">MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000001&#39;,</span><br><span class="line">MASTER_LOG_POS&#x3D;0;</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST=<span class="string">'server1'</span>,</span><br><span class="line">MASTER_USER=<span class="string">'repl'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'PASSWORD'</span>,</span><br><span class="line">MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,</span><br><span class="line">MASTER_LOG_POS=0;</span><br></pre></td></tr></table></figure>
 <p>可以通过<code>SHOW SLAVE STATUS</code>查看是否成功，使用<code>START SLAVE</code>开始复制。</p>
 <h3 id="新备库初始化"><a class="markdownIt-Anchor" href="#新备库初始化"></a> 新备库初始化</h3>
 <p>当主库已经运行一段时间要新增一个备库的时候，需要初始化备库，保持主库和备库同步需要满足如下条件：</p>
@@ -365,7 +365,7 @@
 <li>热备份，如果仅使用了 MyISAM 标，可在主库运行时使用<code>mysqlhotcopy</code>或<code>rsync</code>来复制数据</li>
 <li>mysqldump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases --master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases \</span><br><span class="line">--master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
 <ul>
 <li>使用快照或备份，确保从备份时间开始的二进制日志都存在，恢复备份后，使用<code>CHANGE MATER TO</code>指定二进制日志坐标</li>
 <li>其他热备工具如 Xtrabackup</li>
@@ -428,11 +428,11 @@
 <h3 id="有备库的主-主结构"><a class="markdownIt-Anchor" href="#有备库的主-主结构"></a> 有备库的主 - 主结构</h3>
 <p><img src="https://i.loli.net/2020/03/14/lucwmEgK7fDnWhZ.png" alt="" /></p>
 <h3 id="环形复制"><a class="markdownIt-Anchor" href="#环形复制"></a> 环形复制</h3>
-<p><img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /><br />
-环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。</p>
+<p>环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。<br />
+<img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /></p>
 <h3 id="分发主库"><a class="markdownIt-Anchor" href="#分发主库"></a> 分发主库</h3>
-<p><img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /><br />
-当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。</p>
+<p>当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。<br />
+<img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /></p>
 <h3 id="树结构"><a class="markdownIt-Anchor" href="#树结构"></a> 树结构</h3>
 <p><img src="https://i.loli.net/2020/03/14/DQmJUlYt6PRNxoM.png" alt="" /></p>
 <h3 id="定制化方案"><a class="markdownIt-Anchor" href="#定制化方案"></a> 定制化方案</h3>
@@ -545,20 +545,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -672,7 +672,7 @@ NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
       meta: guest,
       pageSize: '10' || 10,
       visitor: false,
-      lang: 'zh-cn' || 'zh-cn',
+      lang: 'en' || 'zh-cn',
       path: location.pathname,
       recordIP: false,
       serverURLs: ''

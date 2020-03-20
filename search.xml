@@ -62,13 +62,13 @@
 <li>配置主库和备库</li>
 </ol>
 <p>在主库的<code>my.cnf</code>文件中设置如下，重启服务器</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 开启二进制日志</span><br><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line"># 指定唯一的 server id</span><br><span class="line">server_id &#x3D; 10</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 开启二进制日志</span></span><br><span class="line">log_bin = mysql-bin </span><br><span class="line"><span class="comment"># 指定唯一的 server id</span></span><br><span class="line">server_id = 10</span><br></pre></td></tr></table></figure>
 <p>备库中类似，同样需要重启：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">log_bin &#x3D; mysql-bin </span><br><span class="line">server_id &#x3D; 2</span><br><span class="line"># 指定中继日志的位置和名称</span><br><span class="line">relay_log &#x3D; &#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql-relay-bin</span><br><span class="line"># 一下两个不是必须</span><br><span class="line">log_slave_updates &#x3D; 1</span><br><span class="line">read_only &#x3D; 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">log_bin = mysql-bin </span><br><span class="line">server_id = 2</span><br><span class="line"><span class="comment"># 指定中继日志的位置和名称</span></span><br><span class="line">relay_log = /var/lib/mysql/mysql-relay-bin</span><br><span class="line"><span class="comment"># 以下两个不是必须</span></span><br><span class="line">log_slave_updates = 1</span><br><span class="line">read_only = 1</span><br></pre></td></tr></table></figure>
 <ol start="3">
 <li>启动复制</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;server1&#39;,</span><br><span class="line">MASTER_USER&#x3D;&#39;repl&#39;,</span><br><span class="line">MASTER_PASSWORD&#x3D;&#39;PASSWORD&#39;,</span><br><span class="line">MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000001&#39;,</span><br><span class="line">MASTER_LOG_POS&#x3D;0;</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST=<span class="string">'server1'</span>,</span><br><span class="line">MASTER_USER=<span class="string">'repl'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'PASSWORD'</span>,</span><br><span class="line">MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,</span><br><span class="line">MASTER_LOG_POS=0;</span><br></pre></td></tr></table></figure>
 <p>可以通过<code>SHOW SLAVE STATUS</code>查看是否成功，使用<code>START SLAVE</code>开始复制。</p>
 <h3 id="新备库初始化"><a class="markdownIt-Anchor" href="#新备库初始化"></a> 新备库初始化</h3>
 <p>当主库已经运行一段时间要新增一个备库的时候，需要初始化备库，保持主库和备库同步需要满足如下条件：</p>
@@ -83,7 +83,7 @@
 <li>热备份，如果仅使用了 MyISAM 标，可在主库运行时使用<code>mysqlhotcopy</code>或<code>rsync</code>来复制数据</li>
 <li>mysqldump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases --master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases \</span><br><span class="line">--master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
 <ul>
 <li>使用快照或备份，确保从备份时间开始的二进制日志都存在，恢复备份后，使用<code>CHANGE MATER TO</code>指定二进制日志坐标</li>
 <li>其他热备工具如 Xtrabackup</li>
@@ -146,11 +146,11 @@
 <h3 id="有备库的主-主结构"><a class="markdownIt-Anchor" href="#有备库的主-主结构"></a> 有备库的主 - 主结构</h3>
 <p><img src="https://i.loli.net/2020/03/14/lucwmEgK7fDnWhZ.png" alt="" /></p>
 <h3 id="环形复制"><a class="markdownIt-Anchor" href="#环形复制"></a> 环形复制</h3>
-<p><img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /><br />
-环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。</p>
+<p>环形结构没有双主结构的一些有点，如对称配置和简单的故障转移，并且完全依赖于环上的每一个可用节点，增加了系统失效的几率，非常脆弱，应该避免使用。为每个节点增加备库可以减少风险。<br />
+<img src="https://i.loli.net/2020/03/14/PHgKaAmvuCORjJG.png" alt="" /></p>
 <h3 id="分发主库"><a class="markdownIt-Anchor" href="#分发主库"></a> 分发主库</h3>
-<p><img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /><br />
-当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。</p>
+<p>当备库较多时，为了减小主库的负担，指定一个库作为分发主库，从主库获取日志后分发给其他备库。分发主库使用 blackhole 引擎，不执行实际操作。<br />
+<img src="https://i.loli.net/2020/03/14/KLoI4JTMr6hxzpm.png" alt="" /></p>
 <h3 id="树结构"><a class="markdownIt-Anchor" href="#树结构"></a> 树结构</h3>
 <p><img src="https://i.loli.net/2020/03/14/DQmJUlYt6PRNxoM.png" alt="" /></p>
 <h3 id="定制化方案"><a class="markdownIt-Anchor" href="#定制化方案"></a> 定制化方案</h3>
@@ -494,213 +494,6 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
 </li>
 </ul>
 <p>因版本而异，详见官方手册</p>
-]]></content>
-      <categories>
-        <category>database</category>
-      </categories>
-      <tags>
-        <tag>mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>创建高性能的索引-02</title>
-    <url>/2020/02/high-perf-mysql05-2/</url>
-    <content><![CDATA[<h2 id="索引案例学习"><a class="markdownIt-Anchor" href="#索引案例学习"></a> 索引案例学习</h2>
-<h3 id="多种条件过滤"><a class="markdownIt-Anchor" href="#多种条件过滤"></a> 多种条件过滤</h3>
-<p>常用的列放在前面，如果不限制该列可以用 in() 指定所有值</p>
-<p>尽可能将需要做范围查询的列放在索引的后面，以便使用尽可能多的索引列。</p>
-<h3 id="避免多个范围条件"><a class="markdownIt-Anchor" href="#避免多个范围条件"></a> 避免多个范围条件</h3>
-<p>当有 A&gt;N and B&gt;m 两个范围条件时可以维护一个冗余列记录 A&gt;n 的真假（如果 N 不会变动）</p>
-<h3 id="优化排序"><a class="markdownIt-Anchor" href="#优化排序"></a> 优化排序</h3>
-<p>对于分页查询</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
-<p>即使有索引（sex, rating) 依然很慢。可以通过延迟关闭，通过覆盖索引查询到需要的主键再去获取需要的行，减少 MySQL 扫描多余的行。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">profiles</span> <span class="keyword">inner</span> <span class="keyword">join</span>(</span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">id</span> <span class="keyword">from</span> <span class="keyword">profiles</span></span><br><span class="line">        <span class="keyword">where</span> sex=<span class="string">'M'</span> <span class="keyword">order</span> <span class="keyword">by</span> rating <span class="keyword">limit</span> <span class="number">10000</span>, <span class="number">10</span></span><br><span class="line">) <span class="keyword">as</span> x <span class="keyword">using</span>(<span class="keyword">id</span>);</span><br></pre></td></tr></table></figure>
-<a id="more"></a>
-<h2 id="维护索引和表"><a class="markdownIt-Anchor" href="#维护索引和表"></a> 维护索引和表</h2>
-<p>维护表的三个目的：</p>
-<ul>
-<li>找到并修复损坏的表</li>
-<li>维护准确的索引统计信息</li>
-<li>减少碎片</li>
-</ul>
-<h3 id="找到并修复损坏的表"><a class="markdownIt-Anchor" href="#找到并修复损坏的表"></a> 找到并修复损坏的表</h3>
-<p>损坏的索引会导致查询返回错误的结果或莫须有的主键冲突等问题，严重时甚至还会导致数据库的崩溃。</p>
-<p>可以通过运行<code>CHECK TABLE</code>来检查是否发生了表损坏（因不同存储引擎而异）。</p>
-<p>可使用<code>REPAIR TABLE</code>来修复损坏的表，对于不支持的存储引擎，可使用空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>。如果损坏的是系统区域或者数据，只能从备份恢复。</p>
-<p>MyISAM 的表损坏（corruption）通常是系统崩溃导致的。InnoDB 一般不会出现损坏，如果发生损坏，可能是</p>
-<ul>
-<li>硬件问题，如内存或磁盘故障（有可能）</li>
-<li>数据库管理员的错误操作，如在 MySQL 外部直接操作数据文件（有可能）</li>
-<li>InnoDB 本身缺陷（不太可能）</li>
-</ul>
-<p>如果遇到数据损坏，不能只是简单修复，更重要的是找到损坏原因，避免在此发生。</p>
-<h3 id="更新索引统计信息"><a class="markdownIt-Anchor" href="#更新索引统计信息"></a> 更新索引统计信息</h3>
-<p>MySQL 的查询优化器通过两个 API 来icol_per_row存储引擎的索引值分布情况</p>
-<ul>
-<li><code>records_in_range()</code>：传入两个边界值，查询范围内有多少记录，MyISAM 返回精确值，InnoDB 返回估算值。</li>
-<li><code>info()</code>：返回各种类型的数据，包括索引的基数（每个键值有多少条记录）</li>
-</ul>
-<p>可以通过<code>ANALYZE TABLE</code>来生成统计信息。如果存储引擎提供的扫描行数是不准确的，或者执行计划本身太复杂无法准确获取各个阶段的行数，优化器会使用索引统计信息来估算扫描行数。</p>
-<p>每种存储引擎实现索引统计信息的方式不同：</p>
-<ul>
-<li>Mymory 引擎不存储索引统计信息</li>
-<li>MyISAM 将索引统计信息存储在磁盘中，ANALYZE TABLE 需要全索引扫描计算索引基数，此过程中需要锁表</li>
-<li>InnoDB 不再磁盘中存储索引统计信息，通过随机的索引访问进行评估将其存储在内存中。</li>
-</ul>
-<p><code>SHOW INDEX FROM TABLE</code>可查看索引的基数（Cardinality），也可以通过<code>information_schema.statistics 表</code>获取。</p>
-<p>InnoDB 会在表首次打开，或执行<code>ANALYZE TABLE</code>，或表的大小发生很大变化（大小变化超过 1/16 或插入 20 亿行）时计算索引的统计信息：随机读取少量索引页面，以此为样本计算。可通过参数设置样本页数量。</p>
-<p>InnoDB 打开某些<code>information_schema</code>表，使用 SHOW TABLE STATUS 或 SHOW INDEX，或 MySQL 客户端开启自动补全的时候会触发索引统计信息的更新，可能影响性能。可以关闭<code>innodb_stats_on_metadata</code>参数避免此问题。</p>
-<h3 id="减少索引和数据碎片"><a class="markdownIt-Anchor" href="#减少索引和数据碎片"></a> 减少索引和数据碎片</h3>
-<p>B 树索引会碎片化，造成查询效率降低。</p>
-<p>表的数据存储碎片化有三种类型：</p>
-<ul>
-<li>行碎片（Row fragmentation）：数据行被存储在多个片段中，对单行的访问性能下降</li>
-<li>行间碎片（Intra-row fragmentation）：逻辑上顺序的页，在磁盘上不是顺序存储的。对全表扫描和聚簇索引扫描之类的操作影响很大</li>
-<li>剩余空间碎片（Free space fragmentation）：数据页中有大量空余空间，读取数据时读取大量不需要的数据，造成浪费</li>
-</ul>
-<p>MyISAM 中三种都可能发生，InnoDB 中不会出现行碎片。</p>
-<p>解决方式</p>
-<ol>
-<li>OPTIMIZE TABLE 或 导入再导出</li>
-<li>MyISAM 可通过排序算法重建索引</li>
-<li>InnoDB 可先删除索引再重新创建</li>
-<li>空的<code>ALTER</code>操作来重建表：<code>ALTER TABLE innodb_tbl ENGINE=INNODB</code>（消除表的碎片）</li>
-</ol>
-<h2 id="总结"><a class="markdownIt-Anchor" href="#总结"></a> 总结</h2>
-<p>三个原则：</p>
-<ol>
-<li>单行访问成本很高。如果读取一个块只为了获取一行数据，很浪费，最好使一次块读取能获取尽可能多的行</li>
-<li>顺序访问数据很快：顺序 IO 不需要磁盘寻道，对于排序的查询也更快</li>
-<li>索引覆盖查询很快：如果一个所以覆盖了查询所需的所有列，那存储引擎就不用回表查询</li>
-</ol>
-]]></content>
-      <categories>
-        <category>database</category>
-      </categories>
-      <tags>
-        <tag>mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>创建高性能的索引-01</title>
-    <url>/2020/02/high-perf-mysql05-1/</url>
-    <content><![CDATA[<h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
-<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
-<p><strong>B 树索引</strong></p>
-<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
-<p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
-<p>B 树适用于全键值、键值范围或键前缀查找：</p>
-<ul>
-<li>全值匹配：和索引中的所有列进行匹配</li>
-<li>匹配最左前缀：只使用索引的第一列</li>
-<li>匹配列前缀：只匹配某一列的开头部分</li>
-<li>匹配范围值：匹配值处于某个区间</li>
-<li>精确匹配某一列并范围匹配另一列</li>
-<li>只访问索引的查询</li>
-</ul>
-<p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
-<p>B 树索引的限制：</p>
-<ul>
-<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
-<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
-</ul>
-<a id="more"></a>
-<p><strong>哈希索引</strong></p>
-<p>hash index 只有在精确匹配索引所有列的时候才有效。对于一行数据，存储引擎对所有<em>索引列</em>计算一个 hash code。</p>
-<p>MySQL 中只有 Memory 引擎显式支持哈希索引。此外其还支持非唯一哈希索引，哈希值相同是，索引会以链表的形式存放多个记录指针到同一个哈希条目中。</p>
-<p>哈希索引无法用于排序，不支持部分列匹配。</p>
-<p>InnoDB 引擎支持“自适应哈希索引（adaptive hash index）”，当 InnoDB 注意到某些索引值被使用得相对平凡是，它会在 B 树索引之上再创建一个哈希索引。这是一个内部行为，用户无法控制或配置。</p>
-<p>可以维护一个 hash 列，查询时手动指定使用 hash 函数，实现类似哈希索引的效果。</p>
-<p><strong>空间数据索引（R-Tree）</strong></p>
-<p>MyISAM 支持空间索引，可以用作地理数据存储，用所有维度来索引数据，必须使用 GIS 相关函数<code>MBRCONTAINS()</code>等来维护数据，但并不完善。PostgreSQL 中的 PostGIS 较好。</p>
-<p><strong>全文索引</strong></p>
-<p>详见第 7 章</p>
-<h2 id="索引的优点"><a class="markdownIt-Anchor" href="#索引的优点"></a> 索引的优点</h2>
-<p>三大优点：</p>
-<ol>
-<li>减少服务器需要扫描的数据量</li>
-<li>帮助服务器避免排序和临时表</li>
-<li>将随机 IO 变为顺序 IO</li>
-</ol>
-<h2 id="高性能的索引策略"><a class="markdownIt-Anchor" href="#高性能的索引策略"></a> 高性能的索引策略</h2>
-<h3 id="独立的列"><a class="markdownIt-Anchor" href="#独立的列"></a> 独立的列</h3>
-<p>独立的列是指索引列不能是表达式的一部分，也不能是函数的参数。我们应该养成简化 where 条件的习惯，时钟将索引列单独放在比较符号的一侧。</p>
-<h3 id="前缀索引和索引选择性"><a class="markdownIt-Anchor" href="#前缀索引和索引选择性"></a> 前缀索引和索引选择性</h3>
-<p>索引很长的字符列会让索引变得大且慢，一个策略是模拟 hash 索引。</p>
-<p>此外还可以只索引开头的部分字符，节约索引空间，提升效率，但会降低索引的选择性。<strong>索引的选择性</strong>是指，不重复的索引值（基数，cardinality）和记录总数的比值。</p>
-<p>为了确定前缀的合适长度，需要将常见值和常见的前缀进行比较。</p>
-<p>方法一：定性比较</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, city <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改前缀长度，寻找合适长度</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt, <span class="keyword">LEFT</span>(city, <span class="number">3</span>) <span class="keyword">AS</span> pref <span class="keyword">FROM</span> city_demo <span class="keyword">GROUP</span> <span class="keyword">BY</span> city <span class="keyword">ORDER</span> <span class="keyword">BY</span> cnt <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
-<p>方法二：计算选择度，定量比较</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> city)/<span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> city_demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">3</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel3,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">4</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel4,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">5</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel5,</span><br><span class="line"><span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> <span class="keyword">LEFT</span>(city, <span class="number">6</span>))/<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> sel6</span><br><span class="line"><span class="keyword">FROM</span> city_demo;</span><br></pre></td></tr></table></figure>
-<p>方法二中的数值反应平均选择性，还要通过观察调整避免极端案例（最常出现前缀）带来的影响。</p>
-<p><strong>创建前缀索引</strong></p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> city_demo <span class="keyword">ADD</span> <span class="keyword">KEY</span> (city(<span class="number">7</span>));</span><br></pre></td></tr></table></figure>
-<p>前缀索引是一种能够是索引更小更快的办法，但也有缺陷：无法使用前缀索引来做<code>ORDER BY</code>和<code>GROUP BY</code>，也无法使用前缀索引做覆盖扫描。</p>
-<p>一个常见场景是针对很长的十六进制唯一 ID 使用前缀索引。</p>
-<p>后缀索引（suffix index）也有用途，例如查找某个域名的邮箱地址。MySQL 原生并不支持，但可以把字符串反转后存储，创建前缀索引。通过触发器来维护。</p>
-<h3 id="多列索引"><a class="markdownIt-Anchor" href="#多列索引"></a> 多列索引</h3>
-<p>在多个列上分别创建单列索引大部分情况下不能提高查询性能。MySQL 5.x 引入了“索引合并（index merge）”的策略，一定程度上使用表上的多个单列索引来定位指定的行。算法包括：OR 条件的联合，AND 条件的相交，组合前两种情况的联合及相交。可以在<code>EXPLAIN</code>中的 <code>Extra</code>查看。</p>
-<p>出现索引合并意味着索引建得比较糟糕：</p>
-<ul>
-<li>当出现多个索引相交（多个 AND），通常需要创建一个包含多个列的索引</li>
-<li>当出现联合操作（多个 OR 条件），通常需要耗费大量 CPU 和内存用于缓存、排序和合并</li>
-<li>更重要的是，优化器不会吧这些计算到查询成本中，优化器只关心随机页面读取。有时运行这样查询不如直接全表扫描。可通过<code>optimizer_switch</code>关闭索引合并，也可以使用<code>IGNORE INDEX</code>提示让优化器忽略有些索引。</li>
-</ul>
-<h3 id="选择合适的索引顺序"><a class="markdownIt-Anchor" href="#选择合适的索引顺序"></a> 选择合适的索引顺序</h3>
-<p>场景不同，选择不同，需要根据运行频率最高的查询来调整索引列的顺序。</p>
-<p>当不想需要考虑排序和分组时，将选择性最高的列放在前面通常是最好的。</p>
-<h3 id="聚簇索引"><a class="markdownIt-Anchor" href="#聚簇索引"></a> 聚簇索引</h3>
-<p>聚簇索引（Oracle 称为 索引组织表，index-organized table）并不是单独的数据类型而是一种数据存储方式，InnoDB 的聚簇索引在同一个结构中保存了 B-Tree 索引和数据行。当表有聚簇索引时，它的数据行存放在索引的叶子页（leaf page）。因为无法同时把数据放在不同的地方，因此一个表只能有一个聚簇索引。</p>
-<p>InnoDB 默认通过主键聚集数据，没有主键会选择一个唯一的非空索引代替，如果没有这样 的索引，InnoDB 会隐式定义一个主键作为聚簇索引。</p>
-<p>聚簇索引的优点：</p>
-<ul>
-<li>相关数据共同存储，减少随机 IO</li>
-<li>数据访问更快</li>
-<li>使用覆盖索引扫描的查询可以直接使用页节点中的主键值  ——<em>不太理解</em></li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>数据存放在内存中时没有优势</li>
-<li>插入顺序，如果不是按照主键顺序插入数据，那么在数据插入完成后最好使用 OPTIMIZE TABLE 命令重新组织一下表</li>
-<li>更新聚簇索引列的代价很高，因为会强制将每个被更新的行移动到新的位置</li>
-<li>基于聚簇索引的表在插入行或更新主键时，可能面临“页分裂（page split）”问题。当行的主键值要求不许将这一行插入到某个已满的页中是，存储引擎会将该页分裂成两个页面来容纳该行（两个页可能隔得很远），页分裂会导致表占用更多磁盘空间</li>
-<li>聚簇索引可能导致全表扫面变慢，尤其是行比较稀疏，或者因为页分裂导致数据存储不连续的时候</li>
-<li><strong>二级索引访问需要两次索引查找</strong>：二级索引的叶节点不存储地址而是存储行的主键，通过二级索引查找行，需要先在二级索引的叶节点中找到对应的主键值，然后根据主键值在聚簇索引中找到对应的行。</li>
-</ul>
-<p><strong>InnoDB 和 MyISAM 的数据分布对比</strong></p>
-<p><strong>MyISAM</strong>：按照数据插入的顺序存储在磁盘上。索引的叶节点存储数据的物理地址，主键索引和其他索引没有什么不同</p>
-<p><strong>InnoDB</strong>：在 InnoDB 中聚簇索引就是表，不需要独立的行存储，聚簇索引的每个叶节点都包含了主键值、事务 ID、回滚指针以及剩余的列。如果使用主键的列前缀索引，InnoDB 也会包含完整的主键列。</p>
-<p>二级索引中叶节点存储的不是“行指针”，而是主键值，这样的策略减少了行移动或数据页分裂时二级索引的维护工作，但当主键值较长时会让二级索引占用更多的空间。</p>
-<p><strong>在 InnoDB 表中按主键顺序插入行</strong></p>
-<p>如果表中没有什么数据需要聚集，可以定义一个代理键（surrogate key）作为主键，最简单的就是自增列，可以保证数据行顺序写入。</p>
-<p>最好避免随机的（不连续且范围很大）聚簇索引，特别是对于 IO 密集型的应用。从这个角度，使用 UUID 作为聚簇索引很糟糕，插入的花费时间更长，索引占用的空间更大。</p>
-<p>顺序主键什么时候会造成坏的结果？<br />
-对于高并发工作符合，按主键顺序插入可能会造成明显的争用</p>
-<h3 id="覆盖索引"><a class="markdownIt-Anchor" href="#覆盖索引"></a> 覆盖索引</h3>
-<p>如果一个索引包含（或者说覆盖）所有需要查询的字段的值，就称之为“覆盖索引”。使用覆盖索引可以直接获得列的数据，不需要再去读取数据行。</p>
-<ul>
-<li>索引条目通常远小于数据行大小，只读取索引会极大减小数据访问量。</li>
-<li>索引按照列值顺序存储，范围查询有优势</li>
-<li>一些存储引擎如 MyISAM 在内存中只缓存索引，数据则依赖于操作系统缓存，只扫描索引减少系统调用。</li>
-<li>对于聚簇索引，如果二级索引能够实现覆盖查询，可以避免对主键索引的二级查询。</li>
-</ul>
-<p>MySQL 只能使用 B 树索引做覆盖索引（其他索引类型不存储索引列的值）。</p>
-<p>如果索引覆盖了 WHERE 条件的字段，但不是整个查询涉及的字段，MySQL 5.5 及更早版本会回表获取数据行。可以通过延迟关联（deferred join）进行优化，对能覆盖索引的字段进行子查询，得到主键后在外层查询获取所有列值。</p>
-<h3 id="使用索引扫描来做排序"><a class="markdownIt-Anchor" href="#使用索引扫描来做排序"></a> 使用索引扫描来做排序</h3>
-<p>扫描索引本身很快，但如果索引不能覆盖查询所需的列，那就不得不回表查询数据行，因此按索引读取数据的速度通常比顺序全表扫描要慢。</p>
-<p>只有当索引的列顺序和 ORDER BY 子句的顺序完全一致，并且各列的排序方向都一样时，MySQL 才能使用索引的结果做排序。需要关联多张表时，只有 ORDER BY 子句的字段全部属于第一张表时才能使用索引做排序。通常 ORDER BY 子句要满足最左前缀要求，除非前导列限定为常数。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> RENTAL_ID, STAFF_ID <span class="keyword">FROM</span> RENTAL </span><br><span class="line"><span class="keyword">WHERE</span> RENTAL_DATA = <span class="string">'2005-05-25'</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> INVENTORY_ID, CUSTIMER_ID</span><br></pre></td></tr></table></figure>
-<p>如上查询中能够利用建立在<code>（RENTAL_DATA，INVENTORY_ID，CUSTIMER_ID）</code>上的索引。</p>
-<h3 id="压缩索引"><a class="markdownIt-Anchor" href="#压缩索引"></a> 压缩索引</h3>
-<p>MyISAM 使用前缀压缩减少索引的大小，让更多的索引放到内存中，提高性能。但是对于部分操作可能更慢。因为每个值的前缀压缩以来于前面的值，因此只在正序扫面的时候有利，二分查找和倒序扫面都不行。</p>
-<h3 id="冗余和重复索引"><a class="markdownIt-Anchor" href="#冗余和重复索引"></a> 冗余和重复索引</h3>
-<p>重复索引是指在相同的列上按照找相同的顺序创建的相同类型的索引。重复索引影响性能，应该移除。</p>
-<p>唯一限制和主键限制都是通过索引实现的，三个都创建相当于在主键列上创建了三个相同的索引。</p>
-<p>如果创建了索引（A，B），再创建索引（A）就是冗余索引，因为这只是前一个索引的前缀索引。索引（A，B）可以当作索引（A）使用（对于 B 树）。还有一个情况是将一个索引扩展为（A，ID），因为主键列 ID 已经包含在二级索引中了，因此这种扩展也是冗余的。</p>
-<h3 id="索引和锁"><a class="markdownIt-Anchor" href="#索引和锁"></a> 索引和锁</h3>
 ]]></content>
       <categories>
         <category>database</category>
@@ -1485,12 +1278,12 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 <p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mover accent="true"><mi>ω</mi><mo>^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow><annotation encoding="application/x-tex">\hat{\omega} = (X^TX)^{-1}X^Ty
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;">^</span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1413309999999999em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span></span></span></p>
 <p>局部加权线性回归（LWLR）优化结果：</p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mover accent="true"><mi>ω</mi><mo>^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>y</mi><mspace linebreak="newline"></mspace><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>e</mi><mi>x</mi><mi>p</mi><mrow><mo fence="true">(</mo><mfrac><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>j</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>k</mi><mn>2</mn></msup></mrow></mfrac><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mtable rowspacing="0.24999999999999992em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mover accent="true"><mi>ω</mi><mo>^</mo></mover><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>W</mi><mi>y</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mi>e</mi><mi>x</mi><mi>p</mi><mrow><mo fence="true">(</mo><mfrac><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>j</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>k</mi><mn>2</mn></msup></mrow></mfrac><mo fence="true">)</mo></mrow></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{gathered}
 \hat{\omega} = (X^T W X)^{-1} X^T W y  \\
 
 w_{ij} = exp\left(\frac{(x_i - x_j)^2}{2k^2}\right)
-
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;">^</span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1413309999999999em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:0.716668em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.441138em;vertical-align:-0.95003em;"></span><span class="mord mathdefault">e</span><span class="mord mathdefault">x</span><span class="mord mathdefault">p</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911079999999999em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></p>
+\end{gathered}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:4.2924690000000005em;vertical-align:-1.8962345000000003em;"></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.3962345000000003em;"><span style="top:-4.9960115em;"><span class="pstrut" style="height:3.4911079999999997em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;">^</span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mord mathdefault" style="margin-right:0.13889em;">W</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-2.8449034999999996em;"><span class="pstrut" style="height:3.4911079999999997em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.02691em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord mathdefault">e</span><span class="mord mathdefault">x</span><span class="mord mathdefault">p</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.4911079999999999em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.8962345000000003em;"><span></span></span></span></span></span></span></span></span></span></span></span></p>
 <p>LWLR 是非参数模型，每次进行回归计算都需要遍历训练样本。</p>
 <p>优点：实现简单，计算简单</p>
 <p>缺点：不能拟合非线性关系</p>
@@ -1589,7 +1382,7 @@ w_{ij} = exp\left(\frac{(x_i - x_j)^2}{2k^2}\right)
 <p>优点</p>
 <ul>
 <li>算法简单，容易实现 ，算法速度很快；</li>
-<li>对处理大数据集，该算法是相对可伸缩的和高效率的，因为它的复杂度大约是 O(nkt)，其中 n 是所有对象的数目，k 是簇的数目，t 是迭代的次数。通常 k&lt;&lt;n。这个算法<strong>通常局部收敛</strong>。</li>
+<li>对处理大数据集，该算法是相对可伸缩的和高效率的，因为它的复杂度大约是 O(nkt)，其中 n 是所有对象的数目，k 是簇的数目，t 是迭代的次数。通常 <code>k &lt;&lt; n</code>，这个算法<strong>通常局部收敛</strong>。</li>
 <li>算法尝试找出使平方误差函数值最小的 k 个划分。当簇是密集的、球状或团状的，且簇与簇之间区别明显时，聚类效果较好。</li>
 </ul>
 <p>缺点</p>
@@ -1652,7 +1445,7 @@ w_{ij} = exp\left(\frac{(x_i - x_j)^2}{2k^2}\right)
 <li>然后试试决策树（随机森林）看看是否可以大幅度提升你的模型性能。即便最后你并没有把它当做为最终模型，你也可以使用随机森林来移除噪声变量，做特征选择；</li>
 <li>如果特征的数量和观测样本特别多，那么当资源和时间充足时（这个前提很重要），使用 SVM 不失为一种选择。</li>
 </ol>
-<p>通常情况下：GBDT&gt;=SVM&gt;=RF&gt;=Adaboost&gt;=Other…</p>
+<p>通常情况下：GBDT &gt;= SVM &gt;= RF &gt;= Adaboost &gt;= Other</p>
 <p>算法固然重要，<strong>但好的数据却要优于好的算法</strong>，设计优良特征是大有裨益的。假如你有一个超大数据集，那么无论你使用哪种算法可能对分类性能都没太大影响（此时就可以根据速度和易用性来进行抉择）。</p>
 <hr class="footnotes-sep" />
 <section class="footnotes">
@@ -1809,6 +1602,251 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
       </categories>
       <tags>
         <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ETL 概念解析</title>
+    <url>/2019/03/ETL-overview/</url>
+    <content><![CDATA[<h2 id="实现方法"><a class="markdownIt-Anchor" href="#实现方法"></a> 实现方法</h2>
+<p>常见的 ETL 实现方法</p>
+<ol>
+<li>借助 ETL 工具（如 Oracle 的 OWB、Informatic、Kettle 等）实现</li>
+<li>SQL 方式实现</li>
+<li>ETL 工具和 SQL 相结合。</li>
+</ol>
+<p>借助工具可以快速的建立起 ETL 工程，屏蔽了复杂的编码任务，提高了速度，降低了难度，但是缺少灵活性。SQL 的方法优点是灵活，提高 ETL 运行效率，但是编码复杂，对技术要求比较高。往往需要结合使用。</p>
+<a id="more"></a>
+<h2 id="抽取"><a class="markdownIt-Anchor" href="#抽取"></a> 抽取</h2>
+<p>数据抽取主要是针对各个业务系统及不同数据源的分散数据，充分理解数据定义后，规划需要的数据源及数据定义，制定可操作的数据源抽取（增量抽取）方案。</p>
+<p>数据抽取过程中需要关注的要点：</p>
+<ul>
+<li>确认每个数据源的系统和数据结构。</li>
+<li>定义抽取方式，是人工抽取还是基于工具抽取。</li>
+<li>对于每个数据源，确定数据抽取的频度，是每天、每星期、还是每个季度等。</li>
+<li>决定抽取任务中各项任务的先后顺序，某项工作是否必须等到前面的工作成功完成后，才可以开始。</li>
+<li>决定如何处理无法抽取的输入记录。</li>
+</ul>
+<h3 id="增量抽取"><a class="markdownIt-Anchor" href="#增量抽取"></a> 增量抽取</h3>
+<h4 id="1-触发器方式"><a class="markdownIt-Anchor" href="#1-触发器方式"></a> 1、触发器方式</h4>
+<p>触发器方式是普遍采取的一种增量抽取机制。该方式是根据抽取要求，在要被抽取的源表上建立插入、修改、删除 3 个触发器，每当源表中的数据发生变化，就被相应的触发器将变化的数据写入一个增量日志表，ETL 的增量抽取则是从增量日志表中而不是直接在源表中抽取数据，同时增量日志表中抽取过的数据要及时被标记或删除。为了简单起见，增量日志表一般不存储增量数据的所有字段信息，而只是存储源表名称、更新的关键字值和更新操作类型（KNSEN、UPDATE 或 DELETE），ETL 增量抽取进程首先根据源表名称和更新的关键字值，从源表中提取对应的完整记录，再根据更新操作类型，对目标表进行相应的处理。</p>
+<p>例如，对于源表为 ORACLE 类型的数据库，采用触发器方式进行增量数据捕获的过程如下：</p>
+<p>SQL 代码</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建增量日志表 DML_LOG：</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> DML_LOG( <span class="comment">--新建 DML_LOG 表记录增量数据变化</span></span><br><span class="line"> <span class="keyword">ID</span> <span class="built_in">NUMBER</span> PRIMARY <span class="keyword">KEY</span>, <span class="comment">--自增主键</span></span><br><span class="line"> TABLE_NAME <span class="built_in">VARCHAR2</span>(<span class="number">200</span>), <span class="comment">--源表名称</span></span><br><span class="line"> RECORD_ID <span class="built_in">NUMBER</span>, <span class="comment">--源表增量记录的主键值</span></span><br><span class="line"> DML_TYPE <span class="built_in">CHAR</span>(<span class="number">1</span>), <span class="comment">--增量类型，I 表示新增：U 表示更新；D 表示删除</span></span><br><span class="line"> EXECUTE_DATE <span class="built_in">DATE</span> <span class="comment">--发生时间</span></span><br><span class="line"> )；</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 为 DML_LOG 创建一个序列 SEQ_DML_LOG 上，以便触发器写增量日志表时生成 ID 值。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 针对要监听的每一张表，创建一个触发器，例如对表 TEST 创建触发器如下：</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">OR</span> <span class="keyword">REPLACE</span> <span class="keyword">TRIGGER</span> T <span class="keyword">BEFORE</span> <span class="keyword">INSERT</span> <span class="keyword">OR</span> <span class="keyword">UPDATE</span></span><br><span class="line"> <span class="keyword">OR</span> <span class="keyword">DELETE</span> <span class="keyword">ON</span> T <span class="keyword">FOR</span> <span class="keyword">EACH</span> <span class="keyword">ROW</span></span><br><span class="line"><span class="keyword">DECLARE</span> L_DML_TYPE <span class="built_in">VARCHAR2</span>(<span class="number">1</span>)；</span><br><span class="line"> <span class="keyword">BEGIN</span></span><br><span class="line"> <span class="keyword">IF</span> INSERTING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'I'</span>；<span class="comment">-- 源表有新增数据</span></span><br><span class="line"> <span class="keyword">ELSIF</span> UPDATING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'U'</span>； <span class="comment">-- 源表有更新数据</span></span><br><span class="line"> <span class="keyword">ELSIF</span> DELETING <span class="keyword">THEN</span> L_DML_TYPE：=<span class="string">'D'</span>； <span class="comment">-- 源表有删除数据</span></span><br><span class="line"> ENDIF；</span><br><span class="line"><span class="keyword">IF</span> DELETING <span class="keyword">THEN</span> <span class="comment">-- 源表有删除数据 </span></span><br><span class="line"> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> DML_LOG(<span class="keyword">ID</span>，TABLE_NAME，RECORD_ID，EXECUTE_DATE，DML_TYPE)</span><br><span class="line"> <span class="keyword">VALUES</span>(SEQ_DML_LOG.NEXTVAL, <span class="string">'TEST'</span>, OLD.ID, <span class="keyword">SYSDATE</span>, L_DML_TYPE)；</span><br><span class="line"><span class="keyword">ELSE</span></span><br><span class="line"> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> DML_LOG(<span class="keyword">ID</span>，TABLE_NAME，RECORD_ID，EXECUTE_DATE，DML_TYPE)</span><br><span class="line"> <span class="keyword">VALUES</span>(SEQ_DML_LOG.NEXTVAL, <span class="string">'TEST'</span>, NEW.ID, <span class="keyword">SYSDATE</span>, L_DML_TYPE)；</span><br><span class="line"> ENDIF；</span><br><span class="line"><span class="keyword">END</span>；</span><br></pre></td></tr></table></figure>
+<p>这样，对表 T 的所有 DML 操作就记录在增量日志表 DML_LOG 中，注意增量日志表中并没有完全记录增量数据本身，只是记录了增量数据的来源。进行增量 ETL 时，只需要根据增量日志表中的记录情况，反查源表得到真正的增量数据。</p>
+<p>优点：数据抽取的性能较高。</p>
+<p>缺点：要求业务表建立触发器，对业务系统有影响，需要对用户数据库进行修改，不能对多表和视图进行操作，如果目标表发生错误会造成级联事务失败，这在生产系统无法忍受，另外一个缺点是如果触发器运行过程中产生问题，有时需要重新加载整个表来恢复加载作业的运行。这类方法适用于一对一且业务逻辑不复杂的表的增量更新。</p>
+<h4 id="2-时间戳方式"><a class="markdownIt-Anchor" href="#2-时间戳方式"></a> 2、时间戳方式</h4>
+<p>实现原理是指增量抽取时，抽取进程通过比较系统时间或者源表上次抽取时的最大时间戳与抽取源表的时间戳字段的值来决定抽取哪些数据。这种方式需要在源表上增加一个时间戳字段，系统中更新修改表数据的时候，同时修改时间戳字段的值。</p>
+<p>采用时间戳进行增量更新时需要源表有相应的时间戳字段，所以对于没有时间戳的源表需要进行相应业务需要改造，增加必要的时间戳字段。</p>
+<p>有的数据库（例如 SQL SERVER）的时间戳支持自动更新，即表的其它字段的数据发生改变时，时间戳字段的值会被自动更新为记录改变的时刻。在这种情下，进行 ETL 实施时就只需要在源表加上时间戳字段就可以了。</p>
+<p>对于不支持时间戳自动更新的数据库，这就要求业务系统在更新业务数据时，通过编程的方式手工更新时间戳字段。使用时间戳方式可以正常捕获源表的插入和更新操作，但对于删除操作则无能为力，需要结合其它机制才能完成。</p>
+<p>时间戳方式通常需要一个日志表对 ETL 的更新操作进行记录，将最后一次成功更新的时间戳记录下来，以方便进行时间筛选。每次进行 ETL 增量更新时，读取日志表里的上次更新时间戳记录，作为本次增量更新的时间窗口起始时间。</p>
+<p>优点：</p>
+<ul>
+<li>实现逻辑简单，可以大批量更新数据。不仅可以对一张源表进行数据捕获，也可以对多张源表的增量数据进行捕获。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>使用时间戳方式可以正常捕获源表的插入和更新操作，但对于删除操作则无能为力，需要结合其它机制才能完成。这时可以设计一张和源表相同的数据表记录源表中删除的数据，同时记录删除时的时间戳，在对目标表更新时同时读取这张表的记录，进行删除操作。或者在目标表通过打标记的方式（update active_flag=1）进行逻辑删除。</li>
+<li>应用起来有部分局限性。即源表都需要有时间戳字段。如果部分源表（或参考表）无时间戳字段，且源表有部分字段更新时（常见于维度表的定义更新），则面临历史数据的更新问题。这时一般需要采用 SQL 语句或者下文介绍的全表对比方式进行历史数据更新。或者调整时间戳范围，做全表数据的刷新。这种情况需要对目标表的实时性要求不高，可以在系统空闲时进行处理。</li>
+</ul>
+<h4 id="3-全表删除插入方式"><a class="markdownIt-Anchor" href="#3-全表删除插入方式"></a> 3、全表删除插入方式</h4>
+<p>全表删除插入方式是指每次抽取前先删除目标表数据，抽取时全新加载数据。该方式实际上将增量抽取等同于全量抽取。对于数据量不大，全量抽取的时间代价小于执行增量抽取的算法和条件代价时，可以采用该方式。</p>
+<h4 id="4-全表比对方式"><a class="markdownIt-Anchor" href="#4-全表比对方式"></a> 4、全表比对方式</h4>
+<p>全表比对即在增量抽取时，ETL 进程逐条比较源表和目标表的记录，将新增和修改的记录读取出来。优化之后的全部比对方式是采用 MD5 校验码，需要事先为要抽取的表建立一个结构类似的临时表，该临时表记录源表的主键值以及根据源表所有字段的数据计算出来的 MD5 校验码，每次进行数据抽取时，对源表和 MD5 临时表进行 MD5 校验码的比对，</p>
+<ul>
+<li>如有不同，进行 UPDATE 操作</li>
+<li>如目标表没有存在该主键值，表示该记录还没有，则进行 INSERT 操作。</li>
+<li>对在源表中已不存在而目标表仍保留的主键值，执行 DELETE 操作。</li>
+</ul>
+<p>一般全表比对更新可以采用一些常用的 ETL 工具协助进行。</p>
+<p>优点：</p>
+<ul>
+<li>适用于涉及多张源表的抽取与转换，业务逻辑复杂的增量更新。</li>
+<li>适用于源表无时间戳字段，无法采用时间戳方式进行增量更新。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>对于大数据量数据表，效率不高。</li>
+</ul>
+<h4 id="5-日志表方式"><a class="markdownIt-Anchor" href="#5-日志表方式"></a> 5、日志表方式</h4>
+<p>对于建立了业务系统的生产数据库，可以在数据库中创建业务日志表，当特定需要监控的业务数据发生变化时，由相应的业务系统程序模块来更新维护日志表内容。增量抽取时，</p>
+<p>通过读日志表数据决定加载哪些数据及如何加载。日志表的维护需要由业务系统程序用代码来完成。</p>
+<h4 id="6-系统日志分析方式"><a class="markdownIt-Anchor" href="#6-系统日志分析方式"></a> 6、系统日志分析方式</h4>
+<p>该方式通过分析数据库自身的日志来判断变化的数据。关系型数据库系统都会将所有的 DML 操作存储在日志文件中，以实现数据库的备份和还原功能。ETL 增量抽取进程通过对数据库的日志进行分析，提取对相关源表在特定时间后发生的 DML 操作信息，就可以得知自上次抽取时刻以来该表的数据变化情况，从而指导增量抽取动作。有些数据库系统提供了访问日志的专用的程序包（例如 ORACLE 的 LOGMINDER），使数据库日志的分析工作得到大大简化。</p>
+<h4 id="7-特定数据库方式oracle"><a class="markdownIt-Anchor" href="#7-特定数据库方式oracle"></a> 7、特定数据库方式（ORACLE）</h4>
+<p>以下介绍常见的针对特有数据库系统的增景抽取方式。</p>
+<ol>
+<li>ORACLE 改变数据捕获（CHANGEDDATACAPTURE，CDC）方式：</li>
+</ol>
+<p>ORACLECDC 特性是在 ORAELE9I 数据库中引入的。CDC 能够帮助识别从上次抽取之后发生变化的数据。利用 CDC，在对源表进行 INSERT、UPCLATE 或 DELETE 等操作的同时就可以提取数据，并且变化的数据被保存在数据库的变化表中。这样就可以捕获发生变化的数据，然后利用数据库视图以一种可控的方式提供给 ETL 抽取进程，作为增量抽取的依据。CDC 方式对源表数据变化情况的捕获有两种方式：同步 CDC 和异步 CDC。同步 CDC 使用源数据库触发器来捕获变更的数据。这种方式是实时的，没有任何延迟。当 DML 操作提交后，变更表中就产生了变更数据。异步 CDC 使用数据库重做日志（REDOLOG）文件，在源数据库发生变更以后，才进行数据捕获。</p>
+<ol start="2">
+<li>ORACLE 闪回查询方式</li>
+</ol>
+<p>ORACLE9I 以上版本的数据库系统提供了闪回查询机制，允许用户查询过去某个时刻的数据库状态。这样，抽取进程可以将源数据库的当前状态和上次抽取时刻的状态进行对比，快速得出源表数据记录的变化情况。</p>
+<h4 id="8-比较和分析"><a class="markdownIt-Anchor" href="#8-比较和分析"></a> 8、比较和分析</h4>
+<p>可见，ETL 在进行增量抽取操作时，有以上各种机制可以选择。现从兼容性、完备性、性能和侵入性 3 个方面对这些机制的优劣进行比较分析。</p>
+<ul>
+<li>兼容性</li>
+</ul>
+<p>数据抽取需要面对的源系统，并不一定都是关系型数据库系统。某个 ETL 过程可能需要从若干年前的遗留系统中抽取 EXCEL 或者 CSV 文本数据。这时，所有基于关系型数据库产品的增量机制都无法工作，时间戳方式和全表比对方式可能有一定的利用价值，在最坏的情况下，只有放弃增量抽取的思路，转而采用全表删除插入方式。</p>
+<ul>
+<li>完备性</li>
+</ul>
+<p>时间戳方式不能捕获 DELETE 操作，需要结合其它方式一起使用。</p>
+<ul>
+<li>性能</li>
+</ul>
+<p>增量抽取的性能因素表现在两个方面，一是抽取进程本身的性能，二是对源系统性能的负面影响。</p>
+<p>触发器方式、日志表方式以及系统日志分析方式由于不需要在抽取过程中执行比对步骤，所以增量抽取的性能较佳。全表比对方式需要经过复杂的比对过程才能识别出更改的记录，抽取性能最差。</p>
+<p>在对源系统的性能影响方面，触发器方式由于是直接在源系统业务表上建立触发器，同时写临时表，对于频繁操作的业务系统可能会有一定的性能损失，尤其是当业务表上执行批量操作时，行级触发器将会对性能产生严重的影响；同步 CDC 方式内部采用触发器的方式实现，也同样存在性能影响的问题；全表比对方式和日志表方式对数据源系统数据库的性能没有任何影响，只是它们需要业务系统进行额外的运算和数据库操作，会有少许的时间损耗；时间戳方式、系统日志分析方式以及基于系统日志分析的方式（异步 CDC 和闪回查询）对数据库性能的影响也是非常小的。</p>
+<ul>
+<li>侵入性</li>
+</ul>
+<p>指业务系统是否要为实现增抽取机制做功能修改和额外操作，在这一点上，时间戳方式值得特别关注该方式除了要修改数据源系统表结构外，对于不支持时间戳字段自动更新的关系型数据库产品，还必须要修改业务系统的功能，让它在源表 T 执行每次操作时都要显式的更新表的时间戳字段，这在 ETL 实施过程中必须得到数据源系统高度的配合才能达到，并且在多数情况下这种要求在数据源系统看来是比较“过分”的，这也是时间戳方式无法得到广泛运用的主要原因。另外，触发器方式需要在源表上建立触发器，这种在某些场合中也遭到拒绝。还有一些需要建立临时表的方式，例如全表比对和日志表方式。可能因为开放给 ETL 进程的数据库权限的限制而无法实施。同样的情况也可能发生在基于系统日志分析的方式上，因为大多数的数据库产品只允许特定组的用户甚至只有 DBA 才能执行日志分析。闪回查询在侵入性方面的影响是最小的。</p>
+<table>
+<thead>
+<tr>
+<th>增量机制</th>
+<th>兼容性</th>
+<th>完备性</th>
+<th>抽取性能</th>
+<th>对源系统性能影响</th>
+<th>对源系统侵入性</th>
+<th>实现难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发器方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>大</td>
+<td>一般</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>时间戳方式</td>
+<td>关系型数据库，具有“字段”结构的其它数据格式</td>
+<td>低</td>
+<td>较优</td>
+<td>很小</td>
+<td>大</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>全表删除插入方式</td>
+<td>任何数据格式</td>
+<td>高</td>
+<td>极差</td>
+<td>无</td>
+<td>无</td>
+<td>容易</td>
+</tr>
+<tr>
+<td>全表比对方式</td>
+<td>关系型数据库、文本格式</td>
+<td>高</td>
+<td>差</td>
+<td>小</td>
+<td>一般</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>日志表方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>小</td>
+<td>较大</td>
+<td>较容易</td>
+</tr>
+<tr>
+<td>系统日志分析方式</td>
+<td>关系型数据库</td>
+<td>高</td>
+<td>优</td>
+<td>很小</td>
+<td>较大</td>
+<td>难</td>
+</tr>
+<tr>
+<td>同步 CDC 方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>优</td>
+<td>大</td>
+<td>一般</td>
+<td>较难</td>
+</tr>
+<tr>
+<td>异步 CDC 方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>优</td>
+<td>很小</td>
+<td>一般</td>
+<td>较难</td>
+</tr>
+<tr>
+<td>闪回查询方式</td>
+<td>Oracle 数据库 9i 以上</td>
+<td>高</td>
+<td>较优</td>
+<td>很小</td>
+<td>无</td>
+<td>较容易</td>
+</tr>
+</tbody>
+</table>
+<h2 id="清洗"><a class="markdownIt-Anchor" href="#清洗"></a> 清洗</h2>
+<p>一般情况下，数据仓库分为 ODS、DW 两部分。通常的做法是从业务系统到 ODS 做清洗，将脏数据和不完整数据过滤掉，在从 ODS 到 DW 的过程中转换，进行一些业务规则的计算和聚合。</p>
+<h3 id="1-数据清洗"><a class="markdownIt-Anchor" href="#1-数据清洗"></a> 1、数据清洗</h3>
+<p>数据清洗的任务是过滤那些不符合要求的数据，将过滤的结果交给业务主管部门，确认是否过滤掉还是由业务单位修正之后再进行抽取。不符合要求的数据主要是有不完整的数据、错误的数据、重复的数据三大类。</p>
+<ul>
+<li>
+<p>不完整的数据：这一类数据主要是一些应该有的信息缺失。对于这一类数据过滤出来，按缺失的内容分别写入不同 Excel 文件向客户提交，要求在规定的时间内补全。补全后才写入数据仓库。</p>
+</li>
+<li>
+<p>错误的数据：这一类错误产生的原因是业务系统不够健全，在接收输入后没有进行判断直接写入后台数据库造成的，比如数值数据输成全角数字字符、字符串数据后面有一个回车操作、日期格式不正确、日期越界等。这一类数据也要分类，对于类似于全角字符、数据前后有不可见字符的问题，只能通过写 SQL 语句的方式找出来，然后要求客户在业务系统修正之后抽取。日期格式不正确的或者是日期越界的这一类错误会导致 ETL 运行失败，这一类错误需要去业务系统数据库用 SQL 的方式挑出来，交给业务主管部门要求限期修正，修正之后再抽取。</p>
+</li>
+<li>
+<p>重复的数据：对于这一类数据——特别是维表中会出现这种情况——将重复数据记录的所有字段导出来，让客户确认并整理。</p>
+</li>
+</ul>
+<p>数据清洗是一个反复的过程，不可能在几天内完成，只有不断的发现问题，解决问题。对于是否过滤，是否修正一般要求客户确认，对于过滤掉的数据，写入 Excel 文件或者将过滤数据写入数据表，在 ETL 开发的初期可以每天向业务单位发送过滤数据的邮件，促使他们尽快地修正错误，同时也可以做为将来验证数据的依据。数据清洗需要注意的是不要将有用的数据过滤掉，对于每个过滤规则认真进行验证，并要用户确认。</p>
+<h3 id="2-数据转换"><a class="markdownIt-Anchor" href="#2-数据转换"></a> 2、数据转换</h3>
+<p>数据转换的任务主要进行不一致的数据转换、数据粒度的转换，以及一些商务规则的计算。</p>
+<ul>
+<li>
+<p>不一致数据转换：这个过程是一个整合的过程，将不同业务系统的相同类型的数据统一，比如同一个供应商在结算系统的编码是 XX0001, 而在 CRM 中编码是 YY0001，这样在抽取过来之后统一转换成一个编码。</p>
+</li>
+<li>
+<p>数据粒度的转换：业务系统一般存储非常明细的数据，而数据仓库中数据是用来分析的，不需要非常明细的数据。一般情况下，会将业务系统数据按照数据仓库粒度进行聚合。</p>
+</li>
+<li>
+<p>商务规则的计算：不同的企业有不同的业务规则、不同的数据指标，这些指标有的时候不是简单的加加减减就能完成，这个时候需要在 ETL 中将这些数据指标计算好了之后存储在数据仓库中，以供分析使用。</p>
+</li>
+</ul>
+<h2 id="etl-日志"><a class="markdownIt-Anchor" href="#etl-日志"></a> ETL 日志</h2>
+<p>ETL 日志分为三类。</p>
+<ul>
+<li>执行过程日志：这一部分日志是在 ETL 执行过程中每执行一步的记录，记录每次运行每一步骤的起始时间，影响了多少行数据，流水账形式。</li>
+<li>错误日志：当某个模块出错的时候写错误日志，记录每次出错的时间、出错的模块以及出错的信息等。</li>
+<li>总体日志：只记录 ETL 开始时间、结束时间是否成功信息。如果使用 ETL 工具，ETL 工具会自动产生一些日志，这一类日志也可以作为 ETL 日志的一部分。记录日志的目的是随时可以知道 ETL 运行情况，如果出错了，可以知道哪里出错。</li>
+</ul>
+<p>参考文章:</p>
+<ul>
+<li><a href="https:--blog.csdn.net/hzp666/article/details/70139867" target="_blank" rel="noopener">BI的ETL中怎么做增量处理</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/data/library/techarticle/dm-1508-etlsataloadmechanism/index.html" target="_blank" rel="noopener">ETL 数据加载机制概述</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>data</category>
+      </categories>
+      <tags>
+        <tag>ETL</tag>
       </tags>
   </entry>
 </search>
