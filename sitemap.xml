@@ -2,9 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://viggoc.github.io/2019/06/linux-env/</loc>
+    
+    <lastmod>2020-03-29T17:49:09.405Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2019/03/Linux-note/</loc>
+    
+    <lastmod>2020-03-29T17:41:32.816Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://viggoc.github.io/2019/12/ML_algorithm/</loc>
     
-    <lastmod>2020-03-20T15:40:21.836Z</lastmod>
+    <lastmod>2020-03-29T15:07:54.553Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2019/09/Oracle-note-summary/</loc>
+    
+    <lastmod>2020-03-20T17:38:27.722Z</lastmod>
     
   </url>
   

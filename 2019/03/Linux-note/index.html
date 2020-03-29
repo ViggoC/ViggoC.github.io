@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="default">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://viggoc.github.io').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="本文记录 Linux 使用过程中遇到的小问题和解决方法，比较杂。 日常使用Ubuntu 18.04，服务器常用CentOS 7。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 杂记">
+<meta property="og:url" content="https://viggoc.github.io/2019/03/Linux-note/index.html">
+<meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="本文记录 Linux 使用过程中遇到的小问题和解决方法，比较杂。 日常使用Ubuntu 18.04，服务器常用CentOS 7。">
+<meta property="article:published_time" content="2019-03-11T17:17:01.000Z">
+<meta property="article:modified_time" content="2020-03-29T17:41:32.816Z">
+<meta property="article:author" content="VC">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="CentOS">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://viggoc.github.io/2019/03/Linux-note/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Linux 杂记 | VC' Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VC' Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/03/Linux-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux 杂记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-12 01:17:01" itemprop="dateCreated datePublished" datetime="2019-03-12T01:17:01+08:00">2019-03-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-30 01:41:32" itemprop="dateModified" datetime="2020-03-30T01:41:32+08:00">2020-03-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2019/03/Linux-note/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/03/Linux-note/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文记录 Linux 使用过程中遇到的小问题和解决方法，比较杂。</p>
+<p>日常使用<code>Ubuntu 18.04</code>，服务器常用<code>CentOS 7</code>。</p>
+<a id="more"></a>
+<h2 id="gnome"><a class="markdownIt-Anchor" href="#gnome"></a> Gnome</h2>
+<h3 id="菜单管理"><a class="markdownIt-Anchor" href="#菜单管理"></a> 菜单管理</h3>
+<p><strong>菜单快捷方式文件路径</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">global: &#x2F;usr&#x2F;share&#x2F;application</span><br><span class="line">local: &#x2F;home&#x2F;vc&#x2F;.local&#x2F;share&#x2F;applications</span><br></pre></td></tr></table></figure>
+<p><strong>Menu 中为 App 创建文件夹</strong></p>
+<p>方法一：安装插件</p>
+<p>方法二：在 Ubuntu Software 中操作，在 install 选项卡中选中多个 app 添加到 folder</p>
+<p><a href="https://askubuntu.com/questions/1091972/how-do-i-create-app-folders-in-the-gnome-application-menu" target="_blank" rel="noopener">ref</a></p>
+<p><strong>部分 App 在 Menu 中不显示图标</strong></p>
+<p>标记文件中有个<code>NotShowIn=GNOME</code>选项，将其注释</p>
+<h3 id="dock-启用minimize-on-click"><a class="markdownIt-Anchor" href="#dock-启用minimize-on-click"></a> Dock 启用“Minimize on Click”</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 默认为&#39;previews&#39;</span><br><span class="line">gsettings set org.gnome.shell.extensions.dash-to-dock click-action &#39;minimize&#39;</span><br></pre></td></tr></table></figure>
+<h3 id="document-viewer-shortcut"><a class="markdownIt-Anchor" href="#document-viewer-shortcut"></a> document viewer <a href="https://help.gnome.org/users/evince/stable/shortcuts.html.zh_CN" target="_blank" rel="noopener">shortcut</a></h3>
+<ul>
+<li>文档管理器切换路径输入快捷键<code>ctrl+L</code></li>
+<li>在此处打开终端<code>app+E</code></li>
+</ul>
+<h3 id="gnome-桌面美化"><a class="markdownIt-Anchor" href="#gnome-桌面美化"></a> Gnome 桌面美化</h3>
+<p><a href="https://www.cnblogs.com/youxia/p/LinuxDesktop003.html" target="_blank" rel="noopener">针对 Gnome 3 的 Linux 桌面进行美化</a></p>
+<h3 id="中文字体"><a class="markdownIt-Anchor" href="#中文字体"></a> 中文字体</h3>
+<p>中文字体异常，如‘门’字显示为日文。系统级别的解决方法为，修改系统配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi &#x2F;etc&#x2F;fonts&#x2F;conf.d&#x2F;64-language-selector-prefer.conf</span><br></pre></td></tr></table></figure>
+<p>将<code>&lt;family&gt;Noto Sans CJK CS&lt;/falimy&gt;</code>提到最前面。</p>
+<p>Chrome 中可以单独对字体进行设置。</p>
+<h3 id="远程连接桌面"><a class="markdownIt-Anchor" href="#远程连接桌面"></a> 远程连接桌面</h3>
+<p><a href="http://www.blogjava.net/ivanwan/archive/2012/04/26/376670.html" target="_blank" rel="noopener">Xming</a>: 连不上注意查看 log, 看是不是 server 的访问权限问题，</p>
+<h2 id="软件与命令"><a class="markdownIt-Anchor" href="#软件与命令"></a> 软件与命令</h2>
+<h3 id="wps"><a class="markdownIt-Anchor" href="#wps"></a> WPS</h3>
+<ol>
+<li>进入 <a href="http://linux.wps.com/" target="_blank" rel="noopener">WPS 官网</a> 下载最新版安装包
+<ul>
+<li>可卸载自带 office <code>sudo apt-get remove --purge libreoffice*</code></li>
+</ul>
+</li>
+<li>终端下<code>dpkg</code>安装</li>
+<li>若出现系统字体缺失问题可 <a href="https://pan.baidu.com/s/1i5dzB9r" target="_blank" rel="noopener">下载字体库</a> 安装，密码：pwe1</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo unzip wps_symbol_fonts.zip -d &#x2F;usr&#x2F;share&#x2F;fonts&#x2F;wps-office</span><br></pre></td></tr></table></figure>
+<h3 id="ufw"><a class="markdownIt-Anchor" href="#ufw"></a> UFW</h3>
+<p>LInux 原始的防火墙工具 iptables 由于过于繁琐，所以 ubuntu 系统默认提供了一个基于 iptable 之上的防火墙工具 ufw。</p>
+<p>ref:</p>
+<ul>
+<li><a href="https://wiki.ubuntu.org.cn/UbuntuHelp:UFW" target="_blank" rel="noopener">参考 1</a></li>
+<li><a href="https://www.sysgeek.cn/ubuntu-18-04-ufw/" target="_blank" rel="noopener">参考 2</a></li>
+</ul>
+<h3 id="sudo"><a class="markdownIt-Anchor" href="#sudo"></a> sudo</h3>
+<p>sudo cd 命令无法进入权限 700 的目录，要通过 <code>sudo -i/-s</code></p>
+<p>类似的 cp 命令也无法正常运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo cp -R &#x2F;var&#x2F;lib&#x2F;docker&#x2F;* &#x2F;home&#x2F;vc&#x2F;Docker&#x2F;lib&#x2F;</span><br><span class="line">cp: cannot stat &#39;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;*&#39;: No such file or directory</span><br></pre></td></tr></table></figure>
+<p><a href="https://superuser.com/questions/918333/why-cant-sudo-cp-find-the-files" target="_blank" rel="noopener">参考</a></p>
+<p>You can get an interactive shell running as root using any of the following methods (these are the full commands just run as is from an existing shell and they will give you a root shell).</p>
+<ul>
+<li>sudo -i: Gives you a root prompt with a new shell environment (as if root did a login). Does a cd to root’s home directory as well.</li>
+<li>sudo sh or sudo bash: Gives a basic root shell spawned in the environment of the calling user (sanitized by sudo).</li>
+<li>sudo -s -H: Gives a shell and resets $HOME, but doesn’t cd to $HOME like sudo -i.</li>
+<li>sudo su: Uses the normal su method of becoming root but doesn’t need a root password.</li>
+</ul>
+<p>Basically I use either sudo -i or sudo -s -H in most cases depending on if I wanted to end up in root’s home directory or not.</p>
+<h2 id="存储管理"><a class="markdownIt-Anchor" href="#存储管理"></a> 存储管理</h2>
+<h3 id="根目录扩展"><a class="markdownIt-Anchor" href="#根目录扩展"></a> 根目录扩展</h3>
+<ol>
+<li>查看硬盘使用情况：df -lh</li>
+<li>安装 gparted： sudo apt-get install gparted</li>
+<li>打开 gparted 后会发现，有许多小钥匙标识无法去掉，也无法进行分区操作。</li>
+</ol>
+<blockquote>
+<p>因为分区已经挂载了，没法再当前系统下进行重新分配空间，所以得准备一个 Ubuntu 启动盘，在 live 系统中进行操作<br />
+搜索 gparted 并打开，小钥匙标识还没有消除！依次选中你要操作的两个分区（我的是”/“和&quot;/home&quot;）以及 linux-swap，右键选择** unmount**，即可对其进行改变大小的操作。</p>
+</blockquote>
+<ol start="4">
+<li>从/home 分区中分出 20G，如果这个空闲的 20G 不在根目录&quot;/&quot;的下方，则需要向上调整大小，直到调整到根目录的下方。这时就可以对根目录进行操作，resize 根目录的大小，将空闲的 20G 合并进去。</li>
+<li>最后，一定要记得应用到整个系统，即选择菜单栏 &gt;&gt; Edit &gt;&gt; Apply all Operations &gt;&gt; Apply</li>
+</ol>
+<p>成功！</p>
+<p><a href="https://blog.csdn.net/byn12345/article/details/88829984" target="_blank" rel="noopener">参考</a></p>
+<h3 id="snap-安装目录迁移"><a class="markdownIt-Anchor" href="#snap-安装目录迁移"></a> snap 安装目录迁移</h3>
+<p>参考：<a href="https://askubuntu.com/questions/1029562/move-snap-packages-to-another-location-directory/1029948" target="_blank" rel="noopener">https://askubuntu.com/questions/1029562/move-snap-packages-to-another-location-directory/1029948</a></p>
+<h2 id="外设"><a class="markdownIt-Anchor" href="#外设"></a> 外设</h2>
+<h3 id="蓝牙耳机连接"><a class="markdownIt-Anchor" href="#蓝牙耳机连接"></a> 蓝牙耳机连接</h3>
+<p>配对后无法连接，运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install pulseaudio-module-bluetooth（已安装）</span><br><span class="line"></span><br><span class="line">pactl load-module module-bluetooth-discover（执行后成功连接）</span><br></pre></td></tr></table></figure>
+<h3 id="添加添加-25601440-分辨率"><a class="markdownIt-Anchor" href="#添加添加-25601440-分辨率"></a> 添加添加 2560×1440 分辨率</h3>
+<p>前段时间购入了戴尔 U2515 2K 显示器，分辨率为 2560×1440, 不过发现在 Ubuntu 中找不到 2560×1440 分辨率设置，最大的只有 2560×1600 分辨率。查了下，通过 xrandr 命令可解决。</p>
+<p>1）通过 xrandr 即可查看当前显示器所有分辨率，其中 Virtual1 是是当前显示器名称：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">jeff@jeff-virtual-machine:~$ xrandr</span><br><span class="line">Screen 0: minimum 1 x 1, current 2560 x 1440, maximum 16384 x 16384</span><br><span class="line">Virtual1 connected primary 2560x1440+0+0 (normal left inverted right x axis y axis) 0mm x 0mm</span><br><span class="line">   2560x1440     60.00*+</span><br><span class="line">   2560x1600     59.99  </span><br><span class="line">   1920x1440     60.00  </span><br><span class="line">   1856x1392     60.00  </span><br><span class="line">   1792x1344     60.00  </span><br><span class="line">   1920x1200     59.88  </span><br><span class="line">   1600x1200     60.00  </span><br><span class="line">   1680x1050     59.95  </span><br><span class="line">   1400x1050     59.98  </span><br><span class="line">   1280x1024     60.02  </span><br><span class="line">   1440x900      59.89  </span><br><span class="line">   1280x960      60.00  </span><br><span class="line">   1360x768      60.02  </span><br><span class="line">   1280x800      59.81  </span><br><span class="line">   1152x864      75.00  </span><br><span class="line">   1280x768      59.87  </span><br><span class="line">   1024x768      60.00  </span><br><span class="line">   800x600       60.32  </span><br><span class="line">   640x480       59.94</span><br></pre></td></tr></table></figure>
+<p>2）接着敲入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ cvt 2560 1440</span><br><span class="line"># 2560x1440 59.96 Hz (CVT 3.69M9) hsync: 89.52 kHz; pclk: 312.25 MHz</span><br><span class="line">Modeline &quot;2560x1440_60.00&quot;  312.25  2560 2752 3024 3488  1440 1443 1448 1493 -hsync +vsync</span><br></pre></td></tr></table></figure>
+<p>添加我们的 2K 分辨率。</p>
+<p>3）在显示器分辨率列表中添加上面得到的分辨率设置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xrandr --newmode &quot;2560x1440_60.00&quot;  312.25  2560 2752 3024 3488  1440 1443 1448 1493 -hsync +vsync</span><br></pre></td></tr></table></figure>
+<p>4）添加该模式，其中 Virtual1 是第一步中得到的显示器名称：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xrandr --addmode HDMI-1 &quot;2560x1440_60.00&quot;</span><br></pre></td></tr></table></figure>
+<p>最后就可以在分辨率设置中找到该分辨率了，用命令行设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xrandr --output HDMI-1 --mode &quot;2560x1440_60.00&quot;</span><br></pre></td></tr></table></figure>
+<p>保持副屏旋转和位置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xrandr --output VGA-1 --rotate left --pos 2560x0</span><br></pre></td></tr></table></figure>
+<p>汇总</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cvt 2560 1440</span><br><span class="line">xrandr --newmode &quot;2560x1440_60.00&quot;  312.25  2560 2752 3024 3488  1440 1443 1448 1493 -hsync +vsync</span><br><span class="line">xrandr --addmode HDMI-1 &quot;2560x1440_60.00&quot;</span><br><span class="line">xrandr --output HDMI-1 --mode &quot;2560x1440_60.00&quot;</span><br><span class="line">xrandr --output VGA-1 --rotate left --pos 2560x0</span><br></pre></td></tr></table></figure>
+<h3 id="多屏管理"><a class="markdownIt-Anchor" href="#多屏管理"></a> 多屏管理</h3>
+<p><a href="https://wiki.archlinux.org/index.php/multihead" target="_blank" rel="noopener">https://wiki.archlinux.org/index.php/multihead</a></p>
+<p>psychtoolbox 里有一些 po</p>
+<h3 id="使用-windows-共享打印机"><a class="markdownIt-Anchor" href="#使用-windows-共享打印机"></a> 使用 windows 共享打印机</h3>
+<ul>
+<li>安装 samba</li>
+<li>在 <code>设置/设备/打印机</code> 中添加</li>
+</ul>
+<p><a href="https://blog.csdn.net/xindablack/article/details/95182327" target="_blank" rel="noopener">https://blog.csdn.net/xindablack/article/details/95182327</a></p>
+<h2 id="网络"><a class="markdownIt-Anchor" href="#网络"></a> 网络</h2>
+<h3 id="dns"><a class="markdownIt-Anchor" href="#dns"></a> DNS</h3>
+<p>ubuntu 18.04 的 DNS 似乎是由 service systemd-resolved 控制，重启这个服务以后，/etc/resolv.conf 会被重置</p>
+<p>重启 systemd 解析服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl is-active systemd-resolved.service</span><br><span class="line">sudo systemd-resolve --flush-caches</span><br></pre></td></tr></table></figure>
+<p>重启 DNSMasq 缓存服务，Dnsmasq 是轻量级的 DHCP 和 DNS 缓存名称服务器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart dnsmasq.service</span><br><span class="line">sudo service dnsmasq restart</span><br></pre></td></tr></table></figure>
+<h3 id="ubuntu-zjuvpn"><a class="markdownIt-Anchor" href="#ubuntu-zjuvpn"></a> ubuntu zjuvpn</h3>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">default dev ppp0 </span><br><span class="line">default via 10.12.45.1 dev enp3s0 proto static metric 20100 </span><br><span class="line">10.0.0.0&#x2F;8 via 10.12.45.1 dev enp3s0 </span><br><span class="line">10.5.1.0&#x2F;24 via 10.12.45.1 dev enp3s0 </span><br><span class="line">10.10.0.0&#x2F;24 via 10.12.45.1 dev enp3s0 </span><br><span class="line">10.12.45.0&#x2F;24 dev enp3s0 proto kernel scope link src 10.12.45.78 metric 100 </span><br><span class="line">58.196.192.0&#x2F;19 via 10.12.45.1 dev enp3s0 </span><br><span class="line">58.196.224.0&#x2F;20 via 10.12.45.1 dev enp3s0 </span><br><span class="line">58.200.100.0&#x2F;24 via 10.12.45.1 dev enp3s0 </span><br><span class="line">169.254.0.0&#x2F;16 dev enp3s0 scope link metric 1000 </span><br><span class="line">210.32.0.0&#x2F;20 via 10.12.45.1 dev enp3s0 </span><br><span class="line">210.32.128.0&#x2F;19 via 10.12.45.1 dev enp3s0 </span><br><span class="line">210.32.160.0&#x2F;21 via 10.12.45.1 dev enp3s0 </span><br><span class="line">210.32.168.0&#x2F;22 via 10.12.45.1 dev enp3s0 </span><br><span class="line">210.32.172.0&#x2F;23 via 10.12.45.1 dev enp3s0 </span><br><span class="line">210.32.176.0&#x2F;20 via 10.12.45.1 dev enp3s0 </span><br><span class="line">222.205.0.0&#x2F;17 via 10.12.45.1 dev enp3s0</span><br></pre></td></tr></table></figure>
+<p>10.5.1.0/24 via 10.12.45.1 dev enp3s0</p>
+<p>直接改 lns 地址没法联网，改完路由表可以联网但是只能下载不能上传，待续。…</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">IPv4 路由表</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">活动路由：</span><br><span class="line">网络目标        网络掩码          网关       接口   跃点数</span><br><span class="line">          0.0.0.0          0.0.0.0       10.12.45.1      10.12.45.78   4506</span><br><span class="line">          0.0.0.0          0.0.0.0            在链路上    222.205.29.215     26</span><br><span class="line">         10.0.0.0        255.0.0.0       10.12.45.1      10.12.45.78   4251</span><br><span class="line">        10.0.2.72  255.255.255.255       10.12.45.1      10.12.45.78   4251</span><br><span class="line">       10.12.45.0    255.255.255.0            在链路上       10.12.45.78   4506</span><br><span class="line">      10.12.45.78  255.255.255.255            在链路上       10.12.45.78   4506</span><br><span class="line">     10.12.45.255  255.255.255.255            在链路上       10.12.45.78   4506</span><br><span class="line">        127.0.0.0        255.0.0.0            在链路上         127.0.0.1   4556</span><br><span class="line">        127.0.0.1  255.255.255.255            在链路上         127.0.0.1   4556</span><br><span class="line">  127.255.255.255  255.255.255.255            在链路上         127.0.0.1   4556</span><br><span class="line">       210.32.0.0    255.255.240.0       10.12.45.1      10.12.45.78   4251</span><br><span class="line">     210.32.128.0    255.255.192.0       10.12.45.1      10.12.45.78   4251</span><br><span class="line">      222.205.0.0    255.255.128.0       10.12.45.1      10.12.45.78   4251</span><br><span class="line">   222.205.29.215  255.255.255.255            在链路上    222.205.29.215    281</span><br><span class="line">        224.0.0.0        240.0.0.0            在链路上         127.0.0.1   4556</span><br><span class="line">        224.0.0.0        240.0.0.0            在链路上       10.12.45.78   4506</span><br><span class="line">        224.0.0.0        240.0.0.0            在链路上    222.205.29.215     26</span><br><span class="line">  255.255.255.255  255.255.255.255            在链路上         127.0.0.1   4556</span><br><span class="line">  255.255.255.255  255.255.255.255            在链路上       10.12.45.78   4506</span><br><span class="line">  255.255.255.255  255.255.255.255            在链路上    222.205.29.215    281</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br></pre></td></tr></table></figure>
+<h2 id="deepin-wine"><a class="markdownIt-Anchor" href="#deepin-wine"></a> deepin wine</h2>
+<p>为了在 Linux 下使用 QQ 和微信，安装 deepin 魔改过的 wine</p>
+<h3 id="安装"><a class="markdownIt-Anchor" href="#安装"></a> 安装</h3>
+<p>deepin wine 的安装参照 <a href="https://github.com/wszqkzqk/deepin-wine-ubuntu" target="_blank" rel="noopener">deepin-wine-ubuntu</a> 和 <a href="https://github.com/zq1997/deepin-wine" target="_blank" rel="noopener">deepin-wine</a>l 两个就行。实践中花了很多时间解决依赖问题是因为上一条提到的<code>proposed</code>仓库的问题，导致报了很多依赖问题。</p>
+<h3 id="中文乱码问题"><a class="markdownIt-Anchor" href="#中文乱码问题"></a> 中文乱码问题</h3>
+<p>参考 <a href="https://blog.csdn.net/qq_37624415/article/details/82228572" target="_blank" rel="noopener">1</a> 解决了 TIM 的乱码，但 WeChat 依旧乱码。微信现在主要适用网页版，先不处理了，心累。</p>
+<p>其他参考 <a href="http://linux-wiki.cn/wiki/Wine%E7%9A%84%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA%E4%B8%8E%E5%AD%97%E4%BD%93%E8%AE%BE%E7%BD%AE" target="_blank" rel="noopener">2</a>/<a href="https://github.com/wszqkzqk/deepin-wine-ubuntu/issues/136" target="_blank" rel="noopener">3</a>/<a href="https://www.jianshu.com/p/e6f4beff6543" target="_blank" rel="noopener">4</a></p>
+<p>界面的中文正常，输入框的中文依然乱码（气泡模式）。</p>
+<p>根据参考 <a href="https://github.com/wszqkzqk/deepin-wine-ubuntu/issues/136" target="_blank" rel="noopener">3</a>:</p>
+<ul>
+<li>step 1</li>
+</ul>
+<blockquote>
+<p><strong># 经验证这步不做也行</strong></p>
+<p>系统语言非中文时，中文全显示成方块，需要在<code>/opt/deepinwine/tools/run.sh</code>中将 WINE_CMD 那一行修改为:</p>
+<p>WINE_CMD=“LC_ALL=zh_CN.UTF-8 deepin-wine”</p>
+</blockquote>
+<ul>
+<li>step2</li>
+</ul>
+<blockquote>
+<p>#1. 添加字体<br />
+cp msyh.ttc ~/.deepinwine/Deepin-WeChat/drive_c/windows/Fonts<br />
+#2. 修改系统注册表<br />
+edit ~/.deepinwine/Deepin-WeChat/system.reg<br />
+#修改以下两行<br />
+“MS Shell Dlg”=“msyh”<br />
+“MS Shell Dlg 2”=“msyh”</p>
+</blockquote>
+<p>2019-09-11 更新：又 GG 了，把<code>sim*</code>, <code>ms*</code>字体复制到 wine 的 Fonts 目录，解决。</p>
+<h3 id="winecfg"><a class="markdownIt-Anchor" href="#winecfg"></a> winecfg</h3>
+<p>如果是 QQ 用下面的命令执行 WINEPREFIX=~/.deepinwine/Deepin-QQ deepin-wine winecfg 其他应用修改 WINEPREFIX 的值就好了。</p>
+<h3 id="wine-qq-tim"><a class="markdownIt-Anchor" href="#wine-qq-tim"></a> <a href="https://github.com/askme765cs/Wine-QQ-TIM" target="_blank" rel="noopener">Wine-QQ-TIM</a></h3>
+<p>提供在 Linux 上运行最新版腾讯 QQ 与 TIM 的解决方案 Easiest Way to Run QQ&amp;TIM on Linux</p>
+<h2 id="ubuntu-镜像源-channel-之间的关系"><a class="markdownIt-Anchor" href="#ubuntu-镜像源-channel-之间的关系"></a> Ubuntu 镜像源 channel 之间的关系</h2>
+<p><a href="https://help.ubuntu.com/community/UbuntuUpdates" target="_blank" rel="noopener">ubuntu</a> 官方说明</p>
+<h3 id="proposed-updates"><a class="markdownIt-Anchor" href="#proposed-updates"></a> Proposed updates</h3>
+<p>IconsPage/stop.png</p>
+<p><mark>Enabling the proposed updates repository can break your system. It is not recommended for inexperienced users.</mark></p>
+<p>The proposed updates are updates which are waiting to be moved into the recommended updates queue after some testing. They may never reach recommended or they may be replaced with a more recent update.</p>
+<p>Enabling this is reasonable if you want to participate in testing minor updates, or know that your specific problem has been solved here but the package hasn’t reached recommended yet.</p>
+<p>即<code>proposed</code>为测试版，尽量不要开启。在安装<code>deepin-wine</code>的过程中发现因为以前开过<code>proposed</code>，把一下包升级到了较高版本（amd64），在安装相应的 i386 包的时候就不得不使用<code>proposed</code>，否则会找不到依赖。因此以后慎用这个仓库。</p>
+<p>尝试 <a href="http://www.webupd8.org/2013/11/how-to-downgrade-proposed-repository.html" target="_blank" rel="noopener">降级</a> 成功</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2019/03/ETL-overview/" rel="next" title="ETL 概念解析">
+      ETL 概念解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#gnome"><span class="nav-number">1.</span> <span class="nav-text"> Gnome</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#菜单管理"><span class="nav-number">1.1.</span> <span class="nav-text"> 菜单管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dock-启用minimize-on-click"><span class="nav-number">1.2.</span> <span class="nav-text"> Dock 启用“Minimize on Click”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#document-viewer-shortcut"><span class="nav-number">1.3.</span> <span class="nav-text"> document viewer shortcut</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gnome-桌面美化"><span class="nav-number">1.4.</span> <span class="nav-text"> Gnome 桌面美化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中文字体"><span class="nav-number">1.5.</span> <span class="nav-text"> 中文字体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#远程连接桌面"><span class="nav-number">1.6.</span> <span class="nav-text"> 远程连接桌面</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#软件与命令"><span class="nav-number">2.</span> <span class="nav-text"> 软件与命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#wps"><span class="nav-number">2.1.</span> <span class="nav-text"> WPS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ufw"><span class="nav-number">2.2.</span> <span class="nav-text"> UFW</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sudo"><span class="nav-number">2.3.</span> <span class="nav-text"> sudo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存储管理"><span class="nav-number">3.</span> <span class="nav-text"> 存储管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#根目录扩展"><span class="nav-number">3.1.</span> <span class="nav-text"> 根目录扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#snap-安装目录迁移"><span class="nav-number">3.2.</span> <span class="nav-text"> snap 安装目录迁移</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#外设"><span class="nav-number">4.</span> <span class="nav-text"> 外设</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#蓝牙耳机连接"><span class="nav-number">4.1.</span> <span class="nav-text"> 蓝牙耳机连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加添加-25601440-分辨率"><span class="nav-number">4.2.</span> <span class="nav-text"> 添加添加 2560×1440 分辨率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多屏管理"><span class="nav-number">4.3.</span> <span class="nav-text"> 多屏管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-windows-共享打印机"><span class="nav-number">4.4.</span> <span class="nav-text"> 使用 windows 共享打印机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-number">5.</span> <span class="nav-text"> 网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dns"><span class="nav-number">5.1.</span> <span class="nav-text"> DNS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ubuntu-zjuvpn"><span class="nav-number">5.2.</span> <span class="nav-text"> ubuntu zjuvpn</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deepin-wine"><span class="nav-number">6.</span> <span class="nav-text"> deepin wine</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">6.1.</span> <span class="nav-text"> 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中文乱码问题"><span class="nav-number">6.2.</span> <span class="nav-text"> 中文乱码问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#winecfg"><span class="nav-number">6.3.</span> <span class="nav-text"> winecfg</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wine-qq-tim"><span class="nav-number">6.4.</span> <span class="nav-text"> Wine-QQ-TIM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ubuntu-镜像源-channel-之间的关系"><span class="nav-number">7.</span> <span class="nav-text"> Ubuntu 镜像源 channel 之间的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#proposed-updates"><span class="nav-number">7.1.</span> <span class="nav-text"> Proposed updates</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">VC</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">VC</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'en' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</body>
+</html>

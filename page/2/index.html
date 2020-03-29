@@ -46,31 +46,26 @@
   };
 </script>
 
-  <meta name="description" content="逻辑架构 三层架构：  连接与线程处理  每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。 注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL 服务层：SQL 解析、">
-<meta property="og:type" content="article">
-<meta property="og:title" content="MySQL 架构和历史">
-<meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql01-md/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="VC&#39; Blog">
+<meta property="og:url" content="https://viggoc.github.io/page/2/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
-<meta property="og:description" content="逻辑架构 三层架构：  连接与线程处理  每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。 注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL 服务层：SQL 解析、">
-<meta property="article:published_time" content="2020-02-07T08:32:38.000Z">
-<meta property="article:modified_time" content="2020-02-13T05:16:00.229Z">
 <meta property="article:author" content="VC">
-<meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://viggoc.github.io/2020/02/high-perf-mysql01-md/">
+<link rel="canonical" href="https://viggoc.github.io/page/2/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: false,
-    isPost: true
+    isHome: true,
+    isPost: false
   };
 </script>
 
-  <title>MySQL 架构和历史 | VC' Blog</title>
+  <title>VC' Blog</title>
   
 
 
@@ -200,11 +195,11 @@
             
 
   <div class="posts-expand">
-      
+        
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql01-md/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/06/linux-env/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -217,7 +212,8 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          MySQL 架构和历史
+          
+            <a href="/2019/06/linux-env/" class="post-title-link" itemprop="url">Linux 环境变量</a>
         </h1>
 
         <div class="post-meta">
@@ -227,14 +223,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2019-06-12 11:17:01" itemprop="dateCreated datePublished" datetime="2019-06-12T11:17:01+08:00">2019-06-12</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-13 13:16:00" itemprop="dateModified" datetime="2020-02-13T13:16:00+08:00">2020-02-13</time>
+                <time title="Modified: 2020-03-30 01:49:09" itemprop="dateModified" datetime="2020-03-30T01:49:09+08:00">2020-03-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -242,25 +238,13 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
             </span>
 
           
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Valine: </span>
-    
-    <a title="valine" href="/2020/02/high-perf-mysql01-md/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql01-md/" itemprop="commentCount"></span>
-    </a>
-  </span>
   
   
 
@@ -273,109 +257,243 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="逻辑架构"><a class="markdownIt-Anchor" href="#逻辑架构"></a> 逻辑架构</h2>
-<p>三层架构：</p>
-<ul>
-<li>连接与线程处理</li>
-</ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br />
-注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
-<ul>
-<li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
-</ul>
-<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br />
-Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
-<ul>
-<li>存储引擎</li>
-</ul>
-<a id="more"></a>
-<h2 id="并发控制"><a class="markdownIt-Anchor" href="#并发控制"></a> 并发控制</h2>
-<p>两种类型的锁：</p>
-<ul>
-<li>共享锁（shared lock）/ 读锁（read lock）</li>
-<li>排他锁（exclusive lock）/ 写锁（write lock）</li>
-</ul>
-<p>粒度</p>
+          <p>Linux 系统包含两类环境变量：系统环境变量和用户环境变量。</p>
+<p>系统环境变量对所有系统用户都有效，用户环境变量仅仅对当前的用户有效。</p>
+<p>1、修改用户环境变量<br />
+用户环境变量通常被存储在下面的文件中：</p>
 <ul>
 <li>
-<p>表锁<br />
-存储引擎可以管理自己的锁，MySQL 本身还是会使用各种表锁来实现不同的目的。如，服务器会对<code>ALTER TABLE</code>之类的语句使用<em>表锁</em>，而忽略存储引擎的锁机制。</p>
+<p>~/.profile</p>
 </li>
 <li>
-<p>行级锁<br />
-行级锁只在存储引擎层实现（如 InnoDB 和 XtraDB），服务器层面没有实现。</p>
+<p>~/.bash_profile 或者 ~./bash_login</p>
+</li>
+<li>
+<p>~/.bashrc</p>
 </li>
 </ul>
-<h2 id="事务"><a class="markdownIt-Anchor" href="#事务"></a> 事务</h2>
-<p><strong>ACID</strong></p>
+<p>上述文件在 Ubuntu 10.0 以前版本不推荐使用。</p>
+<p>2、系统环境变量<br />
+系统环境变量一般保存在下面的文件中：</p>
 <ul>
-<li>原子性（atomicity）</li>
-<li>一致性（consistency）</li>
-<li>隔离性（isolation）</li>
-<li>持久性（durability）</li>
+<li>
+<p>/etc/environment</p>
+</li>
+<li>
+<p>/etc/profile</p>
+</li>
+<li>
+<p>/etc/bash.bashrc</p>
+</li>
 </ul>
-<p>支持事务必然会来带开销，对于一些不需要事务的查询类应用就可以选择飞事务型的存储引擎，获取更高的性能。通过<code>LOCK TABLES</code>语句同样可以为应用提供一定的保护。</p>
-<p><strong>四种隔离级别</strong></p>
-<ul>
-<li>READ UNCIMMITTED（未提交读）：造成 dirty read，实际很少使用</li>
-<li>READ COMMITTED（提交读）：不可重复读 nonrepeatable read</li>
-<li>REPEATABLE READ：依然会有幻读（Phantom Read） 的问题，进一步通过多版本并发控制（Multi version Concurrency Control，MVCC）解决。是 MySQL 的默认隔离级别。</li>
-<li>SERIALIZABLE：在读取的每一行上都加上锁，可能导致大量的超时和锁争用，实际很少使用。</li>
-</ul>
-<p><strong>事务日志</strong><br />
-使用事务日志，修改数据表式可以先在内存中修改，并把操作行为记录到硬盘上的事务日志，事务日志采用追加方式，写日志操作相对写数据要快。事务日志持久化后，内存中被修改的数据可以在后台慢慢刷回到硬盘。（预写式日志 Write-Adead Logging）</p>
-<p><strong>MySQL 中的事务</strong></p>
-<ul>
-<li>默认自动提交，可通过<code>SET AUTOCOMMIT = 0</code>禁用</li>
-<li>在同一个事务中使用多种存储引擎是不可靠的</li>
-<li>除了自动加的隐式锁，还可以使用特定语句进行显式锁定,如下语句（ORACLE 里也有）</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT ... FOR UPDATE</span><br></pre></td></tr></table></figure>
-<h2 id="多版本并发控制"><a class="markdownIt-Anchor" href="#多版本并发控制"></a> 多版本并发控制</h2>
-<p>MVCC 没有统一的实现标准，有多种实现机制。MVCC 可以看成是行级锁的一个变种，但它在很多情况下避免了加锁操作，开销更低。读操作非阻塞，写操作锁定必要的行。</p>
-<p>典型的有<code>乐观锁</code>和<code>悲观锁</code></p>
-<p>InnoDB 的 MVCC 通过两个隐藏的列实现：行创建时间、行过期时间。存储的不是时间值而是系统版本号（system version number）。详见相关章节。</p>
-<h2 id="存储引擎"><a class="markdownIt-Anchor" href="#存储引擎"></a> 存储引擎</h2>
-<p>MySQL 最初基于<code>ISAM</code>构建，后来被<code>MyISAM</code>取代，如今默认的存储引擎为<code>InnoDB</code>。</p>
-<p>不同的存储引擎各有特点，需要结合实际业务选择使用。多数情况下，使用 InnoDB 综合表现最好。</p>
-<p><strong>应用场景</strong></p>
-<ul>
-<li>日志型应用：使用 MyISAM 或 Archive，开销低，插入速度快。要做分析可以主从备份，读写分离</li>
-</ul>
-<p><strong>切换表的引擎</strong></p>
-<ul>
-<li>ALTER TABLE：执行时间长</li>
-<li>导入导出：mysqldump 导出后修改建表语句导入</li>
-<li>创建与复制：创建新表，复制数据，数据量特别大可以分批处理</li>
-</ul>
+<p>其中 environment 文件直接写变量 <code>$VAR='ABC'</code>；profile 文件是在登录时被执行，要写成命令的形式，如<code>export $VAR='ABC'</code>；bashrc 是当 bash 被打开的时候被读取执行</p>
+<h3 id="etcprofile-不生效问题"><a class="markdownIt-Anchor" href="#etcprofile-不生效问题"></a> /etc/profile 不生效问题</h3>
+<p>发现启动后/etc/profile 不生效，需要手动<code>source /etc/profile</code>.</p>
+<p>首先查到可能是<code>login shell</code>和<code>non-login shell</code>的区别：<br />
+简单来说需要输入密码登陆的是<code>login shell</code>如通过 ssh 访问，在图形桌面中直接打开的终端为<code>non-login</code>.</p>
+<p>login shell(bash) 在登入时，会读取的配置文件：</p>
+<ol>
+<li>/etc/profile</li>
+<li>~/.bash_profile 或~/.bash_login 或 ~/.profile （就按照这个顺序）</li>
+<li>~/.bashrc （通常是写在前面两个配置文件中）</li>
+</ol>
+<p>第二步之所以有三个文件，是因为不同的 shell 有可能命名不同，只会按顺序读取其中的一个。</p>
+<p>non-login shell(bash) 在登入时，只会读取 ~/.bashrc</p>
+<p>参考：</p>
+<ol>
+<li><a href="https://blog.csdn.net/linuxnews/article/details/52579186" target="_blank" rel="noopener">https://blog.csdn.net/linuxnews/article/details/52579186</a></li>
+<li>(<a href="http://feihu.me/blog/2014/env-problem-when-ssh-executing-command-on-remote/" target="_blank" rel="noopener">http://feihu.me/blog/2014/env-problem-when-ssh-executing-command-on-remote/</a>)</li>
+</ol>
+<h4 id="使用-ssh-连接还是不生效"><a class="markdownIt-Anchor" href="#使用-ssh-连接还是不生效"></a> 使用 ssh 连接还是不生效</h4>
+<p>最后发现是因为使用的 zsh 并不会读取<code>/etc/profile</code>, 而是使用<code>/etc/zsh/</code>下面<code>的 zshenv、zprofile、zshrc、zlogin</code>文件，并以这个顺序进行加载。</p>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/mysql/" rel="tag"># mysql</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2019/12/ML_algorithm/" rel="prev" title="常见机器学习算法的优缺点">
-      <i class="fa fa-chevron-left"></i> 常见机器学习算法的优缺点
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/02/high-perf-mysql04-md/" rel="next" title="Schema 与数据类型优化">
-      Schema 与数据类型优化 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/03/ETL-overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/03/ETL-overview/" class="post-title-link" itemprop="url">ETL 概念解析</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-20 14:51:55" itemprop="dateCreated datePublished" datetime="2019-03-20T14:51:55+08:00">2019-03-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-18 22:37:26" itemprop="dateModified" datetime="2020-03-18T22:37:26+08:00">2020-03-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/data/" itemprop="url" rel="index">
+                    <span itemprop="name">data</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
     
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="实现方法"><a class="markdownIt-Anchor" href="#实现方法"></a> 实现方法</h2>
+<p>常见的 ETL 实现方法</p>
+<ol>
+<li>借助 ETL 工具（如 Oracle 的 OWB、Informatic、Kettle 等）实现</li>
+<li>SQL 方式实现</li>
+<li>ETL 工具和 SQL 相结合。</li>
+</ol>
+<p>借助工具可以快速的建立起 ETL 工程，屏蔽了复杂的编码任务，提高了速度，降低了难度，但是缺少灵活性。SQL 的方法优点是灵活，提高 ETL 运行效率，但是编码复杂，对技术要求比较高。往往需要结合使用。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/03/ETL-overview/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/03/Linux-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/03/Linux-note/" class="post-title-link" itemprop="url">Linux 杂记</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-03-12 01:17:01" itemprop="dateCreated datePublished" datetime="2019-03-12T01:17:01+08:00">2019-03-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-30 01:41:32" itemprop="dateModified" datetime="2020-03-30T01:41:32+08:00">2020-03-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本文记录 Linux 使用过程中遇到的小问题和解决方法，比较杂。</p>
+<p>日常使用<code>Ubuntu 18.04</code>，服务器常用<code>CentOS 7</code>。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/03/Linux-note/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
   </article>
   
   
@@ -383,10 +501,15 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 
   </div>
 
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
+
 
           </div>
           
-    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -433,7 +556,6 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#逻辑架构"><span class="nav-number">1.</span> <span class="nav-text"> 逻辑架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#并发控制"><span class="nav-number">2.</span> <span class="nav-text"> 并发控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务"><span class="nav-number">3.</span> <span class="nav-text"> 事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多版本并发控制"><span class="nav-number">4.</span> <span class="nav-text"> 多版本并发控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存储引擎"><span class="nav-number">5.</span> <span class="nav-text"> 存储引擎</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
