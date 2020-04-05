@@ -64,7 +64,7 @@
 <meta property="og:image" content="https://i.loli.net/2020/03/14/sRBtKmiPOTgqfuI.png">
 <meta property="og:image" content="https://i.loli.net/2020/03/14/T5PxH3v87iA6EZg.png">
 <meta property="article:published_time" content="2020-03-13T11:51:55.000Z">
-<meta property="article:modified_time" content="2020-03-20T15:39:30.017Z">
+<meta property="article:modified_time" content="2020-04-05T07:29:47.554Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
@@ -246,7 +246,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-20 23:39:30" itemprop="dateModified" datetime="2020-03-20T23:39:30+08:00">2020-03-20</time>
+                <time title="Modified: 2020-04-05 15:29:47" itemprop="dateModified" datetime="2020-04-05T15:29:47+08:00">2020-04-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -448,7 +448,32 @@
 </ul>
 <h2 id="复制和容量规划"><a class="markdownIt-Anchor" href="#复制和容量规划"></a> 复制和容量规划</h2>
 <p>考虑备库吞吐量的使用不能只使用总查询/备库数量，每台机器还需要加上主库分发的写数据的工作量。备库的扩展不是线性的，查询数量增加 4 倍可能要增加 17 倍的服务器。</p>
-<h2 id="todo"><a class="markdownIt-Anchor" href="#todo"></a> TODO</h2>
+<p>复制无法扩展写操作，虽然主-主结构理论上可以提升写入性能（复制时写入是串行化的，效率更高）但这么做提升非常有效而且风险很大。数据分区是唯一可以扩展写入的方法。</p>
+<p>可以人为地制造延迟，测量备库的性能。比如在12点将备库停止，1点重新开启，发现备库在2点时追上的主库的进度保持同步，则说明备库的性能极限能承担两倍于现在的负载。</p>
+<h2 id="复制管理和维护"><a class="markdownIt-Anchor" href="#复制管理和维护"></a> 复制管理和维护</h2>
+<p>管理和维护工作应该尽量自动化，涉及的工作通常有：</p>
+<ul>
+<li>监控复制</li>
+<li>测量备库延迟</li>
+<li>确认主备是否一致</li>
+<li>未同步的备库修复</li>
+<li>更换主库</li>
+<li>主-主结构中交换角色</li>
+</ul>
+<h2 id="复制的问题和解决方案"><a class="markdownIt-Anchor" href="#复制的问题和解决方案"></a> 复制的问题和解决方案</h2>
+<p>涉及到非常多细节，在此详细记录，实际用到时查阅相关资料。</p>
+<h2 id="高级特性"><a class="markdownIt-Anchor" href="#高级特性"></a> 高级特性</h2>
+<h3 id="半同步复制"><a class="markdownIt-Anchor" href="#半同步复制"></a> 半同步复制</h3>
+<p>半同步复制在提交过程中增加了一个延迟：提交事务时，在客户端接收到查询结束反馈前必须保证二进制日志已经传输到至少一台备库上。主库将事务提交到磁盘之后会增加一些延迟，同样的也增加了客户端的延迟，因此其执行事务的速度受到复制速度的限制。</p>
+<p>特别注意：</p>
+<ul>
+<li>主库不会阻塞事务提交，只有通知客户端被延迟了</li>
+<li>备库在接收到事务后就发送反馈，而不是等到事务执行完才发送</li>
+<li>如果备库一直没有会应已收到事件，会超时并转化为正常的异步复制</li>
+</ul>
+<p>半同步复制在某些场景下能提供足够的灵活性以改善性能，在主库关闭 <code>sync_binlog</code> 的情况下保证安全。写入远程的内存（备库反馈）比写入本地的磁盘要更快。</p>
+<h3 id="复制心跳"><a class="markdownIt-Anchor" href="#复制心跳"></a> 复制心跳</h3>
+<p>在主备库之间建立联系，如果网络断开，备库会注意到丢失的心跳数据。</p>
 
     </div>
 
@@ -470,7 +495,10 @@
     <a href="/2020/02/high-perf-mysql06-02/" rel="prev" title="查询性能优化-02">
       <i class="fa fa-chevron-left"></i> 查询性能优化-02
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/high-perf-mysql11/" rel="next" title="可扩展的 MySQL">
+      可扩展的 MySQL <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -531,7 +559,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text"> 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">2.</span> <span class="nav-text"> 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新备库初始化"><span class="nav-number">2.1.</span> <span class="nav-text"> 新备库初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制的原理"><span class="nav-number">3.</span> <span class="nav-text"> 复制的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制拓扑"><span class="nav-number">4.</span> <span class="nav-text"> 复制拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一主多备"><span class="nav-number">4.1.</span> <span class="nav-text"> 一主多备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主-主复制"><span class="nav-number">4.2.</span> <span class="nav-text"> 主 - 主复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有备库的主-主结构"><span class="nav-number">4.3.</span> <span class="nav-text"> 有备库的主 - 主结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环形复制"><span class="nav-number">4.4.</span> <span class="nav-text"> 环形复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分发主库"><span class="nav-number">4.5.</span> <span class="nav-text"> 分发主库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#树结构"><span class="nav-number">4.6.</span> <span class="nav-text"> 树结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定制化方案"><span class="nav-number">4.7.</span> <span class="nav-text"> 定制化方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制和容量规划"><span class="nav-number">5.</span> <span class="nav-text"> 复制和容量规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#todo"><span class="nav-number">6.</span> <span class="nav-text"> TODO</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text"> 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">2.</span> <span class="nav-text"> 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新备库初始化"><span class="nav-number">2.1.</span> <span class="nav-text"> 新备库初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制的原理"><span class="nav-number">3.</span> <span class="nav-text"> 复制的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制拓扑"><span class="nav-number">4.</span> <span class="nav-text"> 复制拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一主多备"><span class="nav-number">4.1.</span> <span class="nav-text"> 一主多备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主-主复制"><span class="nav-number">4.2.</span> <span class="nav-text"> 主 - 主复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有备库的主-主结构"><span class="nav-number">4.3.</span> <span class="nav-text"> 有备库的主 - 主结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环形复制"><span class="nav-number">4.4.</span> <span class="nav-text"> 环形复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分发主库"><span class="nav-number">4.5.</span> <span class="nav-text"> 分发主库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#树结构"><span class="nav-number">4.6.</span> <span class="nav-text"> 树结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定制化方案"><span class="nav-number">4.7.</span> <span class="nav-text"> 定制化方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制和容量规划"><span class="nav-number">5.</span> <span class="nav-text"> 复制和容量规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制管理和维护"><span class="nav-number">6.</span> <span class="nav-text"> 复制管理和维护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制的问题和解决方案"><span class="nav-number">7.</span> <span class="nav-text"> 复制的问题和解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级特性"><span class="nav-number">8.</span> <span class="nav-text"> 高级特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#半同步复制"><span class="nav-number">8.1.</span> <span class="nav-text"> 半同步复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复制心跳"><span class="nav-number">8.2.</span> <span class="nav-text"> 复制心跳</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -545,7 +573,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

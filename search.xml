@@ -1,6 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>可扩展的 MySQL</title>
+    <url>/2020/04/high-perf-mysql11/</url>
+    <content><![CDATA[<p>在MySQL的规模越来越大时，如何保证快速、高效且经济。</p>
+<h2 id="什么是可扩展性"><a class="markdownIt-Anchor" href="#什么是可扩展性"></a> 什么是可扩展性</h2>
+<p>容易混淆的用词：可扩展性，高可用性，性能。</p>
+<p>可扩展性就是能过够通过增加资源提升容量（工作效率）的能力。表明了当需要增加资源以执行更过工作时系统能够划算地提供等同提升（equal bang for the buck）的能力。另一种说法是，可扩展性是当增加资源以处理负载和增加容量时系统能够获得的投入产出比。</p>
+<p>大部分系统都没办法做到线性扩展，越高的扩展系数导致越大的线性偏差，最终达到临界点。—— 详见通用可扩展定律（Universal Scalability Law，USL）</p>
+<a id="more"></a>
+<p><img src="https://i.loli.net/2020/04/05/ZgOSadRsEPBhvVb.png" alt="" /></p>
+<p>USL 也可能失效，如USL不允许比线性更好的可扩展性，但现实中可能通过增加资源使一部分IO密集型工作变成纯内存工作，获得超越线性的性能扩展。还有一些情况，当系统或数据集大小改变时算法的复杂度可能改变。</p>
+<h2 id="扩展mysql"><a class="markdownIt-Anchor" href="#扩展mysql"></a> 扩展MySQL</h2>
+<ul>
+<li>垂直扩展/向上扩展：买更强悍的机器</li>
+<li>水平扩展/向外扩展：将任务分配到更多的机器</li>
+<li>向内扩展：清理或归档很少或不需要的数据</li>
+</ul>
+<p>帮助规划可扩展性的问题：</p>
+<ul>
+<li>应用的功能完成了多少？ 许多可扩展性解决方案可能会导致实现某些功能更加困难。如果应用的某些核心功能还没开始实现很难确定扩展方案。喵，设计和实现相互依赖，只能滚动前进了。。</li>
+<li>预期的最大负载是多少？ 应用应当在最大负载下也能正常工作。、</li>
+<li>如果依赖系统的每个部分来分担负载，在某个部分失效时会发生什么呢？ 如果依赖备库来分担读负载，当其中一个失效时，是否还能正常处理请求？是否需要禁用某些功能？</li>
+</ul>
+<h3 id="向上扩展"><a class="markdownIt-Anchor" href="#向上扩展"></a> 向上扩展</h3>
+<p>理想情况下是计划先行、拥有足够的开发者和预算，但实际情况并非如此。在深入 MySQL扩展之前可以做一些准备工作：</p>
+<ul>
+<li>性能优化</li>
+<li>购买更强的硬件：这在软件生命周期的早期有效。当前合理的“收益递减点”的机器配置大约是256GB RAM，32核以及一个PCIe flash（存储）驱动。如果继续提升，性价比降低。（注意书的时代背景，数据可能过时）</li>
+</ul>
+<h3 id="向外扩展"><a class="markdownIt-Anchor" href="#向外扩展"></a> 向外扩展</h3>
+<p>向外扩展策略划分为三个部分：复制、拆分以及数据分片。</p>
+<p>最常见的做法是通过复制吧数据分发到多个备库，备库用于读扩展。</p>
+<p>另一种比较常见的向外扩展方法是将工作负载分布到多个“节点”，一个节点就是一个功能部件，可能是一台服务器，也可以是多台机器构成，多数情况下，一个节点内的所有服务器应该拥有相同的数据。书中推荐把“主-主复制”架构作为一个节点。</p>
+<h4 id="按功能拆分"><a class="markdownIt-Anchor" href="#按功能拆分"></a> 按功能拆分</h4>
+<p>按功能拆分意味着不同的节点执行不同的任务。但不能通过功能划分无限地扩展，如果一个功能区域被绑定到单个MySQL节点，就只能进行垂直扩展。</p>
+<p><img src="https://i.loli.net/2020/04/05/4dEwaX3qnUZzFgv.png" alt="" /></p>
+<h4 id="数据分片"><a class="markdownIt-Anchor" href="#数据分片"></a> 数据分片</h4>
+<p>数据分片是最通用最成功的方法，它将数据分割成小块存储到不同的节点中。</p>
+<p>数据分片通常和功能划分结合使用， 部分全局数据（城市列表或登录数据）不会被分片。<br />
+<img src="https://i.loli.net/2020/04/05/SXwR3ZDdnyJtT2U.png" alt="" /></p>
+<h4 id="选择分区键partitioning-key"><a class="markdownIt-Anchor" href="#选择分区键partitioning-key"></a> 选择分区键（partitioning key）</h4>
+<p>一个好的分区键常常是数据库中非常重要的实体的主键。选择分区键时要尽可能跨分片查询，同时要让分片足够小，且分布均匀。</p>
+<p><img src="https://i.loli.net/2020/04/05/KNCbY2zWSl5JFr6.png" alt="" /></p>
+<h4 id="多个分区键"><a class="markdownIt-Anchor" href="#多个分区键"></a> 多个分区键</h4>
+<p>有多个分区键时要设计一定的冗余字段，减少分片查询</p>
+<h4 id="跨分片查询"><a class="markdownIt-Anchor" href="#跨分片查询"></a> 跨分片查询</h4>
+<p>跨分片查询可以借助汇总表来执行，遍历所以分片来形成汇总表，然后将结果缓存。</p>
+<h4 id="分片数据-分片和节点"><a class="markdownIt-Anchor" href="#分片数据-分片和节点"></a> 分片数据、分片和节点</h4>
+<p>分片和节点并不一定是一对一的关系，应该近可能让分片的大小比节点容量小，这样就可以在单个节点上存储多个分片。</p>
+<p>小的分片更容易管理，在当100G的表上增加索引的时间比在100个1G分片上执行的总时间更长。小分片也更加便于转移。</p>
+<h4 id="在节点上部署分片"><a class="markdownIt-Anchor" href="#在节点上部署分片"></a> 在节点上部署分片</h4>
+<h4 id="固定分配"><a class="markdownIt-Anchor" href="#固定分配"></a> 固定分配</h4>
+<h4 id="动态分配"><a class="markdownIt-Anchor" href="#动态分配"></a> 动态分配</h4>
+<h4 id="混合动态分配和固定分配"><a class="markdownIt-Anchor" href="#混合动态分配和固定分配"></a> 混合动态分配和固定分配</h4>
+<h4 id="显式分配"><a class="markdownIt-Anchor" href="#显式分配"></a> 显式分配</h4>
+<h4 id="分片数据均衡"><a class="markdownIt-Anchor" href="#分片数据均衡"></a> 分片数据均衡</h4>
+<h4 id="生成全局唯一-id"><a class="markdownIt-Anchor" href="#生成全局唯一-id"></a> 生成全局唯一 ID</h4>
+<h4 id="分片工具"><a class="markdownIt-Anchor" href="#分片工具"></a> 分片工具</h4>
+<h3 id="通过多实例扩展"><a class="markdownIt-Anchor" href="#通过多实例扩展"></a> 通过多实例扩展</h3>
+<p>不要在一太性能强悍的服务器上只运行一个数据库实例，可以让数据分片足够小，在每台机器上放置多个分片，充分发挥硬件性能。</p>
+<h3 id="通过集群扩展"><a class="markdownIt-Anchor" href="#通过集群扩展"></a> 通过集群扩展</h3>
+<h2 id="负载均衡"><a class="markdownIt-Anchor" href="#负载均衡"></a> 负载均衡</h2>
+]]></content>
+      <categories>
+        <category>database</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql 复制</title>
     <url>/2020/03/high-perf-mysql10/</url>
     <content><![CDATA[<h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
@@ -166,7 +236,32 @@
 </ul>
 <h2 id="复制和容量规划"><a class="markdownIt-Anchor" href="#复制和容量规划"></a> 复制和容量规划</h2>
 <p>考虑备库吞吐量的使用不能只使用总查询/备库数量，每台机器还需要加上主库分发的写数据的工作量。备库的扩展不是线性的，查询数量增加 4 倍可能要增加 17 倍的服务器。</p>
-<h2 id="todo"><a class="markdownIt-Anchor" href="#todo"></a> TODO</h2>
+<p>复制无法扩展写操作，虽然主-主结构理论上可以提升写入性能（复制时写入是串行化的，效率更高）但这么做提升非常有效而且风险很大。数据分区是唯一可以扩展写入的方法。</p>
+<p>可以人为地制造延迟，测量备库的性能。比如在12点将备库停止，1点重新开启，发现备库在2点时追上的主库的进度保持同步，则说明备库的性能极限能承担两倍于现在的负载。</p>
+<h2 id="复制管理和维护"><a class="markdownIt-Anchor" href="#复制管理和维护"></a> 复制管理和维护</h2>
+<p>管理和维护工作应该尽量自动化，涉及的工作通常有：</p>
+<ul>
+<li>监控复制</li>
+<li>测量备库延迟</li>
+<li>确认主备是否一致</li>
+<li>未同步的备库修复</li>
+<li>更换主库</li>
+<li>主-主结构中交换角色</li>
+</ul>
+<h2 id="复制的问题和解决方案"><a class="markdownIt-Anchor" href="#复制的问题和解决方案"></a> 复制的问题和解决方案</h2>
+<p>涉及到非常多细节，在此详细记录，实际用到时查阅相关资料。</p>
+<h2 id="高级特性"><a class="markdownIt-Anchor" href="#高级特性"></a> 高级特性</h2>
+<h3 id="半同步复制"><a class="markdownIt-Anchor" href="#半同步复制"></a> 半同步复制</h3>
+<p>半同步复制在提交过程中增加了一个延迟：提交事务时，在客户端接收到查询结束反馈前必须保证二进制日志已经传输到至少一台备库上。主库将事务提交到磁盘之后会增加一些延迟，同样的也增加了客户端的延迟，因此其执行事务的速度受到复制速度的限制。</p>
+<p>特别注意：</p>
+<ul>
+<li>主库不会阻塞事务提交，只有通知客户端被延迟了</li>
+<li>备库在接收到事务后就发送反馈，而不是等到事务执行完才发送</li>
+<li>如果备库一直没有会应已收到事件，会超时并转化为正常的异步复制</li>
+</ul>
+<p>半同步复制在某些场景下能提供足够的灵活性以改善性能，在主库关闭 <code>sync_binlog</code> 的情况下保证安全。写入远程的内存（备库反馈）比写入本地的磁盘要更快。</p>
+<h3 id="复制心跳"><a class="markdownIt-Anchor" href="#复制心跳"></a> 复制心跳</h3>
+<p>在主备库之间建立联系，如果网络断开，备库会注意到丢失的心跳数据。</p>
 ]]></content>
       <categories>
         <category>database</category>

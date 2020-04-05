@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://viggoc.github.io/2020/04/high-perf-mysql11/</loc>
+    
+    <lastmod>2020-04-05T09:12:48.934Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2020/03/high-perf-mysql10/</loc>
+    
+    <lastmod>2020-04-05T07:29:47.554Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://viggoc.github.io/2019/06/linux-env/</loc>
     
     <lastmod>2020-03-29T17:49:09.405Z</lastmod>
@@ -26,13 +40,6 @@
     <loc>https://viggoc.github.io/2019/09/Oracle-note-summary/</loc>
     
     <lastmod>2020-03-20T17:38:27.722Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2020/03/high-perf-mysql10/</loc>
-    
-    <lastmod>2020-03-20T15:39:30.017Z</lastmod>
     
   </url>
   
