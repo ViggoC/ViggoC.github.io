@@ -46,26 +46,31 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="VC&#39; Blog">
-<meta property="og:url" content="https://viggoc.github.io/index.html">
+  <meta name="description" content="术语解释 doctest: 一种单元测试工具 genxp: generator expression listcomp: list comprehension  Data Structures  Tuples Are Not Just Immutable Lists  Using * to excess items 1234567891011&gt;&gt;&gt; a,b,*rest &#x3D; ra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fluent Python 笔记">
+<meta property="og:url" content="https://viggoc.github.io/2020/02/fluent-python/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="术语解释 doctest: 一种单元测试工具 genxp: generator expression listcomp: list comprehension  Data Structures  Tuples Are Not Just Immutable Lists  Using * to excess items 1234567891011&gt;&gt;&gt; a,b,*rest &#x3D; ra">
+<meta property="article:published_time" content="2020-02-05T01:51:55.000Z">
+<meta property="article:modified_time" content="2020-04-05T09:38:06.418Z">
 <meta property="article:author" content="VC">
+<meta property="article:tag" content="python">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://viggoc.github.io/">
+<link rel="canonical" href="https://viggoc.github.io/2020/02/fluent-python/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
+    isHome: false,
+    isPost: true
   };
 </script>
 
-  <title>VC' Blog</title>
+  <title>Fluent Python 笔记 | VC' Blog</title>
   
 
 
@@ -195,781 +200,10 @@
             
 
   <div class="posts-expand">
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/04/high-perf-mysql11/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/high-perf-mysql11/" class="post-title-link" itemprop="url">可扩展的 MySQL</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-04-05 12:51:55 / Modified: 17:24:08" itemprop="dateCreated datePublished" datetime="2020-04-05T12:51:55+08:00">2020-04-05</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-          <p>在 MySQL 的规模越来越大时，如何保证快速、高效且经济。</p>
-<h2 id="什么是可扩展性"><a class="markdownIt-Anchor" href="#什么是可扩展性"></a> 什么是可扩展性</h2>
-<p>容易混淆的用词：可扩展性，高可用性，性能。</p>
-<p>可扩展性就是能过够通过增加资源提升容量（工作效率）的能力。表明了当需要增加资源以执行更过工作时系统能够划算地提供等同提升（equal bang for the buck）的能力。另一种说法是，可扩展性是当增加资源以处理负载和增加容量时系统能够获得的投入产出比。</p>
-<p>大部分系统都没办法做到线性扩展，越高的扩展系数导致越大的线性偏差，最终达到临界点。—— 详见通用可扩展定律（Universal Scalability Law，USL）</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/high-perf-mysql11/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
   
   
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/03/high-perf-mysql10/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/high-perf-mysql10/" class="post-title-link" itemprop="url">Mysql 复制</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-03-13 19:51:55" itemprop="dateCreated datePublished" datetime="2020-03-13T19:51:55+08:00">2020-03-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-05 15:29:47" itemprop="dateModified" datetime="2020-04-05T15:29:47+08:00">2020-04-05</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="概述"><a class="markdownIt-Anchor" href="#概述"></a> 概述</h2>
-<p>复制功能不仅有利于构建高性能的应用，同时也是高可用、可扩展性、容灾恢复、备份以及数据仓库等工作的基础。</p>
-<p>MySQL 支持两种复制方式：</p>
-<ul>
-<li>基于行的复制</li>
-<li>基于语句的复制（也称为逻辑复制）</li>
-</ul>
-<p>两种方式都是通过在主库上记录二进制日志，在备库中重放日志实现异步的数据复制，因此存在延迟。</p>
-<p>MySQL 的复制大部分后向兼容，新版本的服务器可以作为老版本服务器的备库，但反之不行，因为它可能无法解析新版中的新特性或语法。对于小版本号升级通常是兼容的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/high-perf-mysql10/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-02/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql06-02/" class="post-title-link" itemprop="url">查询性能优化-02</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-02-22 14:21:55 / Modified: 17:35:05" itemprop="dateCreated datePublished" datetime="2020-02-22T14:21:55+08:00">2020-02-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="优化特定类型的查询"><a class="markdownIt-Anchor" href="#优化特定类型的查询"></a> 优化特定类型的查询</h2>
-<h3 id="优化-count-查询"><a class="markdownIt-Anchor" href="#优化-count-查询"></a> 优化 COUNT() 查询</h3>
-<p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
-<p>对于没有任何WHERE条件的COUNT(*)，MyISAM可以直接返回结果。</p>
-<p>可以利用MyISAM此特性对特定语句进行优化</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
-<p>一个查询中统计一个列不同值的数量</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure>
-<p>在对精度要求不高的时候可以使用近似值代替</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql06-02/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-01/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql06-01/" class="post-title-link" itemprop="url">查询性能优化-01</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-02-22 13:21:55 / Modified: 17:35:13" itemprop="dateCreated datePublished" datetime="2020-02-22T13:21:55+08:00">2020-02-22</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
-<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
-<p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
-<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
-<p>分析步骤</p>
-<ol>
-<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
-<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
-</ol>
-<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
-<ul>
-<li>
-<p>查询不需要的记录<br />
-使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
-</li>
-<li>
-<p>取出全部列<br />
-不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br />
-内存和CPU的消耗。<br />
-有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
-</li>
-<li>
-<p>重复查询相同的数据<br />
-利用缓存，减少重复查询。</p>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql06-01/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql06-md/" class="post-title-link" itemprop="url">查询性能优化</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-13 13:21:55" itemprop="dateCreated datePublished" datetime="2020-02-13T13:21:55+08:00">2020-02-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-16 21:22:23" itemprop="dateModified" datetime="2020-03-16T21:22:23+08:00">2020-03-16</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
-<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
-<p>查询需要在不同的地方花费时间，包括网络，CPU 计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的 IO 操作。</p>
-<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
-<p>分析步骤</p>
-<ol>
-<li>确认应用程序是否检索大量不必要的的数据，太多行或太多列。</li>
-<li>确认 MySQL 服务器层是否在分析大量不必要的数据行。</li>
-</ol>
-<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
-<ul>
-<li>
-<p>查询不需要的记录<br />
-使用 SELECT 查询所有结果，获取前面的 N 行后关闭，实际上 MySQL 已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
-</li>
-<li>
-<p>取出全部列<br />
-不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的 IO、内存和 CPU 的消耗。<br />
-有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据，需要进行权衡。</p>
-</li>
-<li>
-<p>重复查询相同的数据<br />
-利用缓存，减少重复查询。</p>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql06-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql05-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql05-md/" class="post-title-link" itemprop="url">创建高性能的索引</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-12 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-12T16:32:38+08:00">2020-02-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-13 13:15:43" itemprop="dateModified" datetime="2020-02-13T13:15:43+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
-<p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
-<p><strong>B 树索引</strong></p>
-<p>B 树中所有的值按顺序存储，每个叶节点到根的距离相同。</p>
-<p>索引对多个值进行排序的依据是<code>CREATE TABLE</code>语句中定义索引时列的顺序。</p>
-<p>B 树适用于全键值、键值范围或键前缀查找：</p>
-<ul>
-<li>全值匹配：和索引中的所有列进行匹配</li>
-<li>匹配最左前缀：只使用索引的第一列</li>
-<li>匹配列前缀：只匹配某一列的开头部分</li>
-<li>匹配范围值：匹配值处于某个区间</li>
-<li>精确匹配某一列并范围匹配另一列</li>
-<li>只访问索引的查询</li>
-</ul>
-<p>索引树中的节点是有序的，因此还可以用于查询中的<code>ORDER BY</code>操作。如果<code>ORDER BY</code>子句满足前面列出的集中查询类型，则索引也可以满足对应的排序需求。</p>
-<p>B 树索引的限制：</p>
-<ul>
-<li>如果不是按照索引的最左列开始查找，则无法使用索引。如为<code>last_name, first_name, birthday</code>创建索引，索引无法用于查询名字为 Bill 的人，也无法用于查找某个特定的生日。类似的，无法查找姓氏以某个字结尾的人。</li>
-<li>不能跳过索引中的列。前述的索引无法用于查找特定姓氏并且在某个特定生日的人，如果不指定 first_name，只能使用索引的第一列。</li>
-<li>如果查询中有某个列的范围查询，则其右边所有的列无法使用索引优化查询。</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql05-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql04-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql04-md/" class="post-title-link" itemprop="url">Schema 与数据类型优化</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-07 19:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T19:32:38+08:00">2020-02-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-13 13:15:10" itemprop="dateModified" datetime="2020-02-13T13:15:10+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="选择优化的数据类型"><a class="markdownIt-Anchor" href="#选择优化的数据类型"></a> 选择优化的数据类型</h2>
-<p>选择数据类型的原则</p>
-<ul>
-<li>更小的通常更好。应该尽量使用可以正确存储数据的最小数据类型，更小的数据类型占用更少的磁盘、内存和 CPU 缓存，处理时需要的 CPU 周期也更少。<strong>但也要确保没有低估需要存储的值的范围</strong>。<em>(个人觉得字符串的长度限制有时候真的很难把握)</em></li>
-<li>简单就好。简单数据类型的操作通常需要更少的 CPU 周期，整型的代价比字符串低，内建时间类型比字符串低，用整型存储 IP 比字符串低。</li>
-<li>尽量避免使用<code>NULL</code>。查询可为 NULL 的列对于 MySQL 来说更难优化，这些列使得索引、索引统计和值比较都更复杂。</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql04-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql01-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql01-md/" class="post-title-link" itemprop="url">MySQL 架构和历史</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-02-13 13:16:00" itemprop="dateModified" datetime="2020-02-13T13:16:00+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="逻辑架构"><a class="markdownIt-Anchor" href="#逻辑架构"></a> 逻辑架构</h2>
-<p>三层架构：</p>
-<ul>
-<li>连接与线程处理</li>
-</ul>
-<p>每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。<br />
-注意区分<code>线程池</code>和<code>连接池</code>，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。<code>线程池</code>和<code>连接池</code>需要结合使用。</p>
-<ul>
-<li>MySQL 服务层：SQL 解析、分析、优化、缓存</li>
-</ul>
-<p>MySQL 的优化器不关心使用的是什么存储引擎，但存储引擎对于优化查询有影响。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。<br />
-Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方式，但<code>oracle 10g</code>之后已经弃用 RBO。相比 MySQL 的优化器，Oracle 的优化更加丰富和完善，可以对照着学习。</p>
-<ul>
-<li>存储引擎</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql01-md/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/fluent-python/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -983,8 +217,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/fluent-python/" class="post-title-link" itemprop="url">Fluent Python 笔记</a>
+          Fluent Python 笔记
         </h1>
 
         <div class="post-meta">
@@ -1017,6 +250,18 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 
           
   
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2020/02/fluent-python/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/fluent-python/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
   
 
         </div>
@@ -1028,7 +273,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="术语解释"><a class="markdownIt-Anchor" href="#术语解释"></a> 术语解释</h2>
+        <h2 id="术语解释"><a class="markdownIt-Anchor" href="#术语解释"></a> 术语解释</h2>
 <p>doctest: 一种单元测试工具</p>
 <p>genxp: generator expression</p>
 <p>listcomp: list comprehension</p>
@@ -1211,112 +456,33 @@ Functions or methods that use the yield keyword. When called, generator function
 <h3 id="retrieving-information-about-parameters"><a class="markdownIt-Anchor" href="#retrieving-information-about-parameters"></a> Retrieving Information About Parameters</h3>
 <p>// TODO</p>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
 
         
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/12/ML_algorithm/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/12/ML_algorithm/" class="post-title-link" itemprop="url">常见机器学习算法的优缺点</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2019-12-20 20:03:55" itemprop="dateCreated datePublished" datetime="2019-12-20T20:03:55+08:00">2019-12-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-29 23:07:54" itemprop="dateModified" datetime="2020-03-29T23:07:54+08:00">2020-03-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/AI/" itemprop="url" rel="index">
-                    <span itemprop="name">AI</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>想要寻找一个合适的算法不容易，实际应用中，我们一般采用启发式实验。</p>
-<p>没有免费的午餐定理 (NFL)：核心在于，假设了所有问题出现的机会相同，或所有问题同等重要。当需求是解决一切问题时，“哪个算法更好”就毫无意义。HG2G 中“深思”面对“宇宙、生命以及一切的中继答案是什么？”这样一个问题，用最复杂的算法算出一个 42 和随便说一个 42 是一样的。</p>
-<h2 id="偏差与方差"><a class="markdownIt-Anchor" href="#偏差与方差"></a> 偏差与方差</h2>
-<ul>
-<li>偏差：描述的是估计值的期望 E 与真实值 Y 之间的差距。偏差越大，越偏离真实数据。</li>
-<li>方差：描述的是预测值的离散程度，方差越大，数据分布约分散。</li>
-<li>模型的真实误差可以看成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>i</mi><mi>a</mi><msup><mi>s</mi><mn>2</mn></msup><mo>+</mo><mi>v</mi><mi>a</mi><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">bias^2 + var + \sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.897438em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">a</span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> 是噪音</li>
-</ul>
-<p>偏差与方差窘境：</p>
-<ul>
-<li>学得不好，偏差大</li>
-<li>学得好，敏感性高，方差大。</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/12/ML_algorithm/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/ML_algorithm/" rel="prev" title="常见机器学习算法的优缺点">
+      <i class="fa fa-chevron-left"></i> 常见机器学习算法的优缺点
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/high-perf-mysql01-md/" rel="next" title="MySQL 架构和历史">
+      MySQL 架构和历史 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
@@ -1324,15 +490,10 @@ Functions or methods that use the yield keyword. When called, generator function
 
   </div>
 
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
-  </nav>
-
-
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -1379,6 +540,7 @@ Functions or methods that use the yield keyword. When called, generator function
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#术语解释"><span class="nav-number">1.</span> <span class="nav-text"> 术语解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#data-structures"><span class="nav-number">2.</span> <span class="nav-text"> Data Structures</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tuples-are-not-just-immutable-lists"><span class="nav-number">2.1.</span> <span class="nav-text"> Tuples Are Not Just Immutable Lists</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#using-and-with-sequences"><span class="nav-number">2.2.</span> <span class="nav-text"> Using + and * with sequences</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#augmented-assignment-with-sequences"><span class="nav-number">2.3.</span> <span class="nav-text"> Augmented Assignment with Sequences</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#listsort-and-the-sorted-built-in-function"><span class="nav-number">2.4.</span> <span class="nav-text"> list.sort and the sorted Built-In Function</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#managing-ordered-sequences-with-bisect"><span class="nav-number">2.5.</span> <span class="nav-text"> Managing Ordered Sequences with bisect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#when-a-list-is-not-the-answer"><span class="nav-number">2.6.</span> <span class="nav-text"> When a List Is Not the Answer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dictionaries-and-sets"><span class="nav-number">3.</span> <span class="nav-text"> Dictionaries and Sets</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#generic-mapping-types"><span class="nav-number">3.1.</span> <span class="nav-text"> Generic Mapping Types</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#overview-of-common-mapping-methods"><span class="nav-number">3.2.</span> <span class="nav-text"> Overview of Common Mapping Methods</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mapping-with-flexible-key-lookup"><span class="nav-number">3.3.</span> <span class="nav-text"> Mapping with Flexible Key Lookup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#immutable-mapping"><span class="nav-number">3.4.</span> <span class="nav-text"> Immutable Mapping</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#set-theory"><span class="nav-number">3.5.</span> <span class="nav-text"> Set Theory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dict-and-set-under-the-hood"><span class="nav-number">3.6.</span> <span class="nav-text"> dict and set Under the Hood</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#text-versus-bytes"><span class="nav-number">4.</span> <span class="nav-text"> Text versus Bytes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#character-issues"><span class="nav-number">4.1.</span> <span class="nav-text"> Character Issues</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#byte-essentials"><span class="nav-number">4.2.</span> <span class="nav-text"> Byte Essentials</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#understanding-encodedecode-problems"><span class="nav-number">4.3.</span> <span class="nav-text"> Understanding Encode&#x2F;Decode Problems</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#handling-text-files"><span class="nav-number">4.4.</span> <span class="nav-text"> Handling Text Files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#normalizing-unicode-for-saner-comparisons"><span class="nav-number">4.5.</span> <span class="nav-text"> Normalizing Unicode for Saner Comparisons</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#first-class-functions"><span class="nav-number">5.</span> <span class="nav-text"> First-Class Functions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#the-seven-flavors-of-callable-objects"><span class="nav-number">5.1.</span> <span class="nav-text"> The Seven Flavors of Callable Objects</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#retrieving-information-about-parameters"><span class="nav-number">5.2.</span> <span class="nav-text"> Retrieving Information About Parameters</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -1496,9 +658,6 @@ Functions or methods that use the yield keyword. When called, generator function
   
 
   
-      
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
-
 
   
 
