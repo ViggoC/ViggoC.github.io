@@ -48,20 +48,20 @@
 
   <meta name="description" content="简介 虚拟机磁盘文件格式  VDI：virtual box 自有文件格式 VMDK：VMWare 格式，受到众多软件支持，具有将存储的文件分割为少于 2 GB 文件的附加功能 VHD：微软家的格式   QEMU 完全以软件的形式模拟出一台完整的电脑所需的所有硬件，甚至是模拟出不同架构的硬件，在这些虚拟的硬件之上，可以安装完整的操作系统。   KVM 完全以软件模拟硬件的形式虽然功能强大，但是性能">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux 下虚拟机">
+<meta property="og:title" content="Linux 下虚拟机体验">
 <meta property="og:url" content="https://viggoc.github.io/2019/07/virtual-machine-in-linux/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
 <meta property="og:description" content="简介 虚拟机磁盘文件格式  VDI：virtual box 自有文件格式 VMDK：VMWare 格式，受到众多软件支持，具有将存储的文件分割为少于 2 GB 文件的附加功能 VHD：微软家的格式   QEMU 完全以软件的形式模拟出一台完整的电脑所需的所有硬件，甚至是模拟出不同架构的硬件，在这些虚拟的硬件之上，可以安装完整的操作系统。   KVM 完全以软件模拟硬件的形式虽然功能强大，但是性能">
-<meta property="og:image" content="https://images0.cnblogs.com/blog/16576/201502/241026434392128.png">
-<meta property="og:image" content="https://images0.cnblogs.com/blog/16576/201502/241032534717180.png">
-<meta property="og:image" content="https://images0.cnblogs.com/blog2015/16576/201503/072047590864636.png">
-<meta property="og:image" content="https://images0.cnblogs.com/blog2015/16576/201503/072048177587106.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/10/8UGD2wNoegtpZO5.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/10/W7u12trUlTyjHFx.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/10/sETLJ6cfgbrAhjH.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/10/OvX1HGlnfLD2krZ.png">
 <meta property="article:published_time" content="2019-07-12T11:21:55.000Z">
-<meta property="article:modified_time" content="2020-04-09T16:41:44.372Z">
+<meta property="article:modified_time" content="2020-04-09T17:05:29.922Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="虚拟机">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://images0.cnblogs.com/blog/16576/201502/241026434392128.png">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/10/8UGD2wNoegtpZO5.png">
 
 <link rel="canonical" href="https://viggoc.github.io/2019/07/virtual-machine-in-linux/">
 
@@ -75,7 +75,7 @@
   };
 </script>
 
-  <title>Linux 下虚拟机 | VC' Blog</title>
+  <title>Linux 下虚拟机体验 | VC' Blog</title>
   
 
 
@@ -222,7 +222,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Linux 下虚拟机
+          Linux 下虚拟机体验
         </h1>
 
         <div class="post-meta">
@@ -239,7 +239,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-10 00:41:44" itemprop="dateModified" datetime="2020-04-10T00:41:44+08:00">2020-04-10</time>
+                <time title="Modified: 2020-04-10 01:05:29" itemprop="dateModified" datetime="2020-04-10T01:05:29+08:00">2020-04-10</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -287,22 +287,22 @@
 </ul>
 <h2 id="qemu"><a class="markdownIt-Anchor" href="#qemu"></a> QEMU</h2>
 <p>完全以软件的形式模拟出一台完整的电脑所需的所有硬件，甚至是模拟出不同架构的硬件，在这些虚拟的硬件之上，可以安装完整的操作系统。</p>
-<p><img src="https://images0.cnblogs.com/blog/16576/201502/241026434392128.png" alt="image" /></p>
+<p><img src="https://i.loli.net/2020/04/10/8UGD2wNoegtpZO5.png" alt="" /></p>
 <h2 id="kvm"><a class="markdownIt-Anchor" href="#kvm"></a> KVM</h2>
 <p>完全以软件模拟硬件的形式虽然功能强大，但是性能难以满足用户的需要。模拟出的硬件的性能和物理硬件的性能相比，必然会大打折扣。为了提高虚拟机软件的性能，最常用的办法就是在主操作系统中通过内核模块开一个洞，通过这个洞将虚拟机中的操作直接映射到物理硬件上，从而提高虚拟机中运行的操作系统的性能。KVM 就是这种加速模式的典型代表。</p>
-<p><img src="https://images0.cnblogs.com/blog/16576/201502/241032534717180.png" alt="image" /></p>
+<p><img src="https://i.loli.net/2020/04/10/W7u12trUlTyjHFx.png" alt="" /></p>
 <p>KVM 已经被加入内核中，qemu-kvm 是为了借助 QEMU 运行虚拟机对 qemu-system-x86_64 命令进行的简单包装</p>
 <h3 id="virt-manager"><a class="markdownIt-Anchor" href="#virt-manager"></a> virt-manager</h3>
 <p>QEMU 和 KVM 自身不带图形界面的虚拟机管理器，virt-manager 提供图形化的管理界面。</p>
 <h2 id="virtualbox"><a class="markdownIt-Anchor" href="#virtualbox"></a> VirtualBox</h2>
 <p>简单易用，跨平台。</p>
 <h2 id="xen"><a class="markdownIt-Anchor" href="#xen"></a> Xen</h2>
-<p><img src="https://images0.cnblogs.com/blog2015/16576/201503/072047590864636.png" alt="image" /></p>
+<p><img src="https://i.loli.net/2020/04/10/sETLJ6cfgbrAhjH.png" alt="" /></p>
 <p>Xen 虚拟机架构中没有 Host System，在硬件层之上是薄薄的一层 Xen Hypervisor，在这之上就是各个虚拟机了，没有 Host System，只有 Domain 0 具有一定特权，而 Guest System 都是 Domain U，不管是 Domain 0 还是 Domain U，都是虚拟机，都是被虚拟机软件管理的对象。</p>
 <p>安装</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo aptitude search xen</span><br><span class="line">sudo aptitude install xen-hypervisor-4.4-amd64</span><br></pre></td></tr></table></figure>
-<p>启动时可以选择让该系统运行于 Xen Hypervisor 上。<br />
-<img src="https://images0.cnblogs.com/blog2015/16576/201503/072048177587106.png" alt="image" /></p>
+<p>启动时可以选择让该系统运行于 Xen Hypervisor 上。</p>
+<p><img src="https://i.loli.net/2020/04/10/OvX1HGlnfLD2krZ.png" alt="" /></p>
 <p>通过 Xen 虚拟机启动 Ubuntu 系统时，Grub 先启动的是 /boot/xen-4.4-amd64.gz，然后才把 Linux 内核以及 initrd 文件作为模块载入内存。</p>
 <p>参考：</p>
 <ol>
