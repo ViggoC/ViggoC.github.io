@@ -64,10 +64,10 @@
 <h2 id="负载均衡"><a class="markdownIt-Anchor" href="#负载均衡"></a> 负载均衡</h2>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -151,7 +151,7 @@
 <ul>
 <li>冷备份，重启主库后使用一个新的二进制日志文件，备库指向这个新文件</li>
 <li>热备份，如果仅使用了 MyISAM 标，可在主库运行时使用<code>mysqlhotcopy</code>或<code>rsync</code>来复制数据</li>
-<li>mysqldump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
+<li>MySQLdump，如果只有 InnoDB 表，可使用如下语句导出数据，将其加载到主库后设置相应的二进制日志坐标</li>
 </ul>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysqldump --single-transaction --all-databases \</span><br><span class="line">--master-data&#x3D;1--host&#x3D;server1 | mysql --host&#x3D;server2</span><br></pre></td></tr></table></figure>
 <ul>
@@ -264,10 +264,10 @@
 <p>在主备库之间建立联系，如果网络断开，备库会注意到丢失的心跳数据。</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -351,10 +351,10 @@
 <p>优化需要三管齐下：不做、少做、快速地做。</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -591,10 +591,10 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
 <p>因版本而异，详见官方手册</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -906,10 +906,10 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
 <p>优化需要三管齐下：不做、少做、快速地做。</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -1101,10 +1101,10 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
 </ol>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -1212,10 +1212,10 @@ MySQL 的存储引擎 API 需要在服务器曾和存储引擎层之间通过行
 <p>MyISAM 中的<code>唯一索引</code>无法通过禁用索引、载入数据、重启索引的方式导入大量数据，也可以通过直接修改元文件的方式操作</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -1298,10 +1298,10 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 </ul>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
-        <tag>mysql</tag>
+        <tag>MySQL</tag>
       </tags>
   </entry>
   <entry>
@@ -1491,10 +1491,10 @@ Functions or methods that use the yield keyword. When called, generator function
 <p>// TODO</p>
 ]]></content>
       <categories>
-        <category>python</category>
+        <category>Python</category>
       </categories>
       <tags>
-        <tag>python</tag>
+        <tag>Python</tag>
       </tags>
   </entry>
   <entry>
@@ -1822,7 +1822,10 @@ B：政府应该提高最低工资。</p>
 </blockquote>
 <p>总收益增加还是减少取决于需求弹性</p>
 <p>分析农业技术或农业政策的影响时要记住，对农民有利的不一定对整个社会也有利。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">graph LR</span><br><span class="line">技术提升 --&gt; 供给增加</span><br><span class="line">供给增加 --&gt; 价格降低</span><br><span class="line">价格降低-- 需求弹性小 --&gt; 农民总收益降低</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph LR
+技术提升 --> 供给增加
+供给增加 --> 价格降低
+价格降低-- 需求弹性小 --> 农民总收益降低</pre>
 <h2 id="供给需求与价格政策"><a class="markdownIt-Anchor" href="#供给需求与价格政策"></a> 供给/需求与价格政策</h2>
 <h3 id="税收"><a class="markdownIt-Anchor" href="#税收"></a> 税收</h3>
 <p>税收负担由交易双方分担；</p>
@@ -1949,7 +1952,7 @@ B：政府应该提高最低工资。</p>
     <url>/2019/10/git_cheat_sheet/</url>
     <content><![CDATA[<h2 id="控制"><a class="markdownIt-Anchor" href="#控制"></a> 控制</h2>
 <ul>
-<li>git init</li>
+<li>git init G</li>
 <li>git add/rm</li>
 <li>git commit -m “informatiom”</li>
 </ul>
@@ -2083,10 +2086,10 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 <p><img src="https://i.loli.net/2020/03/15/DxK5mRwtjZO3nPH.png" alt="cheat sheet" /></p>
 ]]></content>
       <categories>
-        <category>tool</category>
+        <category>Tool</category>
       </categories>
       <tags>
-        <tag>git</tag>
+        <tag>Git</tag>
       </tags>
   </entry>
   <entry>
@@ -2569,10 +2572,345 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 <p>解决方法：1. 修改该字段的名称。2. 新建一个正确的字段。3. 将数据同步的到新字段。4. 删除错误字段。</p>
 ]]></content>
       <categories>
-        <category>database</category>
+        <category>Database</category>
       </categories>
       <tags>
         <tag>oracle</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux 下虚拟机</title>
+    <url>/2019/07/virtual-machine-in-linux/</url>
+    <content><![CDATA[<h1 id="简介"><a class="markdownIt-Anchor" href="#简介"></a> 简介</h1>
+<p>虚拟机磁盘文件格式</p>
+<ul>
+<li>VDI：virtual box 自有文件格式</li>
+<li>VMDK：VMWare 格式，受到众多软件支持，具有将存储的文件分割为少于 2 GB 文件的附加功能</li>
+<li>VHD：微软家的格式</li>
+</ul>
+<h2 id="qemu"><a class="markdownIt-Anchor" href="#qemu"></a> QEMU</h2>
+<p>完全以软件的形式模拟出一台完整的电脑所需的所有硬件，甚至是模拟出不同架构的硬件，在这些虚拟的硬件之上，可以安装完整的操作系统。</p>
+<p><img src="https://images0.cnblogs.com/blog/16576/201502/241026434392128.png" alt="image" /></p>
+<h2 id="kvm"><a class="markdownIt-Anchor" href="#kvm"></a> KVM</h2>
+<p>完全以软件模拟硬件的形式虽然功能强大，但是性能难以满足用户的需要。模拟出的硬件的性能和物理硬件的性能相比，必然会大打折扣。为了提高虚拟机软件的性能，最常用的办法就是在主操作系统中通过内核模块开一个洞，通过这个洞将虚拟机中的操作直接映射到物理硬件上，从而提高虚拟机中运行的操作系统的性能。KVM 就是这种加速模式的典型代表。</p>
+<p><img src="https://images0.cnblogs.com/blog/16576/201502/241032534717180.png" alt="image" /></p>
+<p>KVM 已经被加入内核中，qemu-kvm 是为了借助 QEMU 运行虚拟机对 qemu-system-x86_64 命令进行的简单包装</p>
+<h3 id="virt-manager"><a class="markdownIt-Anchor" href="#virt-manager"></a> virt-manager</h3>
+<p>QEMU 和 KVM 自身不带图形界面的虚拟机管理器，virt-manager 提供图形化的管理界面。</p>
+<h2 id="virtualbox"><a class="markdownIt-Anchor" href="#virtualbox"></a> VirtualBox</h2>
+<p>简单易用，跨平台。</p>
+<h2 id="xen"><a class="markdownIt-Anchor" href="#xen"></a> Xen</h2>
+<p><img src="https://images0.cnblogs.com/blog2015/16576/201503/072047590864636.png" alt="image" /></p>
+<p>Xen 虚拟机架构中没有 Host System，在硬件层之上是薄薄的一层 Xen Hypervisor，在这之上就是各个虚拟机了，没有 Host System，只有 Domain 0 具有一定特权，而 Guest System 都是 Domain U，不管是 Domain 0 还是 Domain U，都是虚拟机，都是被虚拟机软件管理的对象。</p>
+<p>安装</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo aptitude search xen</span><br><span class="line">sudo aptitude install xen-hypervisor-4.4-amd64</span><br></pre></td></tr></table></figure>
+<p>启动时可以选择让该系统运行于 Xen Hypervisor 上。<br />
+<img src="https://images0.cnblogs.com/blog2015/16576/201503/072048177587106.png" alt="image" /></p>
+<p>通过 Xen 虚拟机启动 Ubuntu 系统时，Grub 先启动的是 /boot/xen-4.4-amd64.gz，然后才把 Linux 内核以及 initrd 文件作为模块载入内存。</p>
+<p>参考：</p>
+<ol>
+<li><a href="https://www.cnblogs.com/youxia/p/LinuxDesktop007.html" target="_blank" rel="noopener">Linux 中的 Qemu、KVM、VirtualBox、Xen 虚拟机体验</a></li>
+</ol>
+<h1 id="使用经验"><a class="markdownIt-Anchor" href="#使用经验"></a> 使用经验</h1>
+<h2 id="host-使用-guest-中的-vpn"><a class="markdownIt-Anchor" href="#host-使用-guest-中的-vpn"></a> Host 使用 Guest 中的 VPN</h2>
+<p>有些防火墙（比如华为）只提供 Windows 或 OSX 的 VPN 客户端，Linux 想要建立连接很不方便。这时候只能曲线救国，在 Windows 虚拟机中启动 VPN 客户端，并共享给宿主机。</p>
+<h3 id="virtual-box-添加-host-only-网络"><a class="markdownIt-Anchor" href="#virtual-box-添加-host-only-网络"></a> Virtual Box 添加 Host-only 网络</h3>
+<p>添加 host-only 网络需要先在 VB 进行全局设置： <code>File &gt; Host Network Manager &gt; Add</code>.</p>
+<p>然后相应虚拟机设置中添加 Host-only 网络</p>
+<h3 id="guest-中连接-vpn-并设置网络共享"><a class="markdownIt-Anchor" href="#guest-中连接-vpn-并设置网络共享"></a> Guest 中连接 VPN 并设置网络共享</h3>
+<p>Guest 中 VPN 给 host-only 设置共享，Host 中设置路由，网关设置成 Guest 的 ip</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo route add -net 10.5.0.0 netmask 255.255.0.0 gw 192.168.56.101</span><br></pre></td></tr></table></figure>
+<p>参考：</p>
+<ol>
+<li><a href="https://lizhiyong2000.github.io/2019/06/18/%E5%85%B1%E4%BA%ABVPN%E8%BF%9E%E6%8E%A5%E8%AE%BF%E9%97%AEVPN%E7%BD%91%E7%BB%9C/" target="_blank" rel="noopener">共享 VPN 连接访问 VPN 网络</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>虚拟机</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PySpark 学习笔记</title>
+    <url>/2019/06/PySpark-note/</url>
+    <content><![CDATA[<h2 id="安装"><a class="markdownIt-Anchor" href="#安装"></a> 安装</h2>
+<p>环境：Ubuntu 16.04 / python3.5</p>
+<p>安装报错<code>Could not import pypandoc - required to package PySpark</code>，进行了如下操作</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install -U pip</span><br><span class="line">pip install -U setuptools</span><br><span class="line">sudo apt install pandoc #不确定是否起作用</span><br><span class="line">pip install pypandoc</span><br></pre></td></tr></table></figure>
+<p>运行时发现未安装 JAVA</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt install openjdk-8-jdk</span><br></pre></td></tr></table></figure>
+<p>成功运行</p>
+<a id="more"></a>
+<h2 id="简介"><a class="markdownIt-Anchor" href="#简介"></a> 简介</h2>
+<p>Spark 是 UC Berkeley AMP lab （加州大学伯克利分校的 AMP 实验室）所开源的类 Hadoop MapReduce 的通用并行框架，Spark，拥有 Hadoop MapReduce 所具有的优点；但不同于 MapReduce 的是 Job 中间输出结果可以保存在内存中，从而不再需要读写 HDFS，因此 Spark 能更好地适用于数据挖掘与机器学习等需要迭代的 MapReduce 的算法。</p>
+<p>spark 支持 Scala，Java，JVM，Python，R。</p>
+<p>Spark 的核心是一个对<code>由很多计算任务组成的、运行再多个工作机器或者是一个计算集群上的应用</code>进行调度、分发以及监控的计算引擎。</p>
+<p><img src="http://insidebigdata.com/wp-content/uploads/2015/11/Spark_ecosystem.png" alt="" /></p>
+<p>spark 提供类似 Python 的 pandas 或 R 语言的 data.frame 的操作，但有差异。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/1531909-017acff244e3caf2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/600/format/webp" alt="" /></p>
+<p>SparkContext 使用 Py4J 启动 JVM 并创建 JavaSparkContext。默认情况下，PySpark 将 SparkContext 作为’sc’提供，因此创建新的 SparkContext 将不起作用。</p>
+<p>Spark 应用程序会分离主节点上的单个驱动进程，然后将执行进程分配给多个工作节点。</p>
+<p>shuffle 数据非常消耗资源，DAGScheduler 会对此进行优化。</p>
+<p>Spark SQL 支持 SQL 查询和 DataFrame API，其核心是 Catalyst 优化器。</p>
+<p>saprk 2.0 中 Sparksession 是读取数据，处理元数据，配置绘画和管理集群资源的入口。</p>
+<p>创建 SparkContext</p>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">pyspark</span>.<span class="title">SparkContext</span> <span class="params">(</span></span></span><br><span class="line"><span class="class"><span class="params">   master = None,</span></span></span><br><span class="line"><span class="class"><span class="params">   appName = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   sparkHome = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   pyFiles = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   environment = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   batchSize = <span class="number">0</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">   serializer = PickleSerializer<span class="params">()</span>, </span></span></span><br><span class="line"><span class="class"><span class="params">   conf = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   gateway = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   jsc = None, </span></span></span><br><span class="line"><span class="class"><span class="params">   profiler_cls = &lt;class <span class="string">'pyspark.profiler.BasicProfiler'</span>&gt;</span></span></span><br><span class="line"><span class="class"><span class="params">)</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">from</span> <span class="title">pyspark</span> <span class="title">import</span> <span class="title">SparkContext</span></span></span><br><span class="line">sc = SparkContext("local", "First App")</span><br></pre></td></tr></table></figure>
+<p>以下是 SparkContext 的参数具体含义：</p>
+<ul>
+<li><code>Master</code>- 连接到的集群的 URL。</li>
+<li><code>appName</code>- 工作名称。</li>
+<li><code>sparkHome</code> - Spark 安装目录。</li>
+<li><code>pyFiles</code> - 要发送到集群并添加到 PYTHONPATH 的。zip 或。py 文件。</li>
+<li><code>environment</code> - 工作节点环境变量。</li>
+<li><code>batchSize</code> - 表示为单个 Java 对象的 Python 对象的数量。设置 1 以禁用批处理，设置 0 以根据对象大小自动选择批处理大小，或设置为-1 以使用无限批处理大小。</li>
+<li><code>serializer</code>- RDD 序列化器。</li>
+<li><code>Conf</code> - <code>SparkConf</code>的一个对象，用于设置所有 Spark 属性。</li>
+<li><code>gateway</code>  - 使用现有网关和 JVM，否则初始化新 JVM。</li>
+<li><code>JSC</code> - JavaSparkContext 实例。</li>
+<li><code>profiler_cls</code> - 用于进行性能分析的一类自定义 Profiler（默认为<code>pyspark.profiler.BasicProfiler</code>）。</li>
+</ul>
+<h2 id="rdd"><a class="markdownIt-Anchor" href="#rdd"></a> RDD</h2>
+<p>RDD（弹性分布式数据集，Resilient Distributed Dataset），是 JVM 对象的分布式集合。</p>
+<h3 id="数据读取"><a class="markdownIt-Anchor" href="#数据读取"></a> 数据读取</h3>
+<p>RDD 支持多种数据格式读取：文本，parquest，JSON，Hive tables 以及使用 JDBC 驱动可以读取的数据库。Spark 可以自动处理压缩包。</p>
+<p>从文件中读取的数据为 MapPartitionRDD，使用。parallelize() 方式获得的是 ParallelCollectionRDD。</p>
+<p>RDD 无 schema，可以混用任何数据类型。</p>
+<blockquote>
+<p>定义纯 Python 方法会降低程序的速度，Spark 需要在 Python 解释器和 JVM 之间切换，因此尽可能使用 Spark 内置的功能。</p>
+</blockquote>
+<p>作用域：每个执行器从驱动程序中获得一份变量和方法的副本，执行器对这些变量或方法的修改其他执行者是不可见的。</p>
+<h3 id="转换"><a class="markdownIt-Anchor" href="#转换"></a> 转换</h3>
+<p>转换包括映射、筛选、连接、转换数据集中的值。</p>
+<ul>
+<li>
+<p>.map()</p>
+<p>对 RDD 的每个元素进行转换，通常搭配<code>lambda</code>，输出为多列时需要打包成一个 tuple</p>
+<p><code>.map(lambda row: (row[16], int(row[16])))</code></p>
+</li>
+<li>
+<p>.filter()</p>
+<p>从数据集中选择元素：<code>.filter(lambda row: row[16] == '2014' and row[21] == '0')</code></p>
+</li>
+<li>
+<p>flatMap()</p>
+<p>把所有结果扁平化简单拼接</p>
+</li>
+<li>
+<p>.distinct()</p>
+<p>返回 distinct 值，开销大，慎用</p>
+</li>
+<li>
+<p>.sample()</p>
+<p>sample(isReplace, fraction, seed)</p>
+</li>
+<li>
+<p>.leftOuterJoin()</p>
+<p>和 SQL 中一样，<code>a.leftOuterJoin(b)</code>，高开销，慎用。<code>.join()</code>为内连接，<code>.intersection()</code>返回相同的记录</p>
+</li>
+<li>
+<p>.repartition()</p>
+<p>重新对数据集进行分区，改变分区数量，会重组数据，开销大，慎用。</p>
+</li>
+</ul>
+<h3 id="行动"><a class="markdownIt-Anchor" href="#行动"></a> 行动</h3>
+<ul>
+<li>
+<p>take()</p>
+<p>返回单个数据分区的前 n 行。可以使用 <code>takeSample()</code>取随机样本。</p>
+</li>
+<li>
+<p>collect()</p>
+</li>
+<li>
+<p>reduce()</p>
+<p>reduce() 传递的函数需要不受元素顺序和操作符顺序的影响，如<code>x+y</code>没问题，<code>x/y</code>不行</p>
+</li>
+<li>
+<p>count()</p>
+<p>统计数量，只返回统计值，不会将数据集返回到驱动程序。如果数据集是 key-value 形式，可以使用 <code>countBykey()</code>方式获取不同键的计数。</p>
+</li>
+<li>
+<p>saveAsTextFile()</p>
+<p>把 RDD 保存为文本文件，但不可使用<code>open()</code>读取，要使用<code>textFile()</code>读取。所有数据以字符串形式读取，想要转换为数字要自己进行解析。</p>
+</li>
+<li>
+<p>foreach()</p>
+<p>类似<code>map()</code>，对每个元素进行操作，但不要求返回值为 RDD 支持的类型，可以保存到 pyspark 本身不支持的数据库。</p>
+</li>
+</ul>
+<p>Spark 对 RDD 的计算是惰性的。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">lines = sc.textFile(<span class="string">"README.md"</span>)</span><br><span class="line">pythonLines = lines.filter(<span class="keyword">lambda</span> line: <span class="string">"Python"</span> <span class="keyword">in</span> line)</span><br><span class="line">pythonLines.first()</span><br></pre></td></tr></table></figure>
+<p>上例中，第 1，2 行的语句（转换操作）都不会真正计算 RDD，只有再第三行使用到 RDD（行动操作）的时候，才去按照既定的规则扫描文本。若是在第 1 句就讲文本读进内存，而第 2 句又过滤了大量文本，浪费资源。</p>
+<p>默认情况下，每次行动操作时会重新计算 RDD，除非使用<code>RDD.persist()</code>将其缓存。</p>
+<ul>
+<li>转换操作：输入 RDD（可能有多个），返回 RDD</li>
+<li>行动操作：输出结果，会触发实际的计算</li>
+</ul>
+<p>Spark 会维护一个<code>lineage graph/谱系图</code>来记录不同的 RDD 之间的关系，需要这些信息来按需计算 RDD。</p>
+<p><strong>传递函数时需要注意，当传递的是某个对象的成员或者包含某个对象中字段的引用，Spark 会把整个对象都发送到工作节点上</strong>，替代方案是将所需字段保存为局部变量再传递。</p>
+<h2 id="dataframe"><a class="markdownIt-Anchor" href="#dataframe"></a> DataFrame</h2>
+<p><code>Spark 2.0</code><br />
+中，我们使用<code>SparkSession</code>来替代<code>SQLContext</code>。各种 Spark 的上下文语境<br />
+<code>HiveContext</code>、<code>SQLContext</code>、<code>StreamingContext</code>和<code>SparkContext</code>都被整合到了<br />
+<code>SparkSession</code>，这样一来，只需要将此会话作为读取数据的入口点，和元数据、配置以及群集资源管理一起来使用。</p>
+<h3 id="python-rdd-的通信"><a class="markdownIt-Anchor" href="#python-rdd-的通信"></a> Python - RDD 的通信</h3>
+<p><img src="https://i.loli.net/2020/03/17/zLponBPxWOitYV8.png" alt="" /></p>
+<h3 id="catalyst-优化器"><a class="markdownIt-Anchor" href="#catalyst-优化器"></a> Catalyst 优化器</h3>
+<p><code>Spark SQL</code> 引擎既有基于规则的优化，也有基于成本的优化，包括但不限于谓词下推和列精简。</p>
+<p><img src="https://i.loli.net/2020/03/17/PSr9st4CqTegwWc.png" alt="" /></p>
+<h3 id="创建-dataframe"><a class="markdownIt-Anchor" href="#创建-dataframe"></a> 创建 DataFrame</h3>
+<blockquote>
+<p>在 spark 1.x 中使用 sqlContext</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Create SparkSession</span></span><br><span class="line"><span class="keyword">from</span> pyspark.sql <span class="keyword">import</span> SparkSession</span><br><span class="line">spark = SparkSession \</span><br><span class="line">    .builder \</span><br><span class="line">    .appName(<span class="string">"Python Spark SQL basic example"</span>) \</span><br><span class="line">    .config(<span class="string">"spark.some.config.option"</span>, <span class="string">"some-value"</span>) \</span><br><span class="line">    .getOrCreate()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate JSON data </span></span><br><span class="line">stringJSONRDD = sc.parallelize((<span class="string">""" </span></span><br><span class="line"><span class="string">  &#123; "id": "123",</span></span><br><span class="line"><span class="string">    "name": "Katie",</span></span><br><span class="line"><span class="string">    "age": 19,</span></span><br><span class="line"><span class="string">    "eyeColor": "brown"</span></span><br><span class="line"><span class="string">  &#125;"""</span>,</span><br><span class="line">   <span class="string">"""&#123;</span></span><br><span class="line"><span class="string">    "id": "234",</span></span><br><span class="line"><span class="string">    "name": "Michael",</span></span><br><span class="line"><span class="string">    "age": 22,</span></span><br><span class="line"><span class="string">    "eyeColor": "green"</span></span><br><span class="line"><span class="string">  &#125;"""</span>, </span><br><span class="line">  <span class="string">"""&#123;</span></span><br><span class="line"><span class="string">    "id": "345",</span></span><br><span class="line"><span class="string">    "name": "Simone",</span></span><br><span class="line"><span class="string">    "age": 23,</span></span><br><span class="line"><span class="string">    "eyeColor": "blue"</span></span><br><span class="line"><span class="string">  &#125;"""</span>)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create DataFrame using spark.read.json</span></span><br><span class="line">swimmersJSON = spark.read.json(stringJSONRDD)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create temporary table which is necessary for sql</span></span><br><span class="line">swimmersJSON.createOrReplaceTempView(<span class="string">"swimmersJSON"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># get a parameter for the number of rows</span></span><br><span class="line"><span class="comment"># default 10</span></span><br><span class="line">swimmersJSON.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># SQL Query</span></span><br><span class="line">spark.sql(<span class="string">"select * from swimmersJSON"</span>).collect()</span><br></pre></td></tr></table></figure>
+<p>Spark 使用反射自动推断数据类型</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Print the schema</span></span><br><span class="line">swimmersJSON.printSchema()</span><br></pre></td></tr></table></figure>
+<p>指定类型</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.sql.types <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate our own CSV data </span></span><br><span class="line"><span class="comment">#   This way we don't have to access the file system yet.</span></span><br><span class="line">stringCSVRDD = sc.parallelize([(<span class="number">123</span>, <span class="string">'Katie'</span>, <span class="number">19</span>, <span class="string">'brown'</span>), (<span class="number">234</span>, <span class="string">'Michael'</span>, <span class="number">22</span>, <span class="string">'green'</span>), (<span class="number">345</span>, <span class="string">'Simone'</span>, <span class="number">23</span>, <span class="string">'blue'</span>)])</span><br><span class="line"></span><br><span class="line">schema = StructType([</span><br><span class="line">    StructField(<span class="string">"id"</span>, LongType(), <span class="literal">True</span>),    </span><br><span class="line">    StructField(<span class="string">"name"</span>, StringType(), <span class="literal">True</span>),</span><br><span class="line">    StructField(<span class="string">"age"</span>, LongType(), <span class="literal">True</span>),</span><br><span class="line">    StructField(<span class="string">"eyeColor"</span>, StringType(), <span class="literal">True</span>)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Apply the schema to the RDD and Create DataFrame</span></span><br><span class="line">swimmers = spark.createDataFrame(stringCSVRDD, schema)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Creates a temporary view using the DataFrame</span></span><br><span class="line"><span class="comment"># 这句是必须的，否则'Table or view not found: swimmers; line 1 pos 14'</span></span><br><span class="line">swimmers.createOrReplaceTempView(<span class="string">"swimmers"</span>)</span><br><span class="line"></span><br><span class="line">swimmers.printSchema()</span><br></pre></td></tr></table></figure>
+<h3 id="sql-查询"><a class="markdownIt-Anchor" href="#sql-查询"></a> SQL 查询</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">swimmers.count()</span><br><span class="line">spark.sql(<span class="string">"select count(1) from swimmers"</span>).show()</span><br><span class="line"></span><br><span class="line">swimmers.select(swimmers.id, swimmers.age).filter(swimmers.age == <span class="number">22</span>).show()</span><br><span class="line">swimmers.select(<span class="string">"id"</span>, <span class="string">"age"</span>).filter(<span class="string">"age = 22"</span>).show()</span><br><span class="line">spark.sql(<span class="string">"select id, age from swimmers where age = 22"</span>).show()</span><br><span class="line"></span><br><span class="line">spark.sql(<span class="string">"select id, age from swimmers where age = 22"</span>).show()</span><br></pre></td></tr></table></figure>
+<h3 id="使用案例"><a class="markdownIt-Anchor" href="#使用案例"></a> 使用案例</h3>
+<p><a href="https://github.com/drabastomek/learningPySpark/blob/master/Data/airport-codes-na.txt" target="_blank" rel="noopener">机场数据</a></p>
+<p><a href="https://github.com/drabastomek/learningPySpark/blob/master/Data/departuredelays.csv" target="_blank" rel="noopener">航班数据</a></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">flightPerfFilePath = <span class="string">"spark/flights/departuredelays.csv"</span></span><br><span class="line">airportsFilePath = <span class="string">"spark/flights/airport-codes-na.txt"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取机场数据</span></span><br><span class="line">airports = spark.read.csv(airportsFilePath, header=<span class="string">'true'</span>, inferSchema=<span class="string">'true'</span>, sep=<span class="string">'\t'</span>)</span><br><span class="line">airports.createOrReplaceTempView(<span class="string">"airports"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取航班数据</span></span><br><span class="line">flightPerf = spark.read.csv(flightPerfFilePath, header=<span class="string">'true'</span>)</span><br><span class="line">flightPerf.createOrReplaceTempView(<span class="string">"FlightPerformance"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 缓存数据，加快查询</span></span><br><span class="line"><span class="comment"># Cache the Departure Delays dataset </span></span><br><span class="line">flightPerf.cache()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># SQL 关联查询从'WA'起飞的航班的总延误时长</span></span><br><span class="line">spark.sql(<span class="string">"""</span></span><br><span class="line"><span class="string">select a.City, f.origin, sum(f.delay) as Delays </span></span><br><span class="line"><span class="string">  from FlightPerformance f </span></span><br><span class="line"><span class="string">    join airports a </span></span><br><span class="line"><span class="string">on a.IATA = f.origin </span></span><br><span class="line"><span class="string">where a.State = 'WA' </span></span><br><span class="line"><span class="string">group by a.City, f.origin </span></span><br><span class="line"><span class="string">order by sum(f.delay) desc</span></span><br><span class="line"><span class="string">"""</span>).show()</span><br></pre></td></tr></table></figure>
+<h2 id="数据建模"><a class="markdownIt-Anchor" href="#数据建模"></a> 数据建模</h2>
+<h3 id="清洗数据"><a class="markdownIt-Anchor" href="#清洗数据"></a> 清洗数据</h3>
+<ul>
+<li>重复数据</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">df = spark.createDataFrame([</span><br><span class="line">        (<span class="number">1</span>, <span class="number">144.5</span>, <span class="number">5.9</span>, <span class="number">33</span>, <span class="string">'M'</span>),</span><br><span class="line">        (<span class="number">2</span>, <span class="number">167.2</span>, <span class="number">5.4</span>, <span class="number">45</span>, <span class="string">'M'</span>),</span><br><span class="line">        (<span class="number">3</span>, <span class="number">124.1</span>, <span class="number">5.2</span>, <span class="number">23</span>, <span class="string">'F'</span>),</span><br><span class="line">        (<span class="number">4</span>, <span class="number">144.5</span>, <span class="number">5.9</span>, <span class="number">33</span>, <span class="string">'M'</span>),</span><br><span class="line">        (<span class="number">5</span>, <span class="number">133.2</span>, <span class="number">5.7</span>, <span class="number">54</span>, <span class="string">'F'</span>),</span><br><span class="line">        (<span class="number">3</span>, <span class="number">124.1</span>, <span class="number">5.2</span>, <span class="number">23</span>, <span class="string">'F'</span>),</span><br><span class="line">        (<span class="number">5</span>, <span class="number">129.2</span>, <span class="number">5.3</span>, <span class="number">42</span>, <span class="string">'M'</span>),</span><br><span class="line">    ], [<span class="string">'id'</span>, <span class="string">'weight'</span>, <span class="string">'height'</span>, <span class="string">'age'</span>, <span class="string">'gender'</span>])</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 检查是否有重复</span></span><br><span class="line">print(<span class="string">'Count of rows: &#123;0&#125;'</span>.format(df.count()))</span><br><span class="line">print(<span class="string">'Count of distinct rows: &#123;0&#125;'</span>.format(df.distinct().count()))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除重复数据</span></span><br><span class="line">df = df.dropDuplicates()</span><br><span class="line">df.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查除了 id 以外的数据是否相同</span></span><br><span class="line">print(<span class="string">'Count of ids: &#123;0&#125;'</span>.format(df.count()))</span><br><span class="line">print(<span class="string">'Count of distinct ids: &#123;0&#125;'</span>.format(</span><br><span class="line">    df.select([c <span class="keyword">for</span> c <span class="keyword">in</span> df.columns <span class="keyword">if</span> c != <span class="string">'id'</span>]).distinct().count()))</span><br><span class="line"><span class="comment"># 使用 subset 指定列，删除重复数据</span></span><br><span class="line">df = df.dropDuplicates(subset=[c <span class="keyword">for</span> c <span class="keyword">in</span> df.columns <span class="keyword">if</span> c != <span class="string">'id'</span>])</span><br><span class="line">df.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查 id 的唯一性</span></span><br><span class="line"><span class="keyword">import</span> pyspark.sql.functions <span class="keyword">as</span> fn</span><br><span class="line"></span><br><span class="line">df.agg(</span><br><span class="line">    fn.count(<span class="string">'id'</span>).alias(<span class="string">'count'</span>),</span><br><span class="line">    fn.countDistinct(<span class="string">'id'</span>).alias(<span class="string">'distinct'</span>)</span><br><span class="line">).show()</span><br><span class="line"><span class="comment"># 创建新的自增 id，似乎不是随机的</span></span><br><span class="line">df.withColumn(<span class="string">'new_id'</span>, fn.monotonically_increasing_id()).show()</span><br></pre></td></tr></table></figure>
+<ul>
+<li>缺失值</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">df_miss = spark.createDataFrame([</span><br><span class="line">        (<span class="number">1</span>, <span class="number">143.5</span>, <span class="number">5.6</span>, <span class="number">28</span>,   <span class="string">'M'</span>,  <span class="number">100000</span>),</span><br><span class="line">        (<span class="number">2</span>, <span class="number">167.2</span>, <span class="number">5.4</span>, <span class="number">45</span>,   <span class="string">'M'</span>,  <span class="literal">None</span>),</span><br><span class="line">        (<span class="number">3</span>, <span class="literal">None</span> , <span class="number">5.2</span>, <span class="literal">None</span>, <span class="literal">None</span>, <span class="literal">None</span>),</span><br><span class="line">        (<span class="number">4</span>, <span class="number">144.5</span>, <span class="number">5.9</span>, <span class="number">33</span>,   <span class="string">'M'</span>,  <span class="literal">None</span>),</span><br><span class="line">        (<span class="number">5</span>, <span class="number">133.2</span>, <span class="number">5.7</span>, <span class="number">54</span>,   <span class="string">'F'</span>,  <span class="literal">None</span>),</span><br><span class="line">        (<span class="number">6</span>, <span class="number">124.1</span>, <span class="number">5.2</span>, <span class="literal">None</span>, <span class="string">'F'</span>,  <span class="literal">None</span>),</span><br><span class="line">        (<span class="number">7</span>, <span class="number">129.2</span>, <span class="number">5.3</span>, <span class="number">42</span>,   <span class="string">'M'</span>,  <span class="number">76000</span>),</span><br><span class="line">    ], [<span class="string">'id'</span>, <span class="string">'weight'</span>, <span class="string">'height'</span>, <span class="string">'age'</span>, <span class="string">'gender'</span>, <span class="string">'income'</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询每行的缺失情况（几列）</span></span><br><span class="line">df_miss.rdd.map(</span><br><span class="line">    <span class="keyword">lambda</span> row: (row[<span class="string">'id'</span>], sum([c == <span class="literal">None</span> <span class="keyword">for</span> c <span class="keyword">in</span> row]))</span><br><span class="line">).collect()</span><br><span class="line"><span class="comment"># 查看某条记录的数据情况</span></span><br><span class="line">df_miss.where(<span class="string">'id == 3'</span>).show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 各特征的缺失比例</span></span><br><span class="line">df_miss.agg(*[</span><br><span class="line">    (<span class="number">1</span> - (fn.count(c) / fn.count(<span class="string">'*'</span>))).alias(c + <span class="string">'_missing'</span>)</span><br><span class="line">    <span class="keyword">for</span> c <span class="keyword">in</span> df_miss.columns</span><br><span class="line">]).show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除某个缺失值过多的特征（列）</span></span><br><span class="line">df_miss_no_income = df_miss.select([c <span class="keyword">for</span> c <span class="keyword">in</span> df_miss.columns <span class="keyword">if</span> c != <span class="string">'income'</span>])</span><br><span class="line">df_miss_no_income.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除特征缺失数大于等于 3 个的行</span></span><br><span class="line">df_miss_no_income.dropna(thresh=<span class="number">3</span>).show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 缺失值填充</span></span><br><span class="line">means = df_miss_no_income.agg(</span><br><span class="line">    *[fn.mean(c).alias(c) <span class="keyword">for</span> c <span class="keyword">in</span> df_miss_no_income.columns <span class="keyword">if</span> c != <span class="string">'gender'</span>]</span><br><span class="line">).toPandas().to_dict(<span class="string">'records'</span>)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">means[<span class="string">'gender'</span>] = <span class="string">'missing'</span></span><br><span class="line"></span><br><span class="line">df_miss_no_income.fillna(means).show()</span><br></pre></td></tr></table></figure>
+<ul>
+<li>离群值</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">df_outliers = spark.createDataFrame([</span><br><span class="line">        (<span class="number">1</span>, <span class="number">143.5</span>, <span class="number">5.3</span>, <span class="number">28</span>),</span><br><span class="line">        (<span class="number">2</span>, <span class="number">154.2</span>, <span class="number">5.5</span>, <span class="number">45</span>),</span><br><span class="line">        (<span class="number">3</span>, <span class="number">342.3</span>, <span class="number">5.1</span>, <span class="number">99</span>),</span><br><span class="line">        (<span class="number">4</span>, <span class="number">144.5</span>, <span class="number">5.5</span>, <span class="number">33</span>),</span><br><span class="line">        (<span class="number">5</span>, <span class="number">133.2</span>, <span class="number">5.4</span>, <span class="number">54</span>),</span><br><span class="line">        (<span class="number">6</span>, <span class="number">124.1</span>, <span class="number">5.1</span>, <span class="number">21</span>),</span><br><span class="line">        (<span class="number">7</span>, <span class="number">129.2</span>, <span class="number">5.3</span>, <span class="number">42</span>),</span><br><span class="line">    ], [<span class="string">'id'</span>, <span class="string">'weight'</span>, <span class="string">'height'</span>, <span class="string">'age'</span>])</span><br><span class="line"></span><br><span class="line">cols = [<span class="string">'weight'</span>, <span class="string">'height'</span>, <span class="string">'age'</span>]</span><br><span class="line">bounds = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算四分之一位点，并计算边界</span></span><br><span class="line"><span class="keyword">for</span> col <span class="keyword">in</span> cols:</span><br><span class="line">    quantiles = df_outliers.approxQuantile(col, [<span class="number">0.25</span>, <span class="number">0.75</span>], <span class="number">0.05</span>)</span><br><span class="line">    IQR = quantiles[<span class="number">1</span>] - quantiles[<span class="number">0</span>]</span><br><span class="line">    bounds[col] = [quantiles[<span class="number">0</span>] - <span class="number">1.5</span> * IQR, quantiles[<span class="number">1</span>] + <span class="number">1.5</span> * IQR]</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 筛选离群点  </span></span><br><span class="line">outliers = df_outliers.select(*[<span class="string">'id'</span>] + [</span><br><span class="line">    (</span><br><span class="line">        (df_outliers[c] &lt; bounds[c][<span class="number">0</span>]) | </span><br><span class="line">        (df_outliers[c] &gt; bounds[c][<span class="number">1</span>])</span><br><span class="line">    ).alias(c + <span class="string">'_o'</span>) <span class="keyword">for</span> c <span class="keyword">in</span> cols</span><br><span class="line">])</span><br><span class="line">outliers.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看相应的值</span></span><br><span class="line">df_outliers = df_outliers.join(outliers, on=<span class="string">'id'</span>)</span><br><span class="line">df_outliers.filter(<span class="string">'weight_o'</span>).select(<span class="string">'id'</span>, <span class="string">'weight'</span>).show()</span><br><span class="line">df_outliers.filter(<span class="string">'age_o'</span>).select(<span class="string">'id'</span>, <span class="string">'age'</span>).show()</span><br></pre></td></tr></table></figure>
+<h3 id="熟悉数据"><a class="markdownIt-Anchor" href="#熟悉数据"></a> 熟悉数据</h3>
+<ul>
+<li>描述性统计</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fraud_df.groupby(<span class="string">'gender'</span>).count().show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对数值变量进行统计，统计信息包括 count/mean/stddev/min/max</span></span><br><span class="line">numerical = [<span class="string">'balance'</span>, <span class="string">'numTrans'</span>, <span class="string">'numIntlTrans'</span>]</span><br><span class="line">desc = fraud_df.describe(numerical)</span><br><span class="line">desc.show()</span><br></pre></td></tr></table></figure>
+<ul>
+<li>相关性</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># numerical 为三个数值型特征，计算它们的相关性矩阵</span></span><br><span class="line">numerical = [<span class="string">'balance'</span>, <span class="string">'numTrans'</span>, <span class="string">'numIntlTrans'</span>]</span><br><span class="line">n_numerical = len(numerical)</span><br><span class="line"></span><br><span class="line">corr = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, n_numerical):</span><br><span class="line">    temp = [<span class="literal">None</span>] * i</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(i, n_numerical):</span><br><span class="line">        temp.append(fraud_df.corr(numerical[i], numerical[j]))</span><br><span class="line">    corr.append(temp)</span><br><span class="line">    </span><br><span class="line">print(corr)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可视化</li>
+</ul>
+<p>可使用 <code>matplotlib</code> 不详细展开</p>
+<h2 id="mllib"><a class="markdownIt-Anchor" href="#mllib"></a> MLlib</h2>
+<ul>
+<li>ML 和 MLlib 都是 Spark 中的机器学习库，目前常用的机器学习功能 2 个库都能满足需求。</li>
+<li>ML 从 Spark 2.0 开始作为主要的机器学习库， 因为 ML 功能更全面更灵活，未来会主要支持 ML，MLlib 很有可能会被废弃（据说可能是在 spark3.0 中 deprecated）。</li>
+<li>ML 主要操作的是 DataFrame， 而 MLlib 操作的是 RDD，也就是说二者面向的数据集不一样。相比于 MLlib 在 RDD 提供的基础操作，ML 在 DataFrame 上的抽象级别更高，数据和操作耦合度更低。
+<ul>
+<li>DataFrame 和 RDD 什么关系？DataFrame 是 Dataset 的子集，也就是 Dataset[Row]， 而 DataSet 是对 RDD 的封装，对 SQL 之类的操作做了很多优化。</li>
+</ul>
+</li>
+<li>相比于 MLlib 在 RDD 提供的基础操作，ML 在 DataFrame 上的抽象级别更高，数据和操作耦合度更低。</li>
+<li>ML 中的操作可以使用 pipeline， 跟 sklearn 一样，可以把很多操作（算法/特征提取/特征转换）以管道的形式串起来，然后让数据在这个管道中流动。</li>
+<li>ML 中无论是什么模型，都提供了统一的算法操作接口，比如模型训练都是<code>fit</code>；不像 MLlib 中不同模型会有各种各样的<code>trainXXX</code>。</li>
+<li>MLlib 在 spark2.0 之后进入<code>维护状态</code>， 这个状态通常只修复 BUG 不增加新功能。</li>
+</ul>
+<p>MLlib 包括了三个核心机器学习功能：</p>
+<ul>
+<li>
+<p>数据准备：特征提取、变换、选择、分类特征的散列和一些自然语言处理方法。</p>
+</li>
+<li>
+<p>机器学习算法：实现了一些流行和高级的回归，分类和聚类算法。</p>
+</li>
+<li>
+<p>实用程序：统计方法，如描述性统计、卡方检验、线性代数（稀疏稠密矩阵和向量）<br />
+和模型评估方法。</p>
+</li>
+</ul>
+<h3 id="mllib-中的逻辑回归"><a class="markdownIt-Anchor" href="#mllib-中的逻辑回归"></a> MLlib 中的逻辑回归</h3>
+<p>MLlib 过去使用 SGD 算法求解，在 Spark 2.0 后被废除，使用 <code>LogisticRegressionWithBFGS</code> 模型，该模型用的是 L-BGFS 优化方法。</p>
+<p>评价指标</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pyspark.mllib.evaluation <span class="keyword">as</span> ev</span><br><span class="line">LR_evaluation = ev.BinaryClassificationMetrics(LR_results)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'Area under PR: &#123;0:.2f&#125;'</span> \</span><br><span class="line">      .format(LR_evaluation.areaUnderPR))</span><br><span class="line">print(<span class="string">'Area under ROC: &#123;0:.2f&#125;'</span> \</span><br><span class="line">      .format(LR_evaluation.areaUnderROC))</span><br><span class="line">LR_evaluation.unpersist()</span><br></pre></td></tr></table></figure>
+<h3 id=""><a class="markdownIt-Anchor" href="#"></a> </h3>
+<h2 id="ml-包"><a class="markdownIt-Anchor" href="#ml-包"></a> ML 包</h2>
+<p>在顶层，该软件包公开了三个主要的抽象类：转换器（Transformer）、评估器（Estimator）和管道（Pipeline)。</p>
+<h3 id="转换器"><a class="markdownIt-Anchor" href="#转换器"></a> 转换器</h3>
+<p><code>spark.ml.feature</code> 中提供了许多转换器</p>
+<ul>
+<li>Binarizer：根据指定的阈值将连续变量转换为对应的二进制值</li>
+<li>Bucketizer：根据阈值列表，将连续变量转换为多项值</li>
+<li>QuantileDiscretizer：类似 Bucketizer，传递一个 numBuckets 参数，计算分位数进行数据划分</li>
+<li>ChiSqSelector：根据卡方检验选择预定义数量的特征</li>
+<li>CountVectorizer</li>
+<li>DCT：离散余弦变换取实数值向量，并返回相同长度的向量</li>
+<li>ElementwiseProduct：逐元素乘积</li>
+<li>HashingTF：输入为标记文本的列表，返回一个带有计数的有预订长度的向量</li>
+<li>MaxAbsScaler：将数据调整到 [-1, 1]</li>
+<li>MinMaxScaler：将数据缩放到 [0,  1]</li>
+<li>Normalizer</li>
+<li>NGram：输入为标记文本的列表（一个词为一个元素），返回结果包含 n-gram 列表</li>
+<li>OneHotEncoder</li>
+<li>PCA</li>
+<li>PolynominalExpansion：执行向量的多项式扩展，可以创建特征关联项</li>
+<li>RFormula：可以传递一个公式，如 <code>vec ~ x*3 + y</code>，将产生 vec 列</li>
+<li>StandardScaler：标准化，均值为 0，标准差为 1</li>
+<li>VectorAssembler：将多个数字列合并为一列向量</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">df = spark.createDataFrame(</span><br><span class="line">    [(<span class="number">12</span>,<span class="number">10</span>,<span class="number">3</span>), (<span class="number">1</span>,<span class="number">4</span>,<span class="number">2</span>)], [<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>])</span><br><span class="line"></span><br><span class="line">ft.VectorAssembler(inputCols=[<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'c'</span>],</span><br><span class="line">    outputCol=<span class="string">'features'</span>)\</span><br><span class="line">    .transform(df)\</span><br><span class="line">    .select(<span class="string">'features'</span>)\</span><br><span class="line">    .collect()</span><br></pre></td></tr></table></figure>
+<p>输出为</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[Row(features&#x3D;DenseVector([12.0, 10.0, 3.0])),</span><br><span class="line"> Row(features&#x3D;DenseVector([1.0, 4.0, 2.0]))]</span><br></pre></td></tr></table></figure>
+<h3 id="评估器"><a class="markdownIt-Anchor" href="#评估器"></a> 评估器</h3>
+<h4 id="分类"><a class="markdownIt-Anchor" href="#分类"></a> 分类</h4>
+<p>ML 包提供了 7 种分类模型</p>
+<ul>
+<li>LogisticRegression：目前仅支持二分类</li>
+<li>DecisionTreeClassifier</li>
+<li>RandomForestClassifier：支持多分类</li>
+<li>GBTClassifier：用于分类的梯度提升决策树模型，支持二进制标签，连续特征和分类特征</li>
+<li>NaiveBayes：支持多分类</li>
+<li>MultilayerPerceptionClassifier</li>
+<li>OneVsRest：使用 <code>one vs rest</code>  策略将多分类问题转换为二分类</li>
+</ul>
+<h4 id="回归"><a class="markdownIt-Anchor" href="#回归"></a> 回归</h4>
+<p>ML 包提供 7 种回归模型</p>
+<ul>
+<li>LinearRegression</li>
+<li>AFTSurvivalRegression：加速失效时间生存回归模型。它是一个参数化模型，假设其中一个特征的边际效应加速或减缓了预期寿命，适合具有明确阶段的过程。</li>
+<li>DecisionTreeRegression</li>
+<li>RandomForestRegression</li>
+<li>GBTRegression</li>
+<li>GeneralizedLinearRegression：支持 gaussian、binomial、gamma 和 poisson 分布</li>
+<li>IsotonicRegression：保序回归，拟合一个非递减的函数，适用于有序和递增的数据集</li>
+</ul>
+<h4 id="聚类"><a class="markdownIt-Anchor" href="#聚类"></a> 聚类</h4>
+<p>ML 包提供 4 种聚类模型</p>
+<ul>
+<li>KMeans：将样本分为 K 个簇，迭代地划分，使得簇内样本和所属簇的质点之间的距离平方和最小</li>
+<li>BisectingKMeans：二分 K 均值算法，结合了 K 均值聚类和层级聚类算法。最初将所有样本作为一个簇，逐步迭代分解为 K 个簇</li>
+<li>GaussianMixture：高斯混合模型，使用具有未知参数的 k 个高斯分布刻画数据集，使用期望最大算法寻找参数。对于特征数多的问题，可能表现不佳</li>
+<li>LDA</li>
+</ul>
+<h3 id="实例"><a class="markdownIt-Anchor" href="#实例"></a> 实例</h3>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pyspark.sql.types <span class="keyword">as</span> typ</span><br><span class="line"></span><br><span class="line">labels = [</span><br><span class="line">    (<span class="string">'INFANT_ALIVE_AT_REPORT'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'BIRTH_PLACE'</span>, typ.StringType()),</span><br><span class="line">    (<span class="string">'MOTHER_AGE_YEARS'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'FATHER_COMBINED_AGE'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'CIG_BEFORE'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'CIG_1_TRI'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'CIG_2_TRI'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'CIG_3_TRI'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'MOTHER_HEIGHT_IN'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'MOTHER_PRE_WEIGHT'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'MOTHER_DELIVERY_WEIGHT'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'MOTHER_WEIGHT_GAIN'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'DIABETES_PRE'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'DIABETES_GEST'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'HYP_TENS_PRE'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'HYP_TENS_GEST'</span>, typ.IntegerType()),</span><br><span class="line">    (<span class="string">'PREV_BIRTH_PRETERM'</span>, typ.IntegerType())</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">schema = typ.StructType([</span><br><span class="line">    typ.StructField(e[<span class="number">0</span>], e[<span class="number">1</span>], <span class="literal">False</span>) <span class="keyword">for</span> e <span class="keyword">in</span> labels</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">births = spark.read.csv(<span class="string">'births_transformed.csv.gz'</span>, </span><br><span class="line">                        header=<span class="literal">True</span>, </span><br><span class="line">                        schema=schema)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pyspark.ml.feature <span class="keyword">as</span> ft</span><br><span class="line"><span class="comment"># string 转 int</span></span><br><span class="line">births = births.withColumn(<span class="string">'BIRTH_PLACE_INT'</span>, </span><br><span class="line">        births[<span class="string">'BIRTH_PLACE'</span>].cast(typ.IntegerType()))</span><br><span class="line">encoder = ft.OneHotEncoder(</span><br><span class="line">    inputCol=<span class="string">'BIRTH_PLACE_INT'</span>, </span><br><span class="line">    outputCol=<span class="string">'BIRTH_PLACE_VEC'</span>)</span><br><span class="line"></span><br><span class="line">featuresCreator = ft.VectorAssembler(</span><br><span class="line">    inputCols=[</span><br><span class="line">        col[<span class="number">0</span>] </span><br><span class="line">        <span class="keyword">for</span> col </span><br><span class="line">        <span class="keyword">in</span> labels[<span class="number">2</span>:]] + \</span><br><span class="line">    [encoder.getOutputCol()], </span><br><span class="line">    outputCol=<span class="string">'features'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pyspark.ml.classification <span class="keyword">as</span> cl</span><br><span class="line">logistic = cl.LogisticRegression(</span><br><span class="line">    maxIter=<span class="number">10</span>, </span><br><span class="line">    regParam=<span class="number">0.01</span>, </span><br><span class="line">    labelCol=<span class="string">'INFANT_ALIVE_AT_REPORT'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个管道用于训练模型</span></span><br><span class="line"><span class="keyword">from</span> pyspark.ml <span class="keyword">import</span> Pipeline</span><br><span class="line"></span><br><span class="line">pipeline = Pipeline(stages=[</span><br><span class="line">        encoder, </span><br><span class="line">        featuresCreator, </span><br><span class="line">        logistic</span><br><span class="line">    ])</span><br><span class="line"><span class="comment"># 划分训练集和测试集</span></span><br><span class="line">births_train, births_test = births \</span><br><span class="line">    .randomSplit([<span class="number">0.7</span>, <span class="number">0.3</span>], seed=<span class="number">666</span>)</span><br><span class="line"><span class="comment"># 训练并预测模型</span></span><br><span class="line">model = pipeline.fit(births_train)</span><br><span class="line">test_model = model.transform(births_test)</span><br><span class="line">test_model.take(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>评估模型性能</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pyspark.ml.evaluation <span class="keyword">as</span> ev</span><br><span class="line"></span><br><span class="line">evaluator = ev.BinaryClassificationEvaluator(</span><br><span class="line">    rawPredictionCol=<span class="string">'probability'</span>, </span><br><span class="line">    labelCol=<span class="string">'INFANT_ALIVE_AT_REPORT'</span>)</span><br><span class="line"></span><br><span class="line">print(evaluator.evaluate(test_model, </span><br><span class="line">     &#123;evaluator.metricName: <span class="string">'areaUnderROC'</span>&#125;))</span><br><span class="line">print(evaluator.evaluate(test_model, &#123;evaluator.metricName: <span class="string">'areaUnderPR'</span>&#125;))</span><br></pre></td></tr></table></figure>
+<p>保存/加载模型</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pipelinePath = <span class="string">'./infant_oneHotEncoder_Logistic_Pipeline'</span></span><br><span class="line">pipeline.write().overwrite().save(pipelinePath)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pyspark.ml <span class="keyword">import</span> PipelineModel</span><br><span class="line"></span><br><span class="line">modelPath = <span class="string">'./infant_oneHotEncoder_Logistic_PipelineModel'</span></span><br><span class="line">model.write().overwrite().save(modelPath)</span><br><span class="line"></span><br><span class="line">loadedPipelineModel = PipelineModel.load(modelPath)</span><br><span class="line">test_loadedModel = loadedPipelineModel.transform(births_test)</span><br></pre></td></tr></table></figure>
+<p>调（lian）参（dan）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pyspark.ml.tuning <span class="keyword">as</span> tune</span><br><span class="line"></span><br><span class="line">logistic = cl.LogisticRegression(</span><br><span class="line">    labelCol=<span class="string">'INFANT_ALIVE_AT_REPORT'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 网格搜索</span></span><br><span class="line">grid = tune.ParamGridBuilder() \</span><br><span class="line">    .addGrid(logistic.maxIter,  </span><br><span class="line">             [<span class="number">2</span>, <span class="number">10</span>, <span class="number">50</span>]) \</span><br><span class="line">    .addGrid(logistic.regParam, </span><br><span class="line">             [<span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.3</span>]) \</span><br><span class="line">    .build()</span><br><span class="line">    </span><br><span class="line">evaluator = ev.BinaryClassificationEvaluator(</span><br><span class="line">    rawPredictionCol=<span class="string">'probability'</span>, </span><br><span class="line">    labelCol=<span class="string">'INFANT_ALIVE_AT_REPORT'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 交叉验证</span></span><br><span class="line">cv = tune.CrossValidator(</span><br><span class="line">    estimator=logistic, </span><br><span class="line">    estimatorParamMaps=grid, </span><br><span class="line">    evaluator=evaluator</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">pipeline = Pipeline(stages=[encoder,featuresCreator])</span><br><span class="line">data_transformer = pipeline.fit(births_train)</span><br><span class="line"></span><br><span class="line"><span class="comment"># cvModel 是寻找到的最佳模型</span></span><br><span class="line">cvModel = cv.fit(data_transformer.transform(births_train))</span><br><span class="line"></span><br><span class="line">data_train = data_transformer \</span><br><span class="line">    .transform(births_test)</span><br><span class="line">results = cvModel.transform(data_train)</span><br><span class="line"></span><br><span class="line">print(evaluator.evaluate(results, </span><br><span class="line">     &#123;evaluator.metricName: <span class="string">'areaUnderROC'</span>&#125;))</span><br><span class="line">print(evaluator.evaluate(results, </span><br><span class="line">     &#123;evaluator.metricName: <span class="string">'areaUnderPR'</span>&#125;))</span><br></pre></td></tr></table></figure>
+<p>获取最佳模型的参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">results = [</span><br><span class="line">    (</span><br><span class="line">        [</span><br><span class="line">            &#123;key.name: paramValue&#125; </span><br><span class="line">            <span class="keyword">for</span> key, paramValue </span><br><span class="line">            <span class="keyword">in</span> zip(</span><br><span class="line">                params.keys(), </span><br><span class="line">                params.values())</span><br><span class="line">        ], metric</span><br><span class="line">    ) </span><br><span class="line">    <span class="keyword">for</span> params, metric </span><br><span class="line">    <span class="keyword">in</span> zip(</span><br><span class="line">        cvModel.getEstimatorParamMaps(), </span><br><span class="line">        cvModel.avgMetrics</span><br><span class="line">    )</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">sorted(results, </span><br><span class="line">       key=<span class="keyword">lambda</span> el: el[<span class="number">1</span>], </span><br><span class="line">       reverse=<span class="literal">True</span>)[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+<h3 id="spark-与-深度学习"><a class="markdownIt-Anchor" href="#spark-与-深度学习"></a> Spark 与 深度学习</h3>
+<p>// TODO</p>
+]]></content>
+      <categories>
+        <category>BigData</category>
+      </categories>
+      <tags>
+        <tag>pyspark</tag>
       </tags>
   </entry>
   <entry>
@@ -2874,7 +3212,7 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 </ul>
 ]]></content>
       <categories>
-        <category>data</category>
+        <category>BigData</category>
       </categories>
       <tags>
         <tag>ETL</tag>

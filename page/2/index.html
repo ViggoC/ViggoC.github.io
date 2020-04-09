@@ -230,7 +230,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-08 23:53:37" itemprop="dateModified" datetime="2020-04-08T23:53:37+08:00">2020-04-08</time>
+                <time title="Modified: 2020-04-09 00:33:54" itemprop="dateModified" datetime="2020-04-09T00:33:54+08:00">2020-04-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -334,7 +334,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-16 22:15:11" itemprop="dateModified" datetime="2020-03-16T22:15:11+08:00">2020-03-16</time>
+                <time title="Modified: 2020-04-09 00:57:20" itemprop="dateModified" datetime="2020-04-09T00:57:20+08:00">2020-04-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -342,8 +342,8 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/tool/" itemprop="url" rel="index">
-                    <span itemprop="name">tool</span>
+                  <a href="/categories/Tool/" itemprop="url" rel="index">
+                    <span itemprop="name">Tool</span>
                   </a>
                 </span>
             </span>
@@ -363,7 +363,7 @@
       
           <h2 id="控制"><a class="markdownIt-Anchor" href="#控制"></a> 控制</h2>
 <ul>
-<li>git init</li>
+<li>git init G</li>
 <li>git add/rm</li>
 <li>git commit -m “informatiom”</li>
 </ul>
@@ -434,7 +434,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-21 01:38:27" itemprop="dateModified" datetime="2020-03-21T01:38:27+08:00">2020-03-21</time>
+                <time title="Modified: 2020-04-09 00:56:58" itemprop="dateModified" datetime="2020-04-09T00:56:58+08:00">2020-04-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -442,8 +442,8 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
+                  <a href="/categories/Database/" itemprop="url" rel="index">
+                    <span itemprop="name">Database</span>
                   </a>
                 </span>
             </span>
@@ -955,6 +955,217 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/07/virtual-machine-in-linux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/07/virtual-machine-in-linux/" class="post-title-link" itemprop="url">Linux 下虚拟机</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-12 19:21:55" itemprop="dateCreated datePublished" datetime="2019-07-12T19:21:55+08:00">2019-07-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-10 00:41:44" itemprop="dateModified" datetime="2020-04-10T00:41:44+08:00">2020-04-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="简介"><a class="markdownIt-Anchor" href="#简介"></a> 简介</h1>
+<p>虚拟机磁盘文件格式</p>
+<ul>
+<li>VDI：virtual box 自有文件格式</li>
+<li>VMDK：VMWare 格式，受到众多软件支持，具有将存储的文件分割为少于 2 GB 文件的附加功能</li>
+<li>VHD：微软家的格式</li>
+</ul>
+<h2 id="qemu"><a class="markdownIt-Anchor" href="#qemu"></a> QEMU</h2>
+<p>完全以软件的形式模拟出一台完整的电脑所需的所有硬件，甚至是模拟出不同架构的硬件，在这些虚拟的硬件之上，可以安装完整的操作系统。</p>
+<p><img src="https://images0.cnblogs.com/blog/16576/201502/241026434392128.png" alt="image" /></p>
+<h2 id="kvm"><a class="markdownIt-Anchor" href="#kvm"></a> KVM</h2>
+<p>完全以软件模拟硬件的形式虽然功能强大，但是性能难以满足用户的需要。模拟出的硬件的性能和物理硬件的性能相比，必然会大打折扣。为了提高虚拟机软件的性能，最常用的办法就是在主操作系统中通过内核模块开一个洞，通过这个洞将虚拟机中的操作直接映射到物理硬件上，从而提高虚拟机中运行的操作系统的性能。KVM 就是这种加速模式的典型代表。</p>
+<p><img src="https://images0.cnblogs.com/blog/16576/201502/241032534717180.png" alt="image" /></p>
+<p>KVM 已经被加入内核中，qemu-kvm 是为了借助 QEMU 运行虚拟机对 qemu-system-x86_64 命令进行的简单包装</p>
+<h3 id="virt-manager"><a class="markdownIt-Anchor" href="#virt-manager"></a> virt-manager</h3>
+<p>QEMU 和 KVM 自身不带图形界面的虚拟机管理器，virt-manager 提供图形化的管理界面。</p>
+<h2 id="virtualbox"><a class="markdownIt-Anchor" href="#virtualbox"></a> VirtualBox</h2>
+<p>简单易用，跨平台。</p>
+<h2 id="xen"><a class="markdownIt-Anchor" href="#xen"></a> Xen</h2>
+<p><img src="https://images0.cnblogs.com/blog2015/16576/201503/072047590864636.png" alt="image" /></p>
+<p>Xen 虚拟机架构中没有 Host System，在硬件层之上是薄薄的一层 Xen Hypervisor，在这之上就是各个虚拟机了，没有 Host System，只有 Domain 0 具有一定特权，而 Guest System 都是 Domain U，不管是 Domain 0 还是 Domain U，都是虚拟机，都是被虚拟机软件管理的对象。</p>
+<p>安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo aptitude search xen</span><br><span class="line">sudo aptitude install xen-hypervisor-4.4-amd64</span><br></pre></td></tr></table></figure>
+<p>启动时可以选择让该系统运行于 Xen Hypervisor 上。<br />
+<img src="https://images0.cnblogs.com/blog2015/16576/201503/072048177587106.png" alt="image" /></p>
+<p>通过 Xen 虚拟机启动 Ubuntu 系统时，Grub 先启动的是 /boot/xen-4.4-amd64.gz，然后才把 Linux 内核以及 initrd 文件作为模块载入内存。</p>
+<p>参考：</p>
+<ol>
+<li><a href="https://www.cnblogs.com/youxia/p/LinuxDesktop007.html" target="_blank" rel="noopener">Linux 中的 Qemu、KVM、VirtualBox、Xen 虚拟机体验</a></li>
+</ol>
+<h1 id="使用经验"><a class="markdownIt-Anchor" href="#使用经验"></a> 使用经验</h1>
+<h2 id="host-使用-guest-中的-vpn"><a class="markdownIt-Anchor" href="#host-使用-guest-中的-vpn"></a> Host 使用 Guest 中的 VPN</h2>
+<p>有些防火墙（比如华为）只提供 Windows 或 OSX 的 VPN 客户端，Linux 想要建立连接很不方便。这时候只能曲线救国，在 Windows 虚拟机中启动 VPN 客户端，并共享给宿主机。</p>
+<h3 id="virtual-box-添加-host-only-网络"><a class="markdownIt-Anchor" href="#virtual-box-添加-host-only-网络"></a> Virtual Box 添加 Host-only 网络</h3>
+<p>添加 host-only 网络需要先在 VB 进行全局设置： <code>File &gt; Host Network Manager &gt; Add</code>.</p>
+<p>然后相应虚拟机设置中添加 Host-only 网络</p>
+<h3 id="guest-中连接-vpn-并设置网络共享"><a class="markdownIt-Anchor" href="#guest-中连接-vpn-并设置网络共享"></a> Guest 中连接 VPN 并设置网络共享</h3>
+<p>Guest 中 VPN 给 host-only 设置共享，Host 中设置路由，网关设置成 Guest 的 ip</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo route add -net 10.5.0.0 netmask 255.255.0.0 gw 192.168.56.101</span><br></pre></td></tr></table></figure>
+<p>参考：</p>
+<ol>
+<li><a href="https://lizhiyong2000.github.io/2019/06/18/%E5%85%B1%E4%BA%ABVPN%E8%BF%9E%E6%8E%A5%E8%AE%BF%E9%97%AEVPN%E7%BD%91%E7%BB%9C/" target="_blank" rel="noopener">共享 VPN 连接访问 VPN 网络</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/06/PySpark-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/06/PySpark-note/" class="post-title-link" itemprop="url">PySpark 学习笔记</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-06-12 14:21:55" itemprop="dateCreated datePublished" datetime="2019-06-12T14:21:55+08:00">2019-06-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-09 00:54:54" itemprop="dateModified" datetime="2020-04-09T00:54:54+08:00">2020-04-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="安装"><a class="markdownIt-Anchor" href="#安装"></a> 安装</h2>
+<p>环境：Ubuntu 16.04 / python3.5</p>
+<p>安装报错<code>Could not import pypandoc - required to package PySpark</code>，进行了如下操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pip install -U pip</span><br><span class="line">pip install -U setuptools</span><br><span class="line">sudo apt install pandoc #不确定是否起作用</span><br><span class="line">pip install pypandoc</span><br></pre></td></tr></table></figure>
+<p>运行时发现未安装 JAVA</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install openjdk-8-jdk</span><br></pre></td></tr></table></figure>
+<p>成功运行</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/06/PySpark-note/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/06/linux-env/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1112,7 +1323,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-18 22:37:26" itemprop="dateModified" datetime="2020-03-18T22:37:26+08:00">2020-03-18</time>
+                <time title="Modified: 2020-04-09 00:55:30" itemprop="dateModified" datetime="2020-04-09T00:55:30+08:00">2020-04-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1120,8 +1331,8 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/data/" itemprop="url" rel="index">
-                    <span itemprop="name">data</span>
+                  <a href="/categories/BigData/" itemprop="url" rel="index">
+                    <span itemprop="name">BigData</span>
                   </a>
                 </span>
             </span>
@@ -1325,7 +1536,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1338,7 +1549,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -1374,6 +1585,7 @@
   <span class="post-meta-divider">|</span>
   <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
   </div>
+
 
         
 
@@ -1424,6 +1636,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   

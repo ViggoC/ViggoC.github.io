@@ -55,7 +55,7 @@
 <meta property="og:image" content="https://i.loli.net/2019/08/06/YNuPfTeKjmhnORW.png">
 <meta property="og:image" content="https://i.loli.net/2019/08/06/B1jDuoKHCePpAgd.png">
 <meta property="article:published_time" content="2019-09-28T12:03:55.000Z">
-<meta property="article:modified_time" content="2020-03-20T17:38:27.722Z">
+<meta property="article:modified_time" content="2020-04-08T16:56:58.697Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="oracle">
 <meta name="twitter:card" content="summary">
@@ -237,7 +237,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-21 01:38:27" itemprop="dateModified" datetime="2020-03-21T01:38:27+08:00">2020-03-21</time>
+                <time title="Modified: 2020-04-09 00:56:58" itemprop="dateModified" datetime="2020-04-09T00:56:58+08:00">2020-04-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -245,8 +245,8 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
+                  <a href="/categories/Database/" itemprop="url" rel="index">
+                    <span itemprop="name">Database</span>
                   </a>
                 </span>
             </span>
@@ -769,8 +769,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2019/06/linux-env/" rel="prev" title="Linux 环境变量">
-      <i class="fa fa-chevron-left"></i> Linux 环境变量
+    <a href="/2019/07/virtual-machine-in-linux/" rel="prev" title="Linux 下虚拟机">
+      <i class="fa fa-chevron-left"></i> Linux 下虚拟机
     </a></div>
       <div class="post-nav-item">
     <a href="/2019/10/git_cheat_sheet/" rel="next" title="Git 操作备忘">
@@ -850,7 +850,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -863,7 +863,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -899,6 +899,7 @@
   <span class="post-meta-divider">|</span>
   <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
   </div>
+
 
         
 
@@ -949,6 +950,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   

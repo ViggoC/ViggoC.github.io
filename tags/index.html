@@ -222,10 +222,10 @@
       <div class="post-body">
           <div class="tag-cloud">
             <div class="tag-cloud-title">
-              8 tags in total
+              10 tags in total
             </div>
             <div class="tag-cloud-tags">
-              <a href="/tags/CentOS/" style="font-size: 12px; color: #ccc">CentOS</a> <a href="/tags/ETL/" style="font-size: 12px; color: #ccc">ETL</a> <a href="/tags/Ubuntu/" style="font-size: 21px; color: #6f6f6f">Ubuntu</a> <a href="/tags/git/" style="font-size: 12px; color: #ccc">git</a> <a href="/tags/mysql/" style="font-size: 30px; color: #111">mysql</a> <a href="/tags/oracle/" style="font-size: 12px; color: #ccc">oracle</a> <a href="/tags/python/" style="font-size: 12px; color: #ccc">python</a> <a href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" style="font-size: 12px; color: #ccc">经济学</a>
+              <a href="/tags/CentOS/" style="font-size: 12px; color: #ccc">CentOS</a> <a href="/tags/ETL/" style="font-size: 12px; color: #ccc">ETL</a> <a href="/tags/Git/" style="font-size: 12px; color: #ccc">Git</a> <a href="/tags/MySQL/" style="font-size: 30px; color: #111">MySQL</a> <a href="/tags/Python/" style="font-size: 12px; color: #ccc">Python</a> <a href="/tags/Ubuntu/" style="font-size: 21px; color: #6f6f6f">Ubuntu</a> <a href="/tags/oracle/" style="font-size: 12px; color: #ccc">oracle</a> <a href="/tags/pyspark/" style="font-size: 12px; color: #ccc">pyspark</a> <a href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" style="font-size: 12px; color: #ccc">经济学</a> <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/" style="font-size: 12px; color: #ccc">虚拟机</a>
             </div>
           </div>
         
@@ -303,7 +303,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -316,7 +316,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -352,6 +352,7 @@
   <span class="post-meta-divider">|</span>
   <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
   </div>
+
 
         
 
@@ -402,6 +403,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   
