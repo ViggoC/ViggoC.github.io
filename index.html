@@ -199,6 +199,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2040/04/covid-19-risk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2040/04/covid-19-risk/" class="post-title-link" itemprop="url">疫情风险等级爬虫小记</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2040-04-12 13:51:55" itemprop="dateCreated datePublished" datetime="2040-04-12T13:51:55+08:00">2040-04-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-12 16:12:28" itemprop="dateModified" datetime="2020-04-12T16:12:28+08:00">2020-04-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区/县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。</p>
+<h2 id="数据源"><a class="markdownIt-Anchor" href="#数据源"></a> 数据源</h2>
+<p>网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索发现国家政务服务平台也提供了一个<a href="http://gjzwfw.www.gov.cn/fwmh/healthCode/front/indexAreaRisk.do" target="_blank" rel="noopener">区/县疫情风险等级查询入口</a>，开干。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2040/04/covid-19-risk/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/04/high-perf-mysql11/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1019,7 +1106,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-09 00:55:43" itemprop="dateModified" datetime="2020-04-09T00:55:43+08:00">2020-04-09</time>
+                <time title="Modified: 2020-04-12 16:13:37" itemprop="dateModified" datetime="2020-04-12T16:13:37+08:00">2020-04-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1050,277 +1137,9 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 <p>doctest: 一种单元测试工具</p>
 <p>genxp: generator expression</p>
 <p>listcomp: list comprehension</p>
-<h2 id="data-structures"><a class="markdownIt-Anchor" href="#data-structures"></a> Data Structures</h2>
-<h3 id="tuples-are-not-just-immutable-lists"><a class="markdownIt-Anchor" href="#tuples-are-not-just-immutable-lists"></a> Tuples Are Not Just Immutable Lists</h3>
-<h4 id="using-to-excess-items"><a class="markdownIt-Anchor" href="#using-to-excess-items"></a> Using * to excess items</h4>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a,b,*rest = range(<span class="number">5</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rest</span><br><span class="line">[<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a,b,*rest = range(<span class="number">5</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a, b, rest</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>,[])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a, *body, c, d = range(<span class="number">5</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a, body, c, d</span><br><span class="line">(<span class="number">0</span>, [<span class="number">1</span>, <span class="number">2</span>], <span class="number">3</span>, <span class="number">4</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="multidimensional-slicing-and-ellipsis"><a class="markdownIt-Anchor" href="#multidimensional-slicing-and-ellipsis"></a> Multidimensional Slicing and Ellipsis</h4>
-<p>Numpy uses <code>...</code>(not <code>…</code>) as a shortcut when sliceing arrays of many dimensions; for example, if x is a four-dimensional array, <code>x[i, ...]</code> is a shortcut for <code>x[i, :, :, :]</code>.</p>
-<hr />
-<h3 id="using-and-with-sequences"><a class="markdownIt-Anchor" href="#using-and-with-sequences"></a> Using + and * with sequences</h3>
-<p>Both + and * always create a new object, and never change their operands.</p>
-<h4 id="building-lists-of-lists"><a class="markdownIt-Anchor" href="#building-lists-of-lists"></a> Building Lists of Lists</h4>
-<p>The best way od doing so is with a listcomp.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>board = [[<span class="string">'_'</span>] * <span class="number">3</span> <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>board</span><br><span class="line">[[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>board[<span class="number">1</span>][<span class="number">2</span>] = <span class="string">'X'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>board</span><br><span class="line">[[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'X'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>]]</span><br></pre></td></tr></table></figure>
-<p>A tempting but wrong shortcut is doing it like the following example.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>false_board = [[<span class="string">'_'</span>] * <span class="number">3</span>] * <span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>false_board</span><br><span class="line">[[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'_'</span>]]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>false_board[<span class="number">1</span>][<span class="number">2</span>] = <span class="string">'X'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>false_board</span><br><span class="line">[[<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'X'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'X'</span>], [<span class="string">'_'</span>, <span class="string">'_'</span>, <span class="string">'X'</span>]]</span><br></pre></td></tr></table></figure>
-<h3 id="augmented-assignment-with-sequences"><a class="markdownIt-Anchor" href="#augmented-assignment-with-sequences"></a> Augmented Assignment with Sequences</h3>
-<p>The specical method that makes <code>+=</code> work is <code>__iadd__</code>(for “in-place addition”). However, is <code>__iadd__</code> is not implemented(immutable sequences), Python falls back to call <code>__add__</code>.</p>
-<p>Repeated concatenation of immutable sequences is ineffcient.</p>
-<h4 id="a-assignment-puzzler"><a class="markdownIt-Anchor" href="#a-assignment-puzzler"></a> A += Assignment Puzzler</h4>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">t = (<span class="number">1</span>,<span class="number">2</span>,[<span class="number">30</span>,<span class="number">40</span>])</span><br><span class="line">t[<span class="number">2</span>] += [<span class="number">50</span>,<span class="number">60</span>]</span><br></pre></td></tr></table></figure>
-<p>The result is</p>
-<ul>
-<li>t becomes (1,2,[30,40,50,60])</li>
-<li>TypeError is raised with the message ‘tuple’ object does not support item assignment</li>
-</ul>
-<p>There are three steps when <code>s[a] += b</code> is running:</p>
-<ol>
-<li>Put the value of s[a] on TOS(Top Of Stack)</li>
-<li>Perform TOS <code>+= b</code>. This succeeds if TOS is refers to a mutable object.</li>
-<li>Assign s[a] = TOS. This fails if s is immutable.</li>
-</ol>
-<h3 id="listsort-and-the-sorted-built-in-function"><a class="markdownIt-Anchor" href="#listsort-and-the-sorted-built-in-function"></a> list.sort and the sorted Built-In Function</h3>
-<p>The <code>list.sort</code> method sorts a list in place–that is, without making a copy. It retuens None to remind us that it changes the target object, and does not create a new list.</p>
-<p>In contrast, the built-in function <code>sorted</code> create a new list and retuen it. In fact is accepts any iterable objects, including immutable sequences and generators.</p>
-<h3 id="managing-ordered-sequences-with-bisect"><a class="markdownIt-Anchor" href="#managing-ordered-sequences-with-bisect"></a> Managing Ordered Sequences with bisect</h3>
-<p>An interesting application of bisect is to perform table lookups by numeric values–for example, to convert scores to letter grades.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">grade</span><span class="params">(score, breakpoints=[<span class="number">60</span>, <span class="number">70</span>, <span class="number">80</span>, <span class="number">90</span>], grades=<span class="string">'FDCBA'</span>)</span>:</span></span><br><span class="line"><span class="meta">... </span>    i = bisect.bisect(breakpoints,score)</span><br><span class="line"><span class="meta">... </span>    <span class="keyword">return</span> grades[i]</span><br><span class="line">...</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>[grade(score) <span class="keyword">for</span> score <span class="keyword">in</span> [<span class="number">33</span>, <span class="number">99</span>, <span class="number">77</span>, <span class="number">70</span>, <span class="number">89</span>, <span class="number">90</span>, <span class="number">100</span>]]</span><br><span class="line">[<span class="string">'F'</span>, <span class="string">'A'</span>, <span class="string">'C'</span>, <span class="string">'C'</span>, <span class="string">'B'</span>, <span class="string">'A'</span>, <span class="string">'A'</span>]</span><br></pre></td></tr></table></figure>
-<h3 id="when-a-list-is-not-the-answer"><a class="markdownIt-Anchor" href="#when-a-list-is-not-the-answer"></a> When a List Is Not the Answer</h3>
-<h4 id="array"><a class="markdownIt-Anchor" href="#array"></a> Array</h4>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> array <span class="keyword">import</span> array</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> random <span class="keyword">import</span> random</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats = array(<span class="string">'d'</span>,(random() <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>**<span class="number">7</span>)))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats[<span class="number">-1</span>]</span><br><span class="line"><span class="number">0.652373109695629</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fp = open(<span class="string">'num.bin'</span>, <span class="string">'wb'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats.tofile(fp)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fp.close()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats2 = array(<span class="string">'d'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fp = open(<span class="string">'num.bin'</span>, <span class="string">'rb'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats2.fromfile(fp, <span class="number">10</span>**<span class="number">7</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>fp.close()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats2[<span class="number">-1</span>]</span><br><span class="line"><span class="number">0.652373109695629</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>floats2 == floats</span><br><span class="line"><span class="literal">True</span></span><br></pre></td></tr></table></figure>
-<p>Using <code>array.fromfile</code> is nearly 60 times faster than reading the numbers from a text file. Saving with <code>array.tofile</code> ia about 7 times faster than writing one float per line in a text file.</p>
-<h4 id="memory-views"><a class="markdownIt-Anchor" href="#memory-views"></a> Memory Views</h4>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>nums = array.array(<span class="string">'h'</span>, list(range(<span class="number">-2</span>,<span class="number">3</span>)))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>memv = memoryview(nums)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>len(memv)</span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>memv[<span class="number">0</span>]</span><br><span class="line"><span class="number">-2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>memv_oct = memv.cast(<span class="string">'B'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>memv_oct.tolist()</span><br><span class="line">[<span class="number">254</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>memv_oct[<span class="number">5</span>] = <span class="number">4</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>nums</span><br><span class="line">array(<span class="string">'h'</span>, [<span class="number">-2</span>, <span class="number">-1</span>, <span class="number">1024</span>, <span class="number">1</span>, <span class="number">2</span>])</span><br></pre></td></tr></table></figure>
-<p>非常底层的内操作，一般来说只有在有高性能需求的时候才会用到吧。</p>
-<h4 id="deques-and-other-queues"><a class="markdownIt-Anchor" href="#deques-and-other-queues"></a> Deques and Other Queues</h4>
-<p>The <code>.append</code> and <code>.pop</code> methods make a list as a stack or a queue (if you use <code>.pop(0)</code>), you get LIFO behavior. But inserting and removing form the left of a list(the 0-index end) is costly because the entire list must be shifted.</p>
-<p>The class <code>collections.deque</code> is a <strong>thread-safe double-end</strong> queue designed for fast inserting and removing from both ends.And a queue can be bounded, when it is full, it discards items from the opposite end when you append new one.</p>
-<p>Note:<br />
-Removing items from the middle of a deque is not fast.<br />
-THe <code>append</code> and <code>popleft</code> operations are atomic, so deque is safe to use as a LIFO queue in multithreaded aoolications wihtout th need for <em>lock</em>.</p>
-<h2 id="dictionaries-and-sets"><a class="markdownIt-Anchor" href="#dictionaries-and-sets"></a> Dictionaries and Sets</h2>
-<h3 id="generic-mapping-types"><a class="markdownIt-Anchor" href="#generic-mapping-types"></a> Generic Mapping Types</h3>
-<h4 id="what-is-hashabe"><a class="markdownIt-Anchor" href="#what-is-hashabe"></a> What Is Hashabe?</h4>
-<p>A object is hashable if it has a hash value which never change guring its lifetime (it needs a <code>__hash__()</code> method). and can be compared to other objects (it needs an <code>__eq__()</code> method). Hashable objects which compare equal must have the same hash value.</p>
-<p>The atomic immutable types(str, bytes, numeric types) are all hashable. A <code>frozen Set</code> si aways hashable, because its elements must be hashable by definition. A <code>tuple</code> is hashable <em>only if</em> all its items are hashable.</p>
-<h4 id="various-means-of-building-a-dict"><a class="markdownIt-Anchor" href="#various-means-of-building-a-dict"></a> Various means of building a dict</h4>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = dict(one=<span class="number">1</span>, two=<span class="number">2</span>, three=<span class="number">3</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = &#123;<span class="string">'one'</span>: <span class="number">1</span>, <span class="string">'two'</span>: <span class="number">2</span>, <span class="string">'three'</span>: <span class="number">3</span>&#125;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c = dict(zip([<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'three'</span>],[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d = dict([(<span class="string">'two'</span>, <span class="number">2</span>),(<span class="string">'one'</span>, <span class="number">1</span>), (<span class="string">'three'</span>, <span class="number">3</span>)])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>e = dict(&#123;<span class="string">'three'</span>: <span class="number">3</span>, <span class="string">'one'</span>: <span class="number">1</span>, <span class="string">'two'</span>: <span class="number">2</span>&#125;)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a == b == c == d == e</span><br><span class="line"><span class="literal">True</span></span><br></pre></td></tr></table></figure>
-<h3 id="overview-of-common-mapping-methods"><a class="markdownIt-Anchor" href="#overview-of-common-mapping-methods"></a> Overview of Common Mapping Methods</h3>
-<h4 id="defaultdict"><a class="markdownIt-Anchor" href="#defaultdict"></a> defaultdict</h4>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>counts = dict()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>counts</span><br><span class="line">&#123;&#125;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>counts[<span class="string">'puppy'</span>] += <span class="number">1</span></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">KeyError: <span class="string">'puppy'</span></span><br></pre></td></tr></table></figure>
-<p>第一次对单词进行统计时，会抛出 KeyError，为此可以通过加判断解决：</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">strings = (<span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>, <span class="string">'puppy'</span>,</span><br><span class="line">           <span class="string">'weasel'</span>, <span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>)</span><br><span class="line">counts = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> kw <span class="keyword">in</span> strings:</span><br><span class="line">    <span class="keyword">if</span> kw <span class="keyword">not</span> <span class="keyword">in</span> counts:</span><br><span class="line">        counts[kw] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        counts[kw] += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># counts:</span></span><br><span class="line"><span class="comment"># &#123;'puppy': 5, 'weasel': 1, 'kitten': 2&#125;</span></span><br></pre></td></tr></table></figure>
-<p>也可以通过<code>dict.setdefault()</code>方法来设置默认值：<br />
-<code>setdefault(kw, 0)</code>中如果 kw 存在则返回键 kw 所对应的值，若不存在则返回 0</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">strings = (<span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>, <span class="string">'puppy'</span>,</span><br><span class="line">           <span class="string">'weasel'</span>, <span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>)</span><br><span class="line">counts = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> kw <span class="keyword">in</span> strings:</span><br><span class="line">    counts[kw] = counts.setdefault(kw, <span class="number">0</span>) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>当然更简洁的的方式是通过使用 defaultdict 解决：<br />
-<code>defaultdict()</code>接受一个<code>default_factory()</code>将其返回值作为默认值</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br><span class="line"></span><br><span class="line">strings = (<span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>, <span class="string">'puppy'</span>,</span><br><span class="line">           <span class="string">'weasel'</span>, <span class="string">'puppy'</span>, <span class="string">'kitten'</span>, <span class="string">'puppy'</span>)</span><br><span class="line">counts = defaultdict(<span class="keyword">lambda</span>: <span class="number">0</span>)  <span class="comment"># 使用 lambda 来定义简单的函数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> s <span class="keyword">in</span> strings:</span><br><span class="line">    counts[s] += <span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p>The <code>default_factory</code> of a <code>defaultdict</code> is only invoked to provide default values for <code>__getitem</code> calls, and not for the other methods. For example:</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd = collections.defaultdict() </span><br><span class="line"><span class="comment">#if no default_factory is provided, the usual KeyError is raised for missing keys</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd[<span class="string">'key'</span>]</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">KeyError: <span class="string">'key'</span> </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd</span><br><span class="line">defaultdict(<span class="literal">None</span>, &#123;&#125;)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd = collections.defaultdict(list)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd[<span class="string">'key'</span>]</span><br><span class="line">[]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd.get(<span class="string">'kk'</span>)    <span class="comment"># dd.get() still return None</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dd.get(<span class="string">'key'</span>)</span><br><span class="line">[]</span><br></pre></td></tr></table></figure>
-<h3 id="mapping-with-flexible-key-lookup"><a class="markdownIt-Anchor" href="#mapping-with-flexible-key-lookup"></a> Mapping with Flexible Key Lookup</h3>
-<p>对于<code>dic = {'2': 'two', '4': 'four'}</code> 同时支持数字和字符串<code>2, '2'</code>索引</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StrKeyDict</span><span class="params">(dict)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__missing__</span><span class="params">(self, key)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(key, str):</span><br><span class="line">            <span class="keyword">raise</span> KeyError(key)</span><br><span class="line">        <span class="keyword">return</span> self[str(key)]</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self, key, default=None)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> self[key]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">        <span class="comment"># If a KeyError was raised, __missing__ already failed, so we return default</span></span><br><span class="line">            <span class="keyword">return</span> default  </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__contains__</span><span class="params">(self, key)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> key <span class="keyword">in</span> self.keys() <span class="keyword">or</span> str(key) <span class="keyword">in</span> self.keys()</span><br><span class="line"></span><br><span class="line">d = StrKeyDict(&#123;<span class="string">'2'</span>: <span class="string">'two'</span>, <span class="string">'4'</span>: <span class="string">'four'</span>&#125;)</span><br><span class="line">print(d)</span><br><span class="line">print(d[<span class="number">2</span>],d[<span class="string">'4'</span>])</span><br><span class="line">print(<span class="number">2</span> <span class="keyword">in</span> d)</span><br></pre></td></tr></table></figure>
-<p>Why is the test <code>isinstance(key, str)</code> necessary:<br />
-没有这个判断的话，会进入 <em>不存在-&gt;转换为字符串-&gt;查找-&gt;不存在</em> 的死循环</p>
-<p>Why not check for the key in the usual Pythonic way – key in my_dict:<br />
-It will call <code>__contains__</code> recursively</p>
-<p>在 python3 中<code>dict.keys()</code>返回一个类似与<code>set</code>的<code>view</code>, 而 check <code>k in my_set</code>是很高效的，而 python2 中其返回 list, 因此效率不高。</p>
-<h3 id="immutable-mapping"><a class="markdownIt-Anchor" href="#immutable-mapping"></a> Immutable Mapping</h3>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> types <span class="keyword">import</span> MappingProxyType</span><br><span class="line">dic = &#123;<span class="number">1</span>: <span class="string">'A'</span>&#125;</span><br><span class="line">d_proxy = MappingProxyType(dic)</span><br></pre></td></tr></table></figure>
-<p>创建一个只读的代理字典，遂原始对象同步更新，但不可更改</p>
-<h3 id="set-theory"><a class="markdownIt-Anchor" href="#set-theory"></a> Set Theory</h3>
-<p>frozenset: the immutable sibling of <code>set</code></p>
-<p>Set elements must be hashable. The set type is not hashable, but frozenset is, so you can have frozenset elements inside a set.</p>
-<p>Count occurrences of needles in a haystack:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">found = len(set(needle) &amp; set(haystack))</span><br><span class="line"></span><br><span class="line">found = len(set(needle).intersection(haystack))</span><br></pre></td></tr></table></figure>
-<p>In Python3, the standard string representation of sets always uses the {…} notation, except for the empty set which uses set().</p>
-<p>Calling the constructor is slower because, to evaluate it, Python has to look up the set name to fetch the constructor, then build a list, and ginally pass it to the constructor.</p>
-<p>中缀操作符要求两边都是 set, 函数只要 iterable 就行。</p>
-<h3 id="dict-and-set-under-the-hood"><a class="markdownIt-Anchor" href="#dict-and-set-under-the-hood"></a> dict and set Under the Hood</h3>
-<p>Key ordering depends on insertion order.</p>
-<p><code>dict([(key1,value1), (key2, value2)])</code> == <code>dict([(key2, value2),(key1,value1)])</code>, but their key ordering may not be the same if the hashes of key1 and key2 collide.</p>
-<h4 id="adding-items-to-a-dict-may-change-the-oder-of-existing-keys"><a class="markdownIt-Anchor" href="#adding-items-to-a-dict-may-change-the-oder-of-existing-keys"></a> Adding items to a dict may change the oder of existing keys</h4>
-<p>When you add a new item to a dict, the Python interpreter may decide that the hash table of that dict needs to grow. This entails building a new, bigger hash table, and adding all current items to the new one. During this process, new (but different) hash collisions may happen, with the result that the kays are likely to ordered differently. And you <strong>can’t predict</strong> when it will happen.</p>
-<p>This is why modifying the contents of a dict while iterating through it is a bad idea. If you need to scan and add ites to a dict, do in two steps:</p>
-<ol>
-<li>read the dict from start to end and collect the needed additions in a second dict</li>
-<li>updata the first one with it.</li>
-</ol>
-<p>In Python3, the <code>.keys(), .items(), .values()</code>return <code>views</code>, which behave like set and are dynamic: they do not replicate the contents of dict, and they immediately reflect any changes to the dict.</p>
-<h2 id="text-versus-bytes"><a class="markdownIt-Anchor" href="#text-versus-bytes"></a> Text versus Bytes</h2>
-<h3 id="character-issues"><a class="markdownIt-Anchor" href="#character-issues"></a> Character Issues</h3>
-<p>The Unicode standard explicitly seperates the identity of characters from specific byte representation:</p>
-<ul>
-<li>The identity of charater – its <em>code points</em> – is a number from 0 to 1114111 (U+10FFFF), shown in Unicode standard as 4 to 6 hexadecimal digits with a “U+” prefix.</li>
-<li>The actual vytes that represent a character depends on the <em>encoding</em> in use. An encoding is an algorithm that converts code point to byte sequences and vice versa. The code point for A (U+0041) is encoded as the single byte \x41 in the UTF-8 encoding, or as the bytes \x41\x00 in UTF-16LE encoding. As another example, the Euro sign (U+20AC) becomes three bytes in UTF-8 (\xe2\x82\xac) but in UTF-16LE it is encoded as two bytes: \xac\x20.</li>
-</ul>
-<h3 id="byte-essentials"><a class="markdownIt-Anchor" href="#byte-essentials"></a> Byte Essentials</h3>
-<p>There are two basic built-in types for binary sequences: the immutable <code>bytes</code> type introduced in Python3 and the mutable <code>bytearray</code> added in Python2.6.</p>
-<p>Each item in bytes is an int. A slice of a binary sequence always produces a binary sequence, even slices of 1 length 1.</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe = bytes(<span class="string">'café'</span>, encoding=<span class="string">'utf-8'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe</span><br><span class="line"><span class="string">b'caf\xc3\xa9'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>type(cafe[<span class="number">0</span>])</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">int</span>'&gt;</span></span><br><span class="line"><span class="class">&gt;&gt;&gt; <span class="title">type</span><span class="params">(cafe[:<span class="number">1</span>])</span></span></span><br><span class="line"><span class="class">&lt;<span class="title">class</span> '<span class="title">bytes</span>'&gt;</span></span><br><span class="line"><span class="class"></span></span><br><span class="line">&gt;&gt;&gt; cafe_arr  =bytearray(cafe)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe_arr</span><br><span class="line">bytearray(<span class="string">b'caf\xc3\xa9'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe_arr[<span class="number">-1</span>:]</span><br><span class="line">bytearray(<span class="string">b'\xa9'</span>)</span><br></pre></td></tr></table></figure>
-<p>The only sequence type where <code>s[0] == s[:1]</code> is <code>str</code> type.</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe_str = cafe.decode(<span class="string">'utf-8'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cafe_str[<span class="number">0</span>] == cafe_str[:<span class="number">1</span>]</span><br><span class="line"><span class="literal">True</span></span><br></pre></td></tr></table></figure>
-<p>Three differents displays are used, depending on each byte value:</p>
-<ul>
-<li>For bytes in printable ASCII, the ASCII character itself is used</li>
-<li>For bytes corresponding to tab, newline, carriage return and <code>\</code>, the escape sequences <code>\t, \n, \r and \\</code> are used.</li>
-<li>For other byte value, a hexadecimal escape sequnece is used.</li>
-</ul>
-<p>Both <code>bytes and bytearray</code> support every <code>str</code> method except those that do formatting and a few others that depend on Unicode data, including <code>casefold, isdecimal, isidentifier, isnumeric, isprintable, and encode</code>.</p>
-<p>Binary sequences have a method that <code>str</code> doesn’t have – <code>fromhex</code>:</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>bytes.fromhex(<span class="string">'31 4B CE A9'</span>)</span><br><span class="line"><span class="string">b'1K\xce\xa9'</span></span><br></pre></td></tr></table></figure>
-<h4 id="structs-and-memory-views"><a class="markdownIt-Anchor" href="#structs-and-memory-views"></a> Structs and Memory Views</h4>
-<p>// 内存操作相关，没怎么用到，碰到了再补上。</p>
-<h3 id="understanding-encodedecode-problems"><a class="markdownIt-Anchor" href="#understanding-encodedecode-problems"></a> Understanding Encode/Decode Problems</h3>
-<h4 id="coping-with-unicodeerror"><a class="markdownIt-Anchor" href="#coping-with-unicodeerror"></a> coping with UnicodeError</h4>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; str &#x3D; &#39;café&#39;</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;utf-8&#39;)</span><br><span class="line">b&#39;caf\xc3\xa9&#39;</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;gb2312&#39;)</span><br><span class="line">b&#39;caf\xa8\xa6&#39;</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;ascii&#39;)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</span><br><span class="line">UnicodeEncodeError: &#39;ascii&#39; codec can&#39;t encode character &#39;\xe9&#39; in position 3: ordinal not in range(128)</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;ascii&#39;, errors&#x3D;&#39;ignore&#39;)</span><br><span class="line">b&#39;caf&#39;</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;ascii&#39;, errors&#x3D;&#39;replace&#39;)</span><br><span class="line">b&#39;caf?&#39;</span><br><span class="line">&gt;&gt;&gt; str.encode(&#39;ascii&#39;, errors&#x3D;&#39;xmlcharrefreplace&#39;)</span><br><span class="line">b&#39;caf&amp;#233;&#39;</span><br></pre></td></tr></table></figure>
-<h3 id="handling-text-files"><a class="markdownIt-Anchor" href="#handling-text-files"></a> Handling Text Files</h3>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; open(&#39;cafe.txt&#39;, &#39;w&#39;, encoding&#x3D;&#39;utf-8&#39;).write(&#39;café&#39;)</span><br><span class="line">4</span><br><span class="line">&gt;&gt;&gt; open(&#39;cafe.txt&#39;).read()</span><br><span class="line">&#39;caf 茅&#39;</span><br><span class="line">&gt;&gt;&gt; open(&#39;cafe.txt&#39;, &#39;w&#39;, encoding&#x3D;&#39;utf-8&#39;).write(&#39;中国&#39;)</span><br><span class="line">2</span><br><span class="line">&gt;&gt;&gt; open(&#39;cafe.txt&#39;).read()</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</span><br><span class="line">UnicodeDecodeError: &#39;gbk&#39; codec can&#39;t decode byte 0xad in position 2: illegal multibyte sequence</span><br></pre></td></tr></table></figure>
-<h3 id="normalizing-unicode-for-saner-comparisons"><a class="markdownIt-Anchor" href="#normalizing-unicode-for-saner-comparisons"></a> Normalizing Unicode for Saner Comparisons</h3>
-<p>Unicode 中有一些附加字符 (combining character), 附加在前一个字符上，但在 print 的时候显示成一个字符，如：<br />
-<code>'cafe\u0301'</code>  与 <code>'café'</code> 应该输出一样的结果，这成为规范等价 (canonical equivalent).</p>
-<p>在 Python 中，二者并不等价，需要 <code>from unicodedata import normalize</code> 对字符进行转换。<br />
-// TODO 了解一下，用到再查好了</p>
-<h2 id="first-class-functions"><a class="markdownIt-Anchor" href="#first-class-functions"></a> First-Class Functions</h2>
-<p>“first-class object” as a program entity that can be:</p>
-<ul>
-<li>Created at runtime</li>
-<li>Assigned to a variable or element in a data structure</li>
-<li>Passed as an argument to a function</li>
-<li>Returned as the result of a functio</li>
-</ul>
-<p>A function that takes a function as argument or returns a function as the result is a higher-order function, like <code>map</code> and <code>sort</code>.</p>
-<h3 id="the-seven-flavors-of-callable-objects"><a class="markdownIt-Anchor" href="#the-seven-flavors-of-callable-objects"></a> The Seven Flavors of Callable Objects</h3>
-<p>The Python Data Model documentation lists seven callable types:</p>
-<ul>
-<li>
-<p>User-defined functions<br />
-Created with def statements or lambda expressions.</p>
-</li>
-<li>
-<p>Built-in functions<br />
-A function implemented in C (for CPython), like len or time.strftime.</p>
-</li>
-<li>
-<p>Built-in methods<br />
-Methods implemented in C, like dict.get.</p>
-</li>
-<li>
-<p>Methods<br />
-Functions defined in the body of a class.</p>
-</li>
-<li>
-<p>Classes<br />
-When invoked, a class runs its <code>__new__</code> method to create an instance, then <code>__init__</code> to initialize it, and finally the instance is returned to the caller. Because there is no new operator in Python, calling a class is like calling a function. (Usually calling a class creates an instance of the same class, but other behaviors are possible by overriding <code>__new__</code>. We’ll see an example of this in “Flexible Object Creation with <code>__new__</code>” on page 592.)</p>
-</li>
-<li>
-<p>Class instances<br />
-If a class defines a <code>__call__</code> method, then its instances may be invoked as functions. See “User-Defined Callable Types” on page 145.</p>
-</li>
-<li>
-<p>Generator functions<br />
-Functions or methods that use the yield keyword. When called, generator functions return a generator object.</p>
-</li>
-</ul>
-<p>Generator functions are unlike other callables in many respects. Chapter 14 is devoted to them. They can also be used as coroutines, which are covered in Chapter 16.</p>
-<p>Not only are Python functions real objects, but arbitrary Python objects may also be made to behave like functions. Implementing a <code>__call__</code> instance method is all it takes.</p>
-<h3 id="retrieving-information-about-parameters"><a class="markdownIt-Anchor" href="#retrieving-information-about-parameters"></a> Retrieving Information About Parameters</h3>
-<p>// TODO</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/12/ML_algorithm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/12/ML_algorithm/" class="post-title-link" itemprop="url">常见机器学习算法的优缺点</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2019-12-20 20:03:55" itemprop="dateCreated datePublished" datetime="2019-12-20T20:03:55+08:00">2019-12-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-03-29 23:07:54" itemprop="dateModified" datetime="2020-03-29T23:07:54+08:00">2020-03-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/AI/" itemprop="url" rel="index">
-                    <span itemprop="name">AI</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>想要寻找一个合适的算法不容易，实际应用中，我们一般采用启发式实验。</p>
-<p>没有免费的午餐定理 (NFL)：核心在于，假设了所有问题出现的机会相同，或所有问题同等重要。当需求是解决一切问题时，“哪个算法更好”就毫无意义。HG2G 中“深思”面对“宇宙、生命以及一切的中继答案是什么？”这样一个问题，用最复杂的算法算出一个 42 和随便说一个 42 是一样的。</p>
-<h2 id="偏差与方差"><a class="markdownIt-Anchor" href="#偏差与方差"></a> 偏差与方差</h2>
-<ul>
-<li>偏差：描述的是估计值的期望 E 与真实值 Y 之间的差距。偏差越大，越偏离真实数据。</li>
-<li>方差：描述的是预测值的离散程度，方差越大，数据分布约分散。</li>
-<li>模型的真实误差可以看成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>i</mi><mi>a</mi><msup><mi>s</mi><mn>2</mn></msup><mo>+</mo><mi>v</mi><mi>a</mi><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">bias^2 + var + \sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.897438em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">a</span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> 是噪音</li>
-</ul>
-<p>偏差与方差窘境：</p>
-<ul>
-<li>学得不好，偏差大</li>
-<li>学得好，敏感性高，方差大。</li>
-</ul>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2019/12/ML_algorithm/#more" rel="contents">
+              <a class="btn" href="/2020/02/fluent-python/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1410,7 +1229,7 @@ Functions or methods that use the yield keyword. When called, generator function
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-count">19</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1423,7 +1242,7 @@ Functions or methods that use the yield keyword. When called, generator function
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -1528,9 +1347,6 @@ if (document.querySelectorAll('pre.mermaid').length) {
   
 
   
-      
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
-
 
   
 

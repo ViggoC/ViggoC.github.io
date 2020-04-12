@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="default">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://viggoc.github.io').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.7.1',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区&#x2F;县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。  数据源 网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索">
+<meta property="og:type" content="article">
+<meta property="og:title" content="疫情风险等级爬虫小记">
+<meta property="og:url" content="https://viggoc.github.io/2040/04/covid-19-risk/index.html">
+<meta property="og:site_name" content="VC&#39; Blog">
+<meta property="og:description" content="近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区&#x2F;县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。  数据源 网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索">
+<meta property="og:image" content="https://i.loli.net/2020/04/12/izbn4Z2PwYHXQro.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/12/kgLre2YwZEcnTDh.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/12/dOSWlweg2caoR8E.png">
+<meta property="og:image" content="https://i.loli.net/2020/04/12/R9x8HqjnOovuCKd.png">
+<meta property="article:published_time" content="2040-04-12T05:51:55.000Z">
+<meta property="article:modified_time" content="2020-04-12T08:12:28.894Z">
+<meta property="article:author" content="VC">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/12/izbn4Z2PwYHXQro.png">
+
+<link rel="canonical" href="https://viggoc.github.io/2040/04/covid-19-risk/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>疫情风险等级爬虫小记 | VC' Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">VC' Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2040/04/covid-19-risk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          疫情风险等级爬虫小记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2040-04-12 13:51:55" itemprop="dateCreated datePublished" datetime="2040-04-12T13:51:55+08:00">2040-04-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-12 16:12:28" itemprop="dateModified" datetime="2020-04-12T16:12:28+08:00">2020-04-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine: </span>
+    
+    <a title="valine" href="/2040/04/covid-19-risk/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2040/04/covid-19-risk/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区/县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。</p>
+<h2 id="数据源"><a class="markdownIt-Anchor" href="#数据源"></a> 数据源</h2>
+<p>网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索发现国家政务服务平台也提供了一个<a href="http://gjzwfw.www.gov.cn/fwmh/healthCode/front/indexAreaRisk.do" target="_blank" rel="noopener">区/县疫情风险等级查询入口</a>，开干。</p>
+<a id="more"></a>
+<p>点击进入，虎躯一震，查询一个公开的疫情风险信息竟然还要先注册账户，政府网站的账户不出以外的要把身份信息扒干净。算了，麻利填完，查一个试试。</p>
+<p>先查个武汉<br />
+<img src="https://i.loli.net/2020/04/12/izbn4Z2PwYHXQro.png" alt="" /></p>
+<p>再查个北京<br />
+<img src="https://i.loli.net/2020/04/12/kgLre2YwZEcnTDh.png" alt="" /></p>
+<h2 id="接口分析"><a class="markdownIt-Anchor" href="#接口分析"></a> 接口分析</h2>
+<p>初步判断应该只需要一个地区的编码或者名字就可以查询了，上 <code>F12</code> 一看果然是，post方法需要<code>xzqhdm</code>和<code>Xzqhmc</code>两个参数（<code>BizType</code>应该是固定的查询类别，先不管）。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">query</span>(<span class="params">city,cityName</span>)</span>&#123;</span><br><span class="line">		   $.ajax(&#123;</span><br><span class="line">	           url: <span class="string">'/fwmh/healthCode/front/healthQuery.do'</span>,</span><br><span class="line">	           data: &#123;<span class="attr">BizType</span>: <span class="string">"0117"</span>, <span class="attr">Xzqhdm</span>: city, <span class="attr">Xzqhmc</span>: cityName&#125;,</span><br><span class="line">	           type: <span class="string">"post"</span>,</span><br><span class="line">	           crossDomain: <span class="literal">true</span>,</span><br><span class="line">               ...</span><br><span class="line">           &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>翻一翻<code>select</code>控件看看参数要怎么填，应该就是身份证开头的那几位行政区划代码了，名称的格式是<code>省/市/区</code>（不过最后发现了名称参数没啥用，只要代码对了就行）。</p>
+<p><img src="https://i.loli.net/2020/04/12/dOSWlweg2caoR8E.png" alt="" /></p>
+<p>行政区划代码可以找现成的，也可以从这个网站上爬下来，为了保证数据一致避免不必要的麻烦，也从网站上爬吧。找到相关查询行政区划代码的脚本，发现是通过一定的层级结构查询的，以<code>000000</code>作为<code>pid</code>可以查到所以省，然后再以省的代码查到相应的市，以此类推。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    $.ajax(&#123;</span><br><span class="line">        url: <span class="string">'/fwmh/healthCode/HealthCodeAreaBypParentCode.do'</span>,</span><br><span class="line">        type: <span class="string">"post"</span>,</span><br><span class="line">        crossDomain: <span class="literal">true</span>,</span><br><span class="line">        data: &#123;<span class="attr">code</span>: <span class="string">"000000"</span>&#125;,</span><br><span class="line">        ...</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="编写爬虫"><a class="markdownIt-Anchor" href="#编写爬虫"></a> 编写爬虫</h2>
+<p>接口和参数都清楚了，开始写爬虫。导入<code>requests</code>包，定义两个查询接口的地址。查询需要登录，因此还要从浏览器中找到<code>cookies</code>，转换成键值对的格式作为后续请求接口的参数。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">risk_url = <span class="string">"http://gjzwfw.www.gov.cn/fwmh/healthCode/front/healthQuery.do"</span></span><br><span class="line">area_url = <span class="string">"http://gjzwfw.www.gov.cn/fwmh/healthCode/HealthCodeAreaBypParentCode.do"</span></span><br><span class="line"></span><br><span class="line">raw_cookies = <span class="string">'xxxx'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cookies_convert</span><span class="params">(raw_cookies)</span>:</span></span><br><span class="line">    cookies = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> raw_cookies.split(<span class="string">';'</span>):</span><br><span class="line">        key, value = line.split(<span class="string">'='</span>, <span class="number">1</span>)  <span class="comment"># 1代表只分一次，得到两个数据</span></span><br><span class="line">        cookies[key] = value</span><br><span class="line">    <span class="keyword">return</span> cookies</span><br><span class="line"></span><br><span class="line">cookies = cookies_convert(raw_cookies)</span><br></pre></td></tr></table></figure>
+<p>查询行政区划代码并保存在’area_map.txt’文件中。<code>area_query</code>负责单次查询的处理，因为网络等各种问题，很可能返回无法正确解析的内容，因此要加一个异常处理，无法解析就重试一次。当然也要限制一下重试的次数，避免掉进死循环。</p>
+<p>因为有省/市/区三级，所以获取所有区划代码的<code>get_area_map</code>函数嵌套了好几层，其实也可以通过写成递归的形式简化代码，不过这里就先将就一下吧。</p>
+<p>用<code>time.sleep</code>设置一个随机的查询间隔，避免被封。</p>
+<p>每查一个就要保存一下，不然遇到网络问题程序崩溃就GG了。实践中还发现这个系统的数据有点问题，有一个压根不存在的行政区划代码，相应的名称为空。为此加一行判断，代码或名称为空的就跳过。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">area_map_file = <span class="string">'area_map.txt'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">area_query</span><span class="params">(area_code, retry=<span class="number">0</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> retry == <span class="number">5</span>:</span><br><span class="line">        print(<span class="string">'Retry too many times! Area code: '</span>, area_code)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    area_resp = requests.post(area_url, &#123;<span class="string">'code'</span>: area_code&#125;, cookies=cookies)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = json.loads(area_resp.text)[<span class="string">'result'</span>]</span><br><span class="line">    <span class="keyword">except</span> json.decoder.JSONDecodeError:</span><br><span class="line">        data = area_query(area_code, retry+<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_area_map</span><span class="params">()</span>:</span></span><br><span class="line">    area_map = &#123;&#125;</span><br><span class="line">    <span class="keyword">with</span> open(area_map_file, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        area_code = <span class="string">'000000'</span></span><br><span class="line">        prov_data = area_query(area_code)</span><br><span class="line">        <span class="keyword">for</span> povince <span class="keyword">in</span> prov_data:</span><br><span class="line">            prov_name = povince[<span class="string">'region_name'</span>]</span><br><span class="line">            prov_code = povince[<span class="string">'region_code'</span>]</span><br><span class="line">            city_data = area_query(prov_code)</span><br><span class="line">            <span class="keyword">for</span> city <span class="keyword">in</span> city_data:</span><br><span class="line">                city_name = city[<span class="string">'region_name'</span>]</span><br><span class="line">                city_code = city[<span class="string">'region_code'</span>]</span><br><span class="line">                <span class="comment"># 加一个延时，避免查询频率过高被封</span></span><br><span class="line">                time.sleep(random.random())</span><br><span class="line">                country_data = area_query(city_code)</span><br><span class="line">                <span class="keyword">for</span> country <span class="keyword">in</span> country_data:</span><br><span class="line">                    country_name = country[<span class="string">'region_name'</span>]</span><br><span class="line">                    country_code = country[<span class="string">'region_code'</span>]</span><br><span class="line">                    <span class="comment"># 代码或名称为空时跳过</span></span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> (country_name <span class="keyword">and</span> country_code):</span><br><span class="line">                        <span class="keyword">continue</span></span><br><span class="line">                    area_map[country_code] = prov_name + \</span><br><span class="line">                        <span class="string">'/'</span>+city_name+<span class="string">'/'</span>+country_name</span><br><span class="line">                    print(country_code, area_map[country_code])</span><br><span class="line">                    f.write(country_code+<span class="string">'\t'</span>+area_map[country_code]+<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">return</span> area_map</span><br></pre></td></tr></table></figure>
+<p>根据行政区划代码查询风险等级的代码也是类似的。既然这么类似，后续也可以考虑从两个函数中抽象出一个带重试的API访问函数。不过总共也才两个函数，也先不优化了，ε=ε=ε=┏(゜ロ゜;)┛</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">query_risk</span><span class="params">(city_code, city_name, retry=<span class="number">0</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> retry == <span class="number">5</span>:</span><br><span class="line">        print(<span class="string">'Retry too many times! Area code: '</span>, city_code)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    city_data = &#123;<span class="string">'BizType'</span>: <span class="string">'0117'</span>,</span><br><span class="line">                 <span class="string">'Xzqhdm'</span>: city_code,</span><br><span class="line">                 <span class="string">'Xzqhmc'</span>: city_name&#125;</span><br><span class="line">    time.sleep(random.random())             </span><br><span class="line">    risk_resp = requests.post(risk_url, city_data, cookies=cookies)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = json.loads(risk_resp.text)[<span class="string">'xzqhWarnLv'</span>][<span class="string">'fxdj'</span>]</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        print(<span class="string">'Retry:'</span>, city_code, city_name)</span><br><span class="line">        data = query_risk(city_code,city_name, retry+<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> data</span><br></pre></td></tr></table></figure>
+<p>函数都定义完了，开始给我爬。</p>
+<ol>
+<li>先判断保存行政区划代码的文件是否存在，不存在就重新爬一下</li>
+<li>读取行政区划代码用于查询风险等级</li>
+<li>读取已经查询过的数据，避免重复查询，如果没有历史数据则写入表头</li>
+<li>查询并保存各地区的风险水平，有些地方没有提供数据，用-1代替</li>
+</ol>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询行政区划代码和并称并保存</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(area_map_file):</span><br><span class="line">    print(<span class="string">'Area code file does not exist, uncomment the line below to get it.'</span>)</span><br><span class="line">    <span class="comment"># area_map = get_area_map()</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取行政区划代码用于查询风险等级</span></span><br><span class="line"><span class="keyword">with</span> open(area_map_file, <span class="string">'r'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    areas = f.readlines()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取已经查询过的数据，避免重复查询</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'risk.csv'</span>, <span class="string">'r+'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> csvfile:</span><br><span class="line">    reader = csv.DictReader(csvfile)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        exist_code = set([row[<span class="string">'code'</span>] <span class="keyword">for</span> row <span class="keyword">in</span> reader])</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="comment"># 第一次要写入表头</span></span><br><span class="line">        writer = csv.writer(csvfile)</span><br><span class="line">        writer.writerow([<span class="string">"code"</span>,<span class="string">"name"</span>,<span class="string">"risk"</span>])</span><br><span class="line">        exist_code = set()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'risk.csv'</span>, <span class="string">'a+'</span>, newline=<span class="string">''</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> csvfile:</span><br><span class="line">    writer = csv.writer(csvfile)</span><br><span class="line">    <span class="keyword">for</span> i, line <span class="keyword">in</span> enumerate(areas):</span><br><span class="line">        code, name = line.split()</span><br><span class="line">        <span class="comment"># 跳过查询过的地区</span></span><br><span class="line">        <span class="keyword">if</span> code <span class="keyword">in</span> exist_code: <span class="keyword">continue</span></span><br><span class="line">        risk = query_risk(code, name)</span><br><span class="line">        <span class="comment"># 使用 -1 表示未知</span></span><br><span class="line">        <span class="keyword">if</span> risk == <span class="string">'null'</span>: risk = <span class="number">-1</span></span><br><span class="line">        print(str(i)+<span class="string">'/'</span>+str(len(areas)),code,name,risk)</span><br><span class="line">        writer.writerow([code,name,risk])</span><br></pre></td></tr></table></figure>
+<h2 id="结果"><a class="markdownIt-Anchor" href="#结果"></a> 结果</h2>
+<p>最终爬到2912个区/县的风险等级，其中24个未知，7个为中风险，剩下的全是低风险。</p>
+<p><img src="https://i.loli.net/2020/04/12/R9x8HqjnOovuCKd.png" alt="" /></p>
+<p>全国形式一片大好，画出来的地图也就是一只绿公鸡，没啥必要，就TJ了，ε=ε=ε=┏(゜ロ゜;)┛</p>
+<p>不过还是简单调研了一下，地图绘制相关的包，可以用下面两种方案，下回可以画点其他的。</p>
+<ul>
+<li>matplotlib + basemap</li>
+<li>pyechart.Map</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"># 爬虫</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/high-perf-mysql11/" rel="prev" title="可扩展的 MySQL">
+      <i class="fa fa-chevron-left"></i> 可扩展的 MySQL
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据源"><span class="nav-number">1.</span> <span class="nav-text"> 数据源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口分析"><span class="nav-number">2.</span> <span class="nav-text"> 接口分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写爬虫"><span class="nav-number">3.</span> <span class="nav-text"> 编写爬虫</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结果"><span class="nav-number">4.</span> <span class="nav-text"> 结果</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">VC</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">VC</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.7.1
+  </div>
+
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el: '#valine-comments',
+      verify: false,
+      notify: false,
+      appId: 'N1lbWM73Gja5VWPf0YfwSM0w-9Nh9j0Va',
+      appKey: '7NPQ5VnrCiGVu742uhUiL3kO',
+      placeholder: "Just go go",
+      avatar: 'mm',
+      meta: guest,
+      pageSize: '10' || 10,
+      visitor: false,
+      lang: 'en' || 'zh-cn',
+      path: location.pathname,
+      recordIP: false,
+      serverURLs: ''
+    });
+  }, window.Valine);
+});
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</body>
+</html>
