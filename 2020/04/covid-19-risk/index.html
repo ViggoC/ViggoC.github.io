@@ -49,21 +49,21 @@
   <meta name="description" content="近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区&#x2F;县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。  数据源 网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索">
 <meta property="og:type" content="article">
 <meta property="og:title" content="疫情风险等级爬虫小记">
-<meta property="og:url" content="https://viggoc.github.io/2040/04/covid-19-risk/index.html">
+<meta property="og:url" content="https://viggoc.github.io/2020/04/covid-19-risk/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
 <meta property="og:description" content="近日看到国务院印发的《全国不同风险地区企事业单位复工复产疫情防控措施指南》中提到了低风险，中风险和高风险地区，搜索发现只能通过“国务院客户端微信小程序”以区&#x2F;县为单位进行查询，想了解一下全国各地的形式需要挨个查询，没有一个可以纵览全局的地图，心血来潮想要自己画一个。  数据源 网上常见的查询入口都是微信小程序，但是微信小程序相对封闭，咱也不属于数据获取相对不方便，想找个普通的网站服务。经过一番搜索">
 <meta property="og:image" content="https://i.loli.net/2020/04/12/izbn4Z2PwYHXQro.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/12/kgLre2YwZEcnTDh.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/12/dOSWlweg2caoR8E.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/12/R9x8HqjnOovuCKd.png">
-<meta property="article:published_time" content="2040-04-12T05:51:55.000Z">
-<meta property="article:modified_time" content="2020-04-12T08:12:28.894Z">
+<meta property="article:published_time" content="2020-04-12T05:51:55.000Z">
+<meta property="article:modified_time" content="2020-04-16T07:39:05.414Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="爬虫">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2020/04/12/izbn4Z2PwYHXQro.png">
 
-<link rel="canonical" href="https://viggoc.github.io/2040/04/covid-19-risk/">
+<link rel="canonical" href="https://viggoc.github.io/2020/04/covid-19-risk/">
 
 
 <script id="page-configurations">
@@ -209,7 +209,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2040/04/covid-19-risk/">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/04/covid-19-risk/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -232,14 +232,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2040-04-12 13:51:55" itemprop="dateCreated datePublished" datetime="2040-04-12T13:51:55+08:00">2040-04-12</time>
+              <time title="Created: 2020-04-12 13:51:55" itemprop="dateCreated datePublished" datetime="2020-04-12T13:51:55+08:00">2020-04-12</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-12 16:12:28" itemprop="dateModified" datetime="2020-04-12T16:12:28+08:00">2020-04-12</time>
+                <time title="Modified: 2020-04-16 15:39:05" itemprop="dateModified" datetime="2020-04-16T15:39:05+08:00">2020-04-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -262,8 +262,8 @@
       </span>
       <span class="post-meta-item-text">Valine: </span>
     
-    <a title="valine" href="/2040/04/covid-19-risk/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2040/04/covid-19-risk/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/04/covid-19-risk/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/covid-19-risk/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -289,7 +289,7 @@
 <img src="https://i.loli.net/2020/04/12/kgLre2YwZEcnTDh.png" alt="" /></p>
 <h2 id="接口分析"><a class="markdownIt-Anchor" href="#接口分析"></a> 接口分析</h2>
 <p>初步判断应该只需要一个地区的编码或者名字就可以查询了，上 <code>F12</code> 一看果然是，post方法需要<code>xzqhdm</code>和<code>Xzqhmc</code>两个参数（<code>BizType</code>应该是固定的查询类别，先不管）。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">query</span>(<span class="params">city,cityName</span>)</span>&#123;</span><br><span class="line">		   $.ajax(&#123;</span><br><span class="line">	           url: <span class="string">'/fwmh/healthCode/front/healthQuery.do'</span>,</span><br><span class="line">	           data: &#123;<span class="attr">BizType</span>: <span class="string">"0117"</span>, <span class="attr">Xzqhdm</span>: city, <span class="attr">Xzqhmc</span>: cityName&#125;,</span><br><span class="line">	           type: <span class="string">"post"</span>,</span><br><span class="line">	           crossDomain: <span class="literal">true</span>,</span><br><span class="line">               ...</span><br><span class="line">           &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">query</span>(<span class="params">city,cityName</span>)</span>&#123;</span><br><span class="line">            $.ajax(&#123;</span><br><span class="line">                url: <span class="string">'/fwmh/healthCode/front/healthQuery.do'</span>,</span><br><span class="line">                data: &#123;<span class="attr">BizType</span>: <span class="string">"0117"</span>, <span class="attr">Xzqhdm</span>: city, <span class="attr">Xzqhmc</span>: cityName&#125;,</span><br><span class="line">                type: <span class="string">"post"</span>,</span><br><span class="line">                crossDomain: <span class="literal">true</span>,</span><br><span class="line">               ...</span><br><span class="line">            &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>翻一翻<code>select</code>控件看看参数要怎么填，应该就是身份证开头的那几位行政区划代码了，名称的格式是<code>省/市/区</code>（不过最后发现了名称参数没啥用，只要代码对了就行）。</p>
 <p><img src="https://i.loli.net/2020/04/12/dOSWlweg2caoR8E.png" alt="" /></p>
 <p>行政区划代码可以找现成的，也可以从这个网站上爬下来，为了保证数据一致避免不必要的麻烦，也从网站上爬吧。找到相关查询行政区划代码的脚本，发现是通过一定的层级结构查询的，以<code>000000</code>作为<code>pid</code>可以查到所以省，然后再以省的代码查到相应的市，以此类推。</p>
