@@ -2,9 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://viggoc.github.io/2020/02/high-perf-mysql06-md/</loc>
+    <loc>https://viggoc.github.io/2020/02/high-perf-mysql01/</loc>
     
-    <lastmod>2020-08-26T12:54:46.635Z</lastmod>
+    <lastmod>2020-08-26T13:30:55.457Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2020/02/high-perf-mysql04/</loc>
+    
+    <lastmod>2020-08-26T13:30:51.214Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2020/02/high-perf-mysql05/</loc>
+    
+    <lastmod>2020-08-26T13:30:45.015Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2020/02/high-perf-mysql06/</loc>
+    
+    <lastmod>2020-08-26T13:30:34.362Z</lastmod>
     
   </url>
   
@@ -54,27 +75,6 @@
     <loc>https://viggoc.github.io/2019/10/git_cheat_sheet/</loc>
     
     <lastmod>2020-04-08T16:57:20.770Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2020/02/high-perf-mysql01-md/</loc>
-    
-    <lastmod>2020-04-08T16:56:58.738Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2020/02/high-perf-mysql04-md/</loc>
-    
-    <lastmod>2020-04-08T16:56:58.637Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2020/02/high-perf-mysql05-md/</loc>
-    
-    <lastmod>2020-04-08T16:56:58.636Z</lastmod>
     
   </url>
   

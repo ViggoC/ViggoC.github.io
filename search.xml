@@ -376,7 +376,7 @@
   </entry>
   <entry>
     <title>查询性能优化</title>
-    <url>/2020/02/high-perf-mysql06-md/</url>
+    <url>/2020/02/high-perf-mysql06/</url>
     <content><![CDATA[<p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
 <h2 id="嵌套循环算法"><a class="markdownIt-Anchor" href="#嵌套循环算法"></a> 嵌套循环算法</h2>
 <p>MySQL 的联表算法是基于嵌套循环算法（nested-loop algorithm）而衍生出来的一系列算法，根据不同条件而选用不同的算法</p>
@@ -702,7 +702,7 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
   </entry>
   <entry>
     <title>创建高性能的索引</title>
-    <url>/2020/02/high-perf-mysql05-md/</url>
+    <url>/2020/02/high-perf-mysql05/</url>
     <content><![CDATA[<h2 id="索引基础"><a class="markdownIt-Anchor" href="#索引基础"></a> 索引基础</h2>
 <p>索引可以包含一个或多个列的值，MySQL 只能高效地使用索引的最左前缀，如果索引包含多个列，那么列的顺序也十分重要。</p>
 <p><strong>B 树索引</strong></p>
@@ -897,7 +897,7 @@ MySQL 8.0.18 版本增加了对 hash join 的支持。</p>
   </entry>
   <entry>
     <title>Schema 与数据类型优化</title>
-    <url>/2020/02/high-perf-mysql04-md/</url>
+    <url>/2020/02/high-perf-mysql04/</url>
     <content><![CDATA[<h2 id="选择优化的数据类型"><a class="markdownIt-Anchor" href="#选择优化的数据类型"></a> 选择优化的数据类型</h2>
 <p>选择数据类型的原则</p>
 <ul>
@@ -1008,7 +1008,7 @@ MySQL 的存储引擎 API 需要在服务器曾和存储引擎层之间通过行
   </entry>
   <entry>
     <title>MySQL 架构和历史</title>
-    <url>/2020/02/high-perf-mysql01-md/</url>
+    <url>/2020/02/high-perf-mysql01/</url>
     <content><![CDATA[<h2 id="逻辑架构"><a class="markdownIt-Anchor" href="#逻辑架构"></a> 逻辑架构</h2>
 <p>三层架构：</p>
 <ul>
