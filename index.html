@@ -468,209 +468,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-02/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql06-02/" class="post-title-link" itemprop="url">查询性能优化-02</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-22 14:21:55" itemprop="dateCreated datePublished" datetime="2020-02-22T14:21:55+08:00">2020-02-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-09 00:56:58" itemprop="dateModified" datetime="2020-04-09T00:56:58+08:00">2020-04-09</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="优化特定类型的查询"><a class="markdownIt-Anchor" href="#优化特定类型的查询"></a> 优化特定类型的查询</h2>
-<h3 id="优化-count-查询"><a class="markdownIt-Anchor" href="#优化-count-查询"></a> 优化 COUNT() 查询</h3>
-<p>在COUNT()的括号中指定了列或者列的表达式，则统计的就是这个表达式有值的结果数。</p>
-<p>对于没有任何WHERE条件的COUNT(*)，MyISAM可以直接返回结果。</p>
-<p>可以利用MyISAM此特性对特定语句进行优化</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原查询</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 优化 只需要扫描前5条就行</span></span><br><span class="line"><span class="keyword">SELECT</span> (<span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> world.city) - <span class="keyword">COUNT</span>(*) </span><br><span class="line"><span class="keyword">FROM</span> world.city <span class="keyword">where</span> <span class="keyword">ID</span> &lt;= <span class="number">5</span>;</span><br></pre></td></tr></table></figure>
-<p>一个查询中统计一个列不同值的数量</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(color = <span class="string">'blue'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> blue, <span class="keyword">COUNT</span>(color = <span class="string">'red'</span> <span class="keyword">OR</span> <span class="literal">NULL</span>) <span class="keyword">AS</span> red <span class="keyword">FROM</span> items;</span><br></pre></td></tr></table></figure>
-<p>在对精度要求不高的时候可以使用近似值代替</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql06-02/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
-    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-01/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="VC">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="VC' Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/high-perf-mysql06-01/" class="post-title-link" itemprop="url">查询性能优化-01</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2020-02-22 13:21:55" itemprop="dateCreated datePublished" datetime="2020-02-22T13:21:55+08:00">2020-02-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-09 00:56:58" itemprop="dateModified" datetime="2020-04-09T00:56:58+08:00">2020-04-09</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Database/" itemprop="url" rel="index">
-                    <span itemprop="name">Database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
-<h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
-<p>查询需要在不同的地方花费时间，包括网络，CPU计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的IO操作。</p>
-<h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
-<p>分析步骤</p>
-<ol>
-<li>确认应用程序是否检索大量不必要的的数据。太多行或太多列。</li>
-<li>确认MySQL服务器层是否在分析大量不必要的数据行。</li>
-</ol>
-<h3 id="是否向数据库请求了多余的数据"><a class="markdownIt-Anchor" href="#是否向数据库请求了多余的数据"></a> 是否向数据库请求了多余的数据</h3>
-<ul>
-<li>
-<p>查询不需要的记录<br />
-使用 SELECT 查询所有结果，获取前面的N行后关闭，实际上MySQL已经查询出全部结果。需要多少查多少，用 LIMIT 进行限制。</p>
-</li>
-<li>
-<p>取出全部列<br />
-不要使用 <code>SELECT * FROM a INNER JOIN b INNER JOIN C;</code>这样的语句。很多时候取出全部列是不必要的。并且，取出全部列会让优化器无法完成索引覆盖这类优化，还会为服务器带来额外的IO<br />
-内存和CPU的消耗。<br />
-有时候出于开发效率，应用程序可以通过缓存进行复用等角度也可以查询这些多余的数据。需要进行权衡</p>
-</li>
-<li>
-<p>重复查询相同的数据<br />
-利用缓存，减少重复查询。</p>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/high-perf-mysql06-01/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql06-md/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -702,7 +499,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-09 00:56:58" itemprop="dateModified" datetime="2020-04-09T00:56:58+08:00">2020-04-09</time>
+                <time title="Modified: 2020-08-26 20:54:46" itemprop="dateModified" datetime="2020-08-26T20:54:46+08:00">2020-08-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -730,6 +527,17 @@
 
       
           <p>表结构优化、索引优化、查询优化缺一不可，需要齐头并进。</p>
+<h2 id="嵌套循环算法"><a class="markdownIt-Anchor" href="#嵌套循环算法"></a> 嵌套循环算法</h2>
+<p>MySQL 的联表算法是基于嵌套循环算法（nested-loop algorithm）而衍生出来的一系列算法，根据不同条件而选用不同的算法</p>
+<ul>
+<li>在使用索引关联的情况下，有 Index Nested-Loop join 和 Batched Key Access join 两种算法;</li>
+<li>在未使用索引关联的情况下，有 Simple Nested-Loop join 和 Block Nested-Loop join 两种算法;</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">// Simple Nested-Loop</span><br><span class="line"><span class="keyword">for</span> each row <span class="keyword">in</span> t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row <span class="keyword">in</span> t2 matching reference key &#123;</span><br><span class="line">    <span class="keyword">for</span> each row <span class="keyword">in</span> t3 &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// Block Nested-Loop</span><br><span class="line"><span class="keyword">for</span> each row <span class="keyword">in</span> t1 matching range &#123;</span><br><span class="line">  <span class="keyword">for</span> each row <span class="keyword">in</span> t2 matching reference key &#123;</span><br><span class="line">    store used columns <span class="keyword">from</span> t1, t2 <span class="keyword">in</span> join buffer</span><br><span class="line">    <span class="keyword">if</span> buffer <span class="keyword">is</span> full &#123;</span><br><span class="line">      <span class="keyword">for</span> each row <span class="keyword">in</span> t3 &#123;</span><br><span class="line">        <span class="keyword">for</span> each t1, t2 combination <span class="keyword">in</span> join buffer &#123;</span><br><span class="line">          <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      empty join buffer</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> buffer <span class="keyword">is</span> <span class="keyword">not</span> empty &#123;</span><br><span class="line">  <span class="keyword">for</span> each row <span class="keyword">in</span> t3 &#123;</span><br><span class="line">    <span class="keyword">for</span> each t1, t2 combination <span class="keyword">in</span> join buffer &#123;</span><br><span class="line">      <span class="keyword">if</span> row satisfies join conditions, send to client</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Simple Nested-Loop</code> 最为简单粗暴，毫无性能可言，事实上不会使用这种算法。</p>
+<p><code>Block Nested-Loop</code> 缓存块嵌套循环连接，简称 BNL，是对 SNL 的一种优化。一次性缓存多条驱动表的数据到 Join Buffer，然后拿 Join Buffer 里的数据批量与内层循环读取的数据进行匹配。将内部循环中读取的每一行与缓冲区中的所有记录进行比较，这样就可以减少内层循环的读表次数。原来内层循环的读表次数是外层循环的行数 n，如今读表次数为 n/buffer_size。</p>
+<p><code>Index Nested-Loop</code> 索引嵌套循环，简称 INL，是基于被驱动表的索引进行连接的算法；驱动表的记录逐条与被驱动表的索引进行匹配，避免和被驱动表的每条记录进行比较。</p>
+<p><code>Batched Key Access</code> 是对INL的进一步优化，详见<a href="https://dev.mysql.com/doc/refman/5.7/en/bnl-bka-optimization.html" target="_blank" rel="noopener">文档</a>。</p>
 <h2 id="查询速度为什么会变慢"><a class="markdownIt-Anchor" href="#查询速度为什么会变慢"></a> 查询速度为什么会变慢</h2>
 <p>查询需要在不同的地方花费时间，包括网络，CPU 计算，生成统计信息和执行计划，锁等待等操作，尤其是底层存储引擎检索数据，这些检索需要内存操作、CPU 操作和内存不足时的 IO 操作。</p>
 <h2 id="慢查询基础优化数据访问"><a class="markdownIt-Anchor" href="#慢查询基础优化数据访问"></a> 慢查询基础：优化数据访问</h2>
@@ -1159,6 +967,207 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
   
   
 
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/12/ML_algorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/ML_algorithm/" class="post-title-link" itemprop="url">常见机器学习算法的优缺点</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-12-20 20:03:55" itemprop="dateCreated datePublished" datetime="2019-12-20T20:03:55+08:00">2019-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-03-29 23:07:54" itemprop="dateModified" datetime="2020-03-29T23:07:54+08:00">2020-03-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index">
+                    <span itemprop="name">AI</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>想要寻找一个合适的算法不容易，实际应用中，我们一般采用启发式实验。</p>
+<p>没有免费的午餐定理 (NFL)：核心在于，假设了所有问题出现的机会相同，或所有问题同等重要。当需求是解决一切问题时，“哪个算法更好”就毫无意义。HG2G 中“深思”面对“宇宙、生命以及一切的中继答案是什么？”这样一个问题，用最复杂的算法算出一个 42 和随便说一个 42 是一样的。</p>
+<h2 id="偏差与方差"><a class="markdownIt-Anchor" href="#偏差与方差"></a> 偏差与方差</h2>
+<ul>
+<li>偏差：描述的是估计值的期望 E 与真实值 Y 之间的差距。偏差越大，越偏离真实数据。</li>
+<li>方差：描述的是预测值的离散程度，方差越大，数据分布约分散。</li>
+<li>模型的真实误差可以看成 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>i</mi><mi>a</mi><msup><mi>s</mi><mn>2</mn></msup><mo>+</mo><mi>v</mi><mi>a</mi><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">bias^2 + var + \sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.897438em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">a</span><span class="mord"><span class="mord mathdefault">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> 是噪音</li>
+</ul>
+<p>偏差与方差窘境：</p>
+<ul>
+<li>学得不好，偏差大</li>
+<li>学得好，敏感性高，方差大。</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/ML_algorithm/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="default">
+    <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2019/11/Principles-of-Economics-Micro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="VC">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="VC' Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/Principles-of-Economics-Micro/" class="post-title-link" itemprop="url">《经济学原理：微观经济学分册》 读书笔记</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-11-15 21:51:55" itemprop="dateCreated datePublished" datetime="2019-11-15T21:51:55+08:00">2019-11-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-09 00:50:24" itemprop="dateModified" datetime="2020-04-09T00:50:24+08:00">2020-04-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%80%9A%E8%AF%86/" itemprop="url" rel="index">
+                    <span itemprop="name">通识</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一-经济学十大原理"><a class="markdownIt-Anchor" href="#一-经济学十大原理"></a> 一、经济学十大原理</h2>
+<h3 id="个人决策"><a class="markdownIt-Anchor" href="#个人决策"></a> 个人决策</h3>
+<ul>
+<li>人们面临权衡取舍</li>
+<li>某种东西的成本是为了得到它所放弃的东西</li>
+<li>理性人考虑边际量</li>
+<li>人们会对激励做出反应</li>
+</ul>
+<h3 id="人们如何交易"><a class="markdownIt-Anchor" href="#人们如何交易"></a> 人们如何交易</h3>
+<ul>
+<li>贸易可以使得每个人的状况变得更好</li>
+<li>市场通常是组织经济活动的一种好方法</li>
+<li>政府有时候可以改善市场结果</li>
+</ul>
+<h3 id="整体经济如何运行"><a class="markdownIt-Anchor" href="#整体经济如何运行"></a> 整体经济如何运行</h3>
+<ul>
+<li>一国的生活水平取决于它生产物品与劳务的能力</li>
+<li>当政府发行了过多货币时，物价上升</li>
+<li>社会面临通货膨胀和失业之间的短期权衡</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/Principles-of-Economics-Micro/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
   </div>
 
   
@@ -1229,7 +1238,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">17</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1347,6 +1356,9 @@ if (document.querySelectorAll('pre.mermaid').length) {
   
 
   
+      
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css">
+
 
   
 
