@@ -446,8 +446,7 @@ EXPLAIN 语句中的 type 列反应了<strong>访问类型</strong>。速度从�
 </ul>
 <h2 id="重构查询的方式"><a class="markdownIt-Anchor" href="#重构查询的方式"></a> 重构查询的方式</h2>
 <h3 id="一个复杂查询还是多个简单查询"><a class="markdownIt-Anchor" href="#一个复杂查询还是多个简单查询"></a> 一个复杂查询还是多个简单查询</h3>
-<p>传统的实现中强调数据库完成尽可能多的工作，其逻辑在于认为网络通信<br />
-查询解析和优化是一件代价很高的事情。但这对于 MySQL 不适用，MySQL 在设计上让连接和断开链接都很轻量，对小结果集友好。</p>
+<p>传统的实现中强调数据库完成尽可能多的工作，其逻辑在于认为网络通信，查询解析和优化是一件代价很高的事情。但这对于 MySQL 不适用，MySQL 在设计上让连接和断开链接都很轻量，对小结果集友好。</p>
 <p>在其他条件相同的时候，使用尽可能少的查询更有利。但有的时候，将一个大查询分解成为多个小查询是必要的。</p>
 <h3 id="切分查询"><a class="markdownIt-Anchor" href="#切分查询"></a> 切分查询</h3>
 <p>如定期删除数据时，用一个大的语句一次性完成需要锁住很多数据、占满整个事务日志、耗尽系统资源、阻塞很多小的但重要的查询。</p>
@@ -1051,6 +1050,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 <li>持久性（durability）</li>
 </ul>
 <p>支持事务必然会来带开销，对于一些不需要事务的查询类应用就可以选择飞事务型的存储引擎，获取更高的性能。通过<code>LOCK TABLES</code>语句同样可以为应用提供一定的保护。</p>
+<p><strong>Consistency</strong> ensures that a transaction can only bring the database from one valid state to another, maintaining database invariants: any data written to the database must be valid according to all defined rules, including constraints, cascades, triggers, and any combination thereof. This prevents database corruption by an illegal transaction, but does not guarantee that a transaction is correct. Referential integrity guarantees the primary key – foreign key relationship.</p>
 <p><strong>四种隔离级别</strong></p>
 <ul>
 <li>READ UNCIMMITTED（未提交读）：造成 dirty read，实际很少使用</li>
@@ -1758,9 +1758,9 @@ B：政府应该提高最低工资。</p>
 <a id="more"></a>
 <p>diff</p>
 <ul>
-<li>git diff      # 输出工作区和暂存区的 different</li>
-<li>git diff --cached # 输出暂存区和本地最近的版本 (commit) 的 different</li>
-<li>git diff HEAD     # 输出工作区、暂存区 和本地最近的版本 (commit)</li>
+<li>git diff      # 输出工作区和暂存区的差异</li>
+<li>git diff --cached # 输出暂存区和本地最近的版本 (commit) 的差异</li>
+<li>git diff HEAD     # 输出工作区、暂存区 和本地最近的版本 (commit) 的差异</li>
 <li>git whatchanged --since=‘2 weeks ago’ # 查看两个星期内的修改</li>
 </ul>
 <h3 id="版本回退"><a class="markdownIt-Anchor" href="#版本回退"></a> 版本回退</h3>
@@ -1775,13 +1775,16 @@ B：政府应该提高最低工资。</p>
 <li>git revert HEAD # 撤销当前提交，不需要^</li>
 <li>git reflog</li>
 </ul>
-<p>reset 直接忽略已经提交的 commit, 常用于本地；<br />
-revert 保留原有的 commit, 创建一个新的节点使其与上一个节点内容相同，多用于已经 push 到远程的提交</p>
-<h3 id="撤销修改"><a class="markdownIt-Anchor" href="#撤销修改"></a> 撤销修改</h3>
-<p>工作区</p>
+<p><code>reset</code> VS <code>revert</code></p>
 <ul>
-<li>git checkout – file<br />
-让这个文件回到最近一次 git commit 或 git add 时的状态</li>
+<li>reset 直接忽略已经提交的 commit, 常用于本地；</li>
+<li>revert 保留原有的 commit, 创建一个新的节点使其与上一个节点内容相同，多用于已经 push 到远程的提交</li>
+</ul>
+<h3 id="撤销修改"><a class="markdownIt-Anchor" href="#撤销修改"></a> 撤销修改</h3>
+<p>让工作区文件（未 add）回到最近一次 git commit 或 git add 时的状态</p>
+<ul>
+<li>git checkout – file  # 单个文件或文件夹</li>
+<li>git checkout . # 针对所有文件</li>
 </ul>
 <p>缓存区</p>
 <ul>
@@ -1793,6 +1796,17 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 <li>git rm</li>
 <li>git checkout – file<br />
 用版本库里的版本替换工作区的版本</li>
+</ul>
+<h3 id="删除未追踪untracked文件"><a class="markdownIt-Anchor" href="#删除未追踪untracked文件"></a> 删除未追踪（untracked）文件</h3>
+<ul>
+<li>git clean -f 强制删除文件</li>
+<li>git clean -df 同时删除目录</li>
+<li>git clean -xdf 同时删除被 ignore 的文件</li>
+</ul>
+<h3 id="修改提交记录"><a class="markdownIt-Anchor" href="#修改提交记录"></a> 修改提交记录</h3>
+<ul>
+<li>git commit --amend # 修改 commit 的内容</li>
+<li>git commit --amend --author=‘Author Name <a href="mailto:email@address.com">email@address.com</a>’ # 同时修改作者</li>
 </ul>
 <h3 id="远程"><a class="markdownIt-Anchor" href="#远程"></a> 远程</h3>
 <p>push</p>
@@ -1814,6 +1828,10 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 <li>git rebase # 把本地未 push 的分叉提交历史整理成直线，未 push 的修改都在最新远程状态之后</li>
 </ul>
 <h2 id="分支"><a class="markdownIt-Anchor" href="#分支"></a> 分支</h2>
+<h3 id="切换"><a class="markdownIt-Anchor" href="#切换"></a> 切换</h3>
+<ul>
+<li>git checkout -  # 快速切换到上一个分支</li>
+</ul>
 <h3 id="合并"><a class="markdownIt-Anchor" href="#合并"></a> 合并</h3>
 <ul>
 <li>git checkout -b dev
@@ -1868,6 +1886,41 @@ revert 保留原有的 commit, 创建一个新的节点使其与上一个节点�
 <li>git tag -d <tagname>          # 可以删除一个本地标签；</li>
 <li>git push origin :refs/tags/<tagname>  # 可以删除一个远程标签，推送“空”到远程</li>
 </ul>
+<h2 id="多平台换行符问题"><a class="markdownIt-Anchor" href="#多平台换行符问题"></a> 多平台换行符问题</h2>
+<p>不统一的换行符确实对跨平台的文件交换带来了麻烦。换行符发生改变时，Git 会认为整个文件被修改。</p>
+<p>git 的换行符设置有三种模式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 提交时转换为 LF，检出时转换为 CRLF，适用于 windows 平台</span><br><span class="line">git config --global core.autocrlf true</span><br><span class="line"></span><br><span class="line"># 提交时转换为 LF，检出时不转换</span><br><span class="line">git config --global core.autocrlf input</span><br><span class="line"></span><br><span class="line"># 提交检出均不转换</span><br><span class="line">git config --global core.autocrlf false</span><br></pre></td></tr></table></figure>
+<p>若在 Windows 下配置 <code>core.autocrlf true</code> 并 pull 文件，并把文件拷贝到配置为 <code>core.autocrlf false</code> 的系统下，提交代码时就会发现每一行都被修改了。</p>
+<p>此外，还有一个<code>core.safecrlf</code>用于检查文件是否包含混合换行符，其有三个可选项：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 拒绝提交包含混合换行符的文件</span><br><span class="line">git config --global core.safecrlf true</span><br><span class="line"></span><br><span class="line"># 允许提交包含混合换行符的文件</span><br><span class="line">git config --global core.safecrlf false</span><br><span class="line"></span><br><span class="line"># 提交包含混合换行符的文件时给出警告</span><br><span class="line">git config --global core.safecrlf warn</span><br></pre></td></tr></table></figure>
+<p>Windows 上 Git bash 客户端自带 dos2unix 转换工具可以完成换行符的转换。</p>
+<h2 id="清空-commit-history"><a class="markdownIt-Anchor" href="#清空-commit-history"></a> 清空 commit history</h2>
+<ol>
+<li>
+<p>Checkout</p>
+<p><code>git checkout --orphan latest_branch</code></p>
+</li>
+<li>
+<p>Add all the files</p>
+<p><code>git add -A</code></p>
+</li>
+<li>
+<p>Commit the changes</p>
+<p><code>git commit -am &quot;commit message&quot;</code></p>
+</li>
+<li>
+<p>Delete the branch</p>
+<p><code>git branch -D master</code></p>
+</li>
+<li>
+<p>Rename the current branch to master</p>
+<p><code>git branch -m master</code></p>
+</li>
+<li>
+<p>Finally, force update your repository</p>
+<p><code>git push -f origin master</code></p>
+</li>
+</ol>
 <h2 id="学习资源"><a class="markdownIt-Anchor" href="#学习资源"></a> 学习资源</h2>
 <p><a href="http://rogerdudler.github.io/git-guide/index.zh.html" target="_blank" rel="noopener">git-简明指南</a></p>
 <p><a href="https://learngitbranching.js.org/" target="_blank" rel="noopener">在线学习网站</a>：可实操的教程，通过动画展示版本关系</p>

@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://viggoc.github.io/2020/02/high-perf-mysql06/</loc>
+    
+    <lastmod>2020-10-23T03:44:04.713Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://viggoc.github.io/2019/10/git_cheat_sheet/</loc>
+    
+    <lastmod>2020-10-07T07:56:43.457Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://viggoc.github.io/2020/02/high-perf-mysql01/</loc>
     
-    <lastmod>2020-08-26T13:30:55.457Z</lastmod>
+    <lastmod>2020-09-05T12:19:36.916Z</lastmod>
     
   </url>
   
@@ -19,13 +33,6 @@
     <loc>https://viggoc.github.io/2020/02/high-perf-mysql05/</loc>
     
     <lastmod>2020-08-26T13:30:45.015Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2020/02/high-perf-mysql06/</loc>
-    
-    <lastmod>2020-08-26T13:30:34.362Z</lastmod>
     
   </url>
   
@@ -68,13 +75,6 @@
     <loc>https://viggoc.github.io/2020/04/high-perf-mysql11/</loc>
     
     <lastmod>2020-04-11T11:31:33.490Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://viggoc.github.io/2019/10/git_cheat_sheet/</loc>
-    
-    <lastmod>2020-04-08T16:57:20.770Z</lastmod>
     
   </url>
   

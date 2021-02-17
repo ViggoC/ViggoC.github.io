@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -26,9 +26,9 @@
 <meta property="og:url" content="https://viggoc.github.io/2020/02/high-perf-mysql01/index.html">
 <meta property="og:site_name" content="VC&#39; Blog">
 <meta property="og:description" content="逻辑架构 三层架构：  连接与线程处理  每个连接拥有一个线程，线程的创建和销毁消耗资源，可以通过维护线程池的方式，提高性能。 注意区分线程池和连接池，连接池一般在客户端设置，而线程池是在 DB 服务器上配置。连接池可以减少连接的创建和释放，提高请求的平均响应时间，控制一个应用的 DB 连接数，但无法控制整个应用集群的连接数规模。线程池和连接池需要结合使用。  MySQL 服务层：SQL 解析、">
-<meta property="og:locale" content="zh_CN">
+<meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-02-07T08:32:38.000Z">
-<meta property="article:modified_time" content="2020-08-26T13:30:55.457Z">
+<meta property="article:modified_time" content="2020-09-05T12:19:36.916Z">
 <meta property="article:author" content="VC">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
@@ -42,7 +42,7 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'zh-CN'
+    lang   : 'en'
   };
 </script>
 
@@ -86,7 +86,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
+    <div class="toggle" aria-label="Toggle navigation bar">
       <span class="toggle-line toggle-line-first"></span>
       <span class="toggle-line toggle-line-middle"></span>
       <span class="toggle-line toggle-line-last"></span>
@@ -116,26 +116,26 @@
   <ul id="menu" class="menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
 
   </li>
       <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
         </a>
       </li>
   </ul>
@@ -151,7 +151,7 @@
   </span>
   <div class="search-input-container">
     <input autocomplete="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
+           placeholder="Searching..." spellcheck="false"
            type="search" class="search-input">
   </div>
   <span class="popup-btn-close">
@@ -188,7 +188,7 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://viggoc.github.io/2020/02/high-perf-mysql01/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -210,22 +210,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              <span class="post-meta-item-text">Posted on</span>
 
-              <time title="创建时间：2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
+              <time title="Created: 2020-02-07 16:32:38" itemprop="dateCreated datePublished" datetime="2020-02-07T16:32:38+08:00">2020-02-07</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-08-26 21:30:55" itemprop="dateModified" datetime="2020-08-26T21:30:55+08:00">2020-08-26</time>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-09-05 20:19:36" itemprop="dateModified" datetime="2020-09-05T20:19:36+08:00">2020-09-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
+              <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/Database/" itemprop="url" rel="index"><span itemprop="name">Database</span></a>
                 </span>
@@ -238,7 +238,7 @@
       <span class="post-meta-item-icon">
         <i class="fa fa-comment-o"></i>
       </span>
-      <span class="post-meta-item-text">Valine：</span>
+      <span class="post-meta-item-text">Valine: </span>
     
     <a title="valine" href="/2020/02/high-perf-mysql01/#valine-comments" itemprop="discussionUrl">
       <span class="post-comments-count valine-comment-count" data-xid="/2020/02/high-perf-mysql01/" itemprop="commentCount"></span>
@@ -298,6 +298,7 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 <li>持久性（durability）</li>
 </ul>
 <p>支持事务必然会来带开销，对于一些不需要事务的查询类应用就可以选择飞事务型的存储引擎，获取更高的性能。通过<code>LOCK TABLES</code>语句同样可以为应用提供一定的保护。</p>
+<p><strong>Consistency</strong> ensures that a transaction can only bring the database from one valid state to another, maintaining database invariants: any data written to the database must be valid according to all defined rules, including constraints, cascades, triggers, and any combination thereof. This prevents database corruption by an illegal transaction, but does not guarantee that a transaction is correct. Referential integrity guarantees the primary key – foreign key relationship.</p>
 <p><strong>四种隔离级别</strong></p>
 <ul>
 <li>READ UNCIMMITTED（未提交读）：造成 dirty read，实际很少使用</li>
@@ -406,10 +407,10 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          文章目录
+          Table of Contents
         </li>
         <li class="sidebar-nav-overview">
-          站点概览
+          Overview
         </li>
       </ul>
 
@@ -430,20 +431,20 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
           <a href="/archives/">
         
           <span class="site-state-item-count">17</span>
-          <span class="site-state-item-name">日志</span>
+          <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
         <span class="site-state-item-count">7</span>
-        <span class="site-state-item-name">分类</span></a>
+        <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
         <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">标签</span></a>
+        <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
 </div>
@@ -469,13 +470,13 @@ Oracle 中有库基于规则优化 (RBO) 和基于代价优化 (CBO) 两种方�
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">VC</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
   </div>
 
         
